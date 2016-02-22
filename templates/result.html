@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<title>Results</title>
+</head>
+
+<body>
+{% block head %} <h1>Data Visualizer</h1> {% endblock %}
+  <p>
+  {% for t in dataType %}
+  {{t}}
+  {% endfor %}
+  </p>
+  <p>
+  {% for v in dataValue %}
+  {{v}}
+  {% endfor %}
+  </p>
+<!--  {% if v == '' %}
+  <p> error </p>
+  {% endif %} -->
+  <style>
+
+.chart div {
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;
+}
+
+</style>
+<div class="chart"></div>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+
+var data = [{% for v in dataValue %}
+  {{v}},
+  {% endfor %}];
+
+var names = [{% for t in dataType %}
+  "{{t}}",
+  {% endfor %}];
+
+
+var x = d3.scale.linear()
+    .domain([0, d3.max(data)])
+    .range([0, 420]);
+
+d3.select(".chart")
+  .selectAll("div")
+    .data(data)
+  .enter().append("div")
+    .style("width", function(d) { return x(d) + "px"; })
+    .text(function(d) { return d; });
+
+</script>
+</body>
+</html>
