@@ -46,16 +46,16 @@ def parseCSV(uploadedFile, dataT, dataV):
 def input():
 	dataType, dataValue = [], []
 	# upon opening the homepage, user is prompted with a selection of repos
-	# if request.method == 'GET':
-	# 	return render_template('input.html')
+	if request.method == 'GET':
+		return render_template('input.html')
 	
 	# when user selects a repo, the following runs codemaat and generates a csv file
 	# the csv file is opened and parsed; visualization is displayed
-	# elif request.method == 'POST':
-	with open('summary.csv', 'rt') as csvfile:
-		parseCSV(csvfile, dataType, dataValue)
-	return render_template('result.html', dataType=dataType, dataValue=dataValue)
-	csvfile.close();
+	elif request.method == 'POST':
+		with open('summary.csv', 'rt') as csvfile:
+			parseCSV(csvfile, dataType, dataValue)
+		return render_template('result.html', dataType=dataType, dataValue=dataValue)
+		csvfile.close();
 
 # THIS NEEDS TO BE WORKED ON
 # TRYING TO GET ROUTE('/') TO REDIRECT TO BELOW ROUTE AFTER RENDER_TEMPLATE
