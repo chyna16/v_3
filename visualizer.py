@@ -43,7 +43,7 @@ def parseCSV(uploadedFile, dataT, dataV):
 	readInfo = csv.DictReader(uploadedFile)
 	for row in readInfo:
 		dataT.append(row['statistic'])
-		dataV.append(row['value'])
+		dataV.append(int(row['value']))
 	return dataT, dataV;
 
 @app.route('/', methods=['GET', 'POST'])

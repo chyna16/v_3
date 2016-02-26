@@ -1,44 +1,8 @@
-<!DOCTYPE html>
+alert("hello");
 
-<html>
-<head>
-<script src="//d3js.org/d3.v3.min.js"></script>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script> -->
-<title>Results</title>
-</head>
 
-<body>
-{% block head %} <h1>Data Visualizer</h1> {% endblock %}
-  <p style="float:left">
-  {% for t in dataType %}
-  <br> {{t}}
-  {% endfor %}
-  </p>
-  <br>
-  <p>
-  {% for v in dataValue %}
-   {{v}} <br>
-  {% endfor %}
-  </p>
+document.getElementById("test").innerHTML = "Hello";
 
-<style>
-.chart div {
-  font: 10px sans-serif;
-  background-color: steelblue;
-  text-align: right;
-  padding: 3px;
-  margin: 1px;
-  color: white;
-}
-</style>
-
-<h1 onclick="scatterPlot()">Scatter Plot</h1>
-<h1 onclick="barGraph()">Bar Graph</h1>
-<h1 onclick="pieChart()">Pie Chart</h1>
-<div id="wrapper" class="chart"></div>
-
-<script>
 var data = [];
   {% for v in dataValue %} data.push({{v}}); {% endfor %};
 
@@ -46,7 +10,6 @@ var labels = [];
   {% for t in dataType %} labels.push("{{t}}"); {% endfor %};
 
 var height = 300, width = 500;
-var radius = height / 2 - 10;
 var padding = 50;
 
 
@@ -100,37 +63,10 @@ function barGraph() {
     .domain([0, d3.max(data)])
     .range([0, 420]);
 
-  var bar = d3.select("#wrapper")
+  d3.select("#wrapper")
     .selectAll("div")
       .data(data)
     .enter().append("div")
       .style("width", function(d) { return x(d) + "px"; })
       .text(function(d) { return d; });
 }
-
-function pieChart() {
-  var arc = d3.svg.arc()
-    .innerRadius(radius - 40)
-    .outerRadius(radius);
-
-  var pie = d3.layout.pie()
-      .padAngle(.02);
-
-  var color = d3.scale.category10();
-
-  var svg = d3.select("#wrapper").append("svg")
-      .attr("width", width)
-      .attr("height", height)
-    .append("g")
-      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-  svg.selectAll("path")
-      .data(pie(data))
-    .enter().append("path")
-      .style("fill", function(d, i) { return color(i); })
-      .attr("d", arc);
-}
-</script>
-
-</body>
-</html>
