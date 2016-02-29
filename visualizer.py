@@ -1,6 +1,9 @@
 from flask import Flask, request, render_template
-import csv, os, time
+import csv, os, time, fnmatch
 from werkzeug import secure_filename
+ 
+rootPath = '/home/tramain/dataDisplay1/csv_folder'
+pattern = '*.csv'
 
 app = Flask(__name__)
 
@@ -11,7 +14,7 @@ app = Flask(__name__)
 
 def create():
     print("Setting a path for codemaat...")
-    # setting the path doesn't work 100% of the time when script is run
+    # setting the path doesn't work when script is run
     os.system("PATH=/home/tramain/ixmaat0.8.5:$PATH")
     os.system("PATH=$PATH:/home/tramain/ixmaat0.8.5")
     print("Done.")
@@ -20,8 +23,21 @@ def create():
     os.system("git log --pretty=format:'[%h] %aN %ad %s' --date=short --numstat > logfile.log")
     print("Done.")
     print("-" * 60)
-    print("Creating csv file from generated log...")
+    print("Creating csv files from generated log...")
+    time.sleep(1)
+    print("Creating repository summary...")
     os.system("maat -l logfile.log -c git -a summary > summary.csv")
+    # Reports an overview of mined data from git's log file
+	print("Creating organizational metrics summary...")
+	os.system("maat -l logfile.log -c git > metrics.csv")
+	# Reports the number of authors/revisions made per module
+	print("Creating organizational metrics summary...")
+	os.system("maat -l logfile.log -c git -a coupling > coupling.csv")
+	# Reports correlation of files that often commit together
+	# degree = % of commits where the two files were changed in the same commit
+	print("Creating code age summary...")
+	os.system("maat -l logfile.log -c git -a age > age.csv")
+	# Reports how long ago the last change was made in measurement of months
     print("Done. Check your current folder for your files.")
     print("-" * 60);
 
@@ -39,14 +55,22 @@ def parseCSV(uploadedFile, dataT, dataV):
 	readInfo = csv.DictReader(uploadedFile)
 	for row in readInfo:
 		dataT.append(row['statistic'])
-		dataV.append(int(row['value']))
+		dataV.append(row['value'])
 	return dataT, dataV;
 
 @app.route('/', methods=['GET', 'POST'])
 def input():
 	dataType, dataValue = [], []
 	# upon opening the homepage, user is prompted with a selection of repos
+	
 	if request.method == 'GET':
+		csvlist = []
+
+		for root, dirs, files in os.walk(rootPath):
+    		for filename in fnmatch.filter(files, pattern):
+        		print(filename)
+        		csvlist.append(filename)
+
 		return render_template('input.html')
 	
 	# when user selects a repo, the following runs codemaat and generates a csv file
