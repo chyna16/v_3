@@ -6,15 +6,16 @@
 <title>V3</title>
 </head>
 
-<!-- working on radio selections -->
 <body>
-	<form method="post" enctype="multipart/form-data">
-		<!-- <input type="file" name="data" accept="file_extension"> -->
-		<input type="radio" name="chart">repo1</input>
-		<!-- <input type="radio" name="bar" id="bar" accept = "file_extension" value = "output2.html"> bar </input>
-		<input type="radio" name="options" id="option3" value="option3"> Option3 </input> -->
-		<button type="submit">Show Results</button>
-	</form> 
+
+<h1>Select the Data You Want Displayed</h1>
+
+<form method="POST" enctype="multipart/form-data">
+	{% for file in csvList %}
+		<input type="radio" name="filename" value={{file}}>{{file}}</input>
+	{% endfor %}
+	<button type="submit">Show Results</button>
+</form> 
 
 </body>
 </html>
