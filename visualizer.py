@@ -3,6 +3,7 @@ import csv, os, time, fnmatch
 from werkzeug import secure_filename
  
 rootPath = '/home/tramain/dataDisplay1/csv_folder'
+# rootPath = '/home/ubuntu/Desktop/repos/v3clone/v3/csv_folder'
 pattern = '*.csv'
 
 app = Flask(__name__)
@@ -61,22 +62,20 @@ def parseCSV(uploadedFile, dataT, dataV):
 @app.route('/', methods=['GET', 'POST'])
 def input():
 	dataType, dataValue = [], []
-	# upon opening the homepage, user is prompted with a selection of repos
 	
+	# upon opening the homepage, user is prompted with a selection of repos
 	if request.method == 'GET':
-		csvlist = []
-
-		for root, dirs, files in os.walk(rootPath):
-    		for filename in fnmatch.filter(files, pattern):
-        		print(filename)
-        		csvlist.append(filename)
-
-		return render_template('input.html')
+		csvList = []
+		for root, dirs, files in os.walk(rootPath): # traverses filesystem of rootPath
+			for filename in fnmatch.filter(files, pattern): # picks out files of type in pattern
+				csvList.append(filename) # fills array with names of csv files in current directory
+		return render_template('input.html', csvList=csvList) # returns array of csv filenames to webpage
 	
 	# when user selects a repo, the following runs codemaat and generates a csv file
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
-		with open('summary.csv', 'rt') as csvfile:
+		data = request.form['filename'] # gets name of csv filename that was selected by the user on webpage
+		with open('csv_folder/{}'.format(data), 'rt') as csvfile: # variable data SHOULD be in form of 'csvname.csv'
 			parseCSV(csvfile, dataType, dataValue)
 		return render_template('result.html', dataType=dataType, dataValue=dataValue)
 		csvfile.close();
@@ -90,7 +89,7 @@ def input():
 if __name__ == '__main__':
     # debug mode causes create() function to run twice
     # app.debug = True
-    create()
-    browser()
+    # create()
+    # browser()
     app.run()
     #app.run(host='0.0.0.0')
