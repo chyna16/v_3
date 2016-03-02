@@ -1,9 +1,10 @@
 from flask import Flask, request, render_template
 import csv, os, time, fnmatch
 from werkzeug import secure_filename
+import json
  
-rootPath = '/home/tramain/dataDisplay1/csv_folder'
-# rootPath = '/home/ubuntu/Desktop/repos/v3clone/v3/csv_folder'
+# rootPath = '/home/tramain/dataDisplay1/csv_folder'
+rootPath = '/home/ubuntu/Desktop/repos/v3clone/v3/csv_folder'
 pattern = '*.csv'
 
 app = Flask(__name__)
@@ -13,55 +14,64 @@ app = Flask(__name__)
 # code below only works with code maat downloaded 
 # and script is run from the repository directory
 
-def create():
-    print("Setting a path for codemaat...")
-    # setting the path doesn't work when script is run
-    os.system("PATH=/home/tramain/ixmaat0.8.5:$PATH")
-    os.system("PATH=$PATH:/home/tramain/ixmaat0.8.5")
-    print("Done.")
-    print("-" * 60)
-    print("Obtaining repository logs...")
-    os.system("git log --pretty=format:'[%h] %aN %ad %s' --date=short --numstat > logfile.log")
-    print("Done.")
-    print("-" * 60)
-    print("Creating csv files from generated log...")
-    time.sleep(1)
-    print("Creating repository summary...")
-    os.system("maat -l logfile.log -c git -a summary > summary.csv")
-    # Reports an overview of mined data from git's log file
-	print("Creating organizational metrics summary...")
-	os.system("maat -l logfile.log -c git > metrics.csv")
-	# Reports the number of authors/revisions made per module
-	print("Creating organizational metrics summary...")
-	os.system("maat -l logfile.log -c git -a coupling > coupling.csv")
-	# Reports correlation of files that often commit together
-	# degree = % of commits where the two files were changed in the same commit
-	print("Creating code age summary...")
-	os.system("maat -l logfile.log -c git -a age > age.csv")
-	# Reports how long ago the last change was made in measurement of months
-    print("Done. Check your current folder for your files.")
-    print("-" * 60);
+# def create():
+#     print("Setting a path for codemaat...")
+#     # setting the path doesn't work when script is run
+#     os.system("PATH=/home/tramain/ixmaat0.8.5:$PATH")
+#     os.system("PATH=$PATH:/home/tramain/ixmaat0.8.5")
+#     print("Done.")
+#     print("-" * 60)
+#     print("Obtaining repository logs...")
+#     os.system("git log --pretty=format:'[%h] %aN %ad %s' --date=short --numstat > logfile.log")
+#     print("Done.")
+#     print("-" * 60)
+#     print("Creating csv files from generated log...")
+#     time.sleep(1)
+#     print("Creating repository summary...")
+#     os.system("maat -l logfile.log -c git -a summary > summary.csv")
+#     # Reports an overview of mined data from git's log file
+# 	print("Creating organizational metrics summary...")
+# 	os.system("maat -l logfile.log -c git > metrics.csv")
+# 	# Reports the number of authors/revisions made per module
+# 	print("Creating organizational metrics summary...")
+# 	os.system("maat -l logfile.log -c git -a coupling > coupling.csv")
+# 	# Reports correlation of files that often commit together
+# 	# degree = % of commits where the two files were changed in the same commit
+# 	print("Creating code age summary...")
+# 	os.system("maat -l logfile.log -c git -a age > age.csv") 
+# 	# Reports how long ago the last change was made in measurement of months
+#     print("Done. Check your current folder for your files.")
+#     print("-" * 60);
 
-def browser():
-    print("Process complete. Opening browser to http://127.0.0.1:5000/")
-    time.sleep(2)
-    os.system("google-chrome-stable http://127.0.0.1:5000")
-    print("-" * 60);
+# def browser():
+#     print("Process complete. Opening browser to http://127.0.0.1:5000/")
+#     time.sleep(2)
+#     os.system("google-chrome-stable http://127.0.0.1:5000")
+#     print("-" * 60);
 
 # --------------------------------------------------------------------
 
 # this function takes csv file and two empty arrays
 # reads each column from file into an array and returns the arrays
-def parseCSV(uploadedFile, dataT, dataV):
-	readInfo = csv.DictReader(uploadedFile)
-	for row in readInfo:
-		dataT.append(row['statistic'])
-		dataV.append(row['value'])
-	return dataT, dataV;
+def parseCSV(uploadedFile, dataArray):
+	rowArray = []
+	length = 0
+	i = 0
+	reader = csv.reader(uploadedFile)
+	for row in reader:
+		length = len(row)
+		rowArray.append(row)
+	while i < length:
+		colArray = []
+		for r in rowArray:
+			colArray.append(r[i])
+		dataArray.append(colArray)
+		i+=1
+	return dataArray;
 
 @app.route('/', methods=['GET', 'POST'])
 def input():
-	dataType, dataValue = [], []
+	dataArray = []
 	
 	# upon opening the homepage, user is prompted with a selection of repos
 	if request.method == 'GET':
@@ -76,8 +86,10 @@ def input():
 	elif request.method == 'POST':
 		data = request.form['filename'] # gets name of csv filename that was selected by the user on webpage
 		with open('csv_folder/{}'.format(data), 'rt') as csvfile: # variable data SHOULD be in form of 'csvname.csv'
-			parseCSV(csvfile, dataType, dataValue)
-		return render_template('result.html', dataType=dataType, dataValue=dataValue)
+			parseCSV(csvfile, dataArray)
+		print(dataArray)
+		return render_template('result.html', dataArray=json.dumps(dataArray))
+
 		csvfile.close();
 
 # THIS NEEDS TO BE WORKED ON

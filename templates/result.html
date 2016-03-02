@@ -10,17 +10,18 @@
 
 <body>
 {% block head %} <h1>Data Visualizer</h1> {% endblock %}
-  <p style="float:left">
-  {% for t in dataType %}
+  <!-- <p style="float:left">
+  {% for t in dataArray %}
   <br> {{t}}
   {% endfor %}
   </p>
   <br>
   <p>
   {% for v in dataValue %}
-   {{v}} <br>
+   {{v[1]}} <br>
   {% endfor %}
-  </p>
+  </p> -->
+
 
 <style>
 .chart div {
@@ -39,18 +40,39 @@
 <div id="wrapper" class="chart"></div>
 
 <script>
-var data = [];
-  {% for v in dataValue %} data.push({{v}}); {% endfor %};
+var dataArray = {{dataArray|safe}}
 
-var labels = [];
-  {% for t in dataType %} labels.push("{{t}}"); {% endfor %};
+// {% for t in dataArray %}
+//   {% for i in t %}
+//     tempArr.push("{{t[i]}}");
+//   {% endfor %}
+//   alert(tempArr);
+//   dataArr.push(tempArr);
+// {% endfor %};
+
 
 var height = 300, width = 500;
 var radius = height / 2 - 10;
 var padding = 50;
 
+var type = [];
+var value = [];
+var value2 = [];
 
-function scatterPlot() {    
+for (i = 1; i < dataArray[0].length; i++) {
+  type.push(dataArray[0][i]);
+}
+for (i = 1; i < dataArray[1].length; i++) {
+  value.push(dataArray[1][i]);
+}
+for (i = 1; i < dataArray[2].length; i++) {
+  value2.push(dataArray[2][i]);
+}
+
+function scatterPlot() {
+  // FIX: summary.csv shows a skewed range
+  // FIX: automated spacing between plot points
+
   var plot = d3.select("#wrapper").append('svg')
       .attr('id', 'plot')
       .attr('height', height + padding * 2)
@@ -60,10 +82,9 @@ function scatterPlot() {
       .attr('id', 'viz')
       .attr('transform', 'translate(' + padding + ',' + padding + ')');
 
+  var xScale = d3.scale.ordinal().domain(type).rangePoints([0, width]);
   var yScale = d3.scale.linear().range([height, 10]);
-  var xScale = d3.scale.ordinal().domain(labels).rangePoints([0, width]);
-
-  var yDomain = [0, d3.max(data)]
+  var yDomain = [0, d3.max(value)]
   yScale.domain(yDomain);
 
   var xAxis = d3.svg.axis()
@@ -84,27 +105,28 @@ function scatterPlot() {
         .call(xAxis);
 
   var dots = plot.selectAll('circle')
-        .data(data)
+        .data(value)
         .enter()
         .append('circle');
 
   dots.attr('r', 5)
     .attr('cx', function(d, i) {
-      return i * ((width/6) + 15) })
+      return i * 20 })
     .attr('cy', function(d) {
       return yScale(d) });
 }
 
 function barGraph() {
   var x = d3.scale.linear()
-    .domain([0, d3.max(data)])
+    .domain([0, d3.max(value)])
     .range([0, 420]);
 
   var bar = d3.select("#wrapper")
     .selectAll("div")
-      .data(data)
+      .data(value)
     .enter().append("div")
-      .style("width", function(d) { return x(d) + "px"; })
+      .style("width", function(d) { return d + "px"; })
+      .data(type)
       .text(function(d) { return d; });
 }
 
@@ -125,7 +147,7 @@ function pieChart() {
       .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
   svg.selectAll("path")
-      .data(pie(data))
+      .data(pie(value))
     .enter().append("path")
       .style("fill", function(d, i) { return color(i); })
       .attr("d", arc);
