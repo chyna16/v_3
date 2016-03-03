@@ -2,27 +2,28 @@
 
 <html>
 <head>
+<script src="//d3js.org/d3.v3.min.js"></script>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script> -->
 <title>Results</title>
 </head>
 
 <body>
 {% block head %} <h1>Data Visualizer</h1> {% endblock %}
-  <p>
-  {% for t in dataType %}
-  {{t}}
+  <!-- <p style="float:left">
+  {% for t in dataArray %}
+  <br> {{t}}
   {% endfor %}
   </p>
+  <br>
   <p>
   {% for v in dataValue %}
-  {{v}}
+   {{v[1]}} <br>
   {% endfor %}
-  </p>
-<!--  {% if v == '' %}
-  <p> error </p>
-  {% endif %} -->
-  <style>
+  </p> -->
 
+
+<style>
 .chart div {
   font: 10px sans-serif;
   background-color: steelblue;
@@ -31,32 +32,127 @@
   margin: 1px;
   color: white;
 }
-
 </style>
-<div class="chart"></div>
-<script src="//d3js.org/d3.v3.min.js"></script>
+
+<h1 onclick="scatterPlot()">Scatter Plot</h1>
+<h1 onclick="barGraph()">Bar Graph</h1>
+<h1 onclick="pieChart()">Pie Chart</h1>
+<div id="wrapper" class="chart"></div>
+
 <script>
+var dataArray = {{dataArray|safe}}
 
-var data = [{% for v in dataValue %}
-  {{v}},
-  {% endfor %}];
+// {% for t in dataArray %}
+//   {% for i in t %}
+//     tempArr.push("{{t[i]}}");
+//   {% endfor %}
+//   alert(tempArr);
+//   dataArr.push(tempArr);
+// {% endfor %};
 
-var names = [{% for t in dataType %}
-  "{{t}}",
-  {% endfor %}];
 
+var height = 300, width = 500;
+var radius = height / 2 - 10;
+var padding = 50;
 
-var x = d3.scale.linear()
-    .domain([0, d3.max(data)])
+var type = [];
+var value = [];
+var value2 = [];
+
+for (i = 1; i < dataArray[0].length; i++) {
+  type.push(dataArray[0][i]);
+}
+for (i = 1; i < dataArray[1].length; i++) {
+  value.push(dataArray[1][i]);
+}
+for (i = 1; i < dataArray[2].length; i++) {
+  value2.push(dataArray[2][i]);
+}
+
+function scatterPlot() {
+  // FIX: summary.csv shows a skewed range
+  // FIX: automated spacing between plot points
+
+  var plot = d3.select("#wrapper").append('svg')
+      .attr('id', 'plot')
+      .attr('height', height + padding * 2)
+      .attr('width', width + padding * 2)
+      .style('padding', padding)
+      .append('g')
+      .attr('id', 'viz')
+      .attr('transform', 'translate(' + padding + ',' + padding + ')');
+
+  var xScale = d3.scale.ordinal().domain(type).rangePoints([0, width]);
+  var yScale = d3.scale.linear().range([height, 10]);
+  var yDomain = [0, d3.max(value)]
+  yScale.domain(yDomain);
+
+  var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom")
+        .ticks(6);
+  var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .ticks(3);
+
+  plot.append("g")
+        .attr('class', 'y axis')
+        .call(yAxis);
+  plot.append("g")
+        .attr('class', 'x axis')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(xAxis);
+
+  var dots = plot.selectAll('circle')
+        .data(value)
+        .enter()
+        .append('circle');
+
+  dots.attr('r', 5)
+    .attr('cx', function(d, i) {
+      return i * 20 })
+    .attr('cy', function(d) {
+      return yScale(d) });
+}
+
+function barGraph() {
+  var x = d3.scale.linear()
+    .domain([0, d3.max(value)])
     .range([0, 420]);
 
-d3.select(".chart")
-  .selectAll("div")
-    .data(data)
-  .enter().append("div")
-    .style("width", function(d) { return x(d) + "px"; })
-    .text(function(d) { return d; });
+  var bar = d3.select("#wrapper")
+    .selectAll("div")
+      .data(value)
+    .enter().append("div")
+      .style("width", function(d) { return d + "px"; })
+      .data(type)
+      .text(function(d) { return d; });
+}
 
+function pieChart() {
+  var arc = d3.svg.arc()
+    .innerRadius(radius - 40)
+    .outerRadius(radius);
+
+  var pie = d3.layout.pie()
+      .padAngle(.02);
+
+  var color = d3.scale.category10();
+
+  var svg = d3.select("#wrapper").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+    .append("g")
+      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+  svg.selectAll("path")
+      .data(pie(value))
+    .enter().append("path")
+      .style("fill", function(d, i) { return color(i); })
+      .attr("d", arc);
+}
 </script>
+
 </body>
 </html>
