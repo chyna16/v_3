@@ -2,39 +2,54 @@ from flask import Flask, request, render_template
 import csv, os, time, fnmatch
 from werkzeug import secure_filename
 import json
- 
-rootPath = '/home/tramain/repos/v3/csv_files'
+
+# this is the directory of where the html page obtains the list of files to select from
+owd = os.getcwd()
+
+if os.name == 'nt':
+	rootPath = os.path.normpath(owd + '/csv_files')
+	maatPath = os.path.normpath('C:/Users/bentinct/winmaat0.8.5/')
+	repoDir = os.path.normpath('C:/Users/bentinct/repos/mcshake/.git')
+else:
+	rootPath = owd + '/csv_files'
+	maatPath = '/home/tramain/ixmaat0.8.5'
+	repoDir = '/home/tramain/mcshake/.git'
 # rootPath = '/home/ubuntu/Desktop/repos/v3clone/v3/csv_folder'
 
+# this returns only files of this type to the html page to display.
 pattern = '*.csv'
 
 app = Flask(__name__)
 
 # -------------------------------------------------------------------
-
+# 'git --git-dir C:\users\bentinct\repos\mcshake\.git log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile.log'
 # code below only works with code maat downloaded 
-# and script is run from the repository directory
+
 
 def set_path():
 	print("Setting a path for codemaat...")
 	# path is set temporarily, per script run
-	os.environ['PATH'] += os.pathsep + '/home/tramain/ixmaat0.8.5'
+	os.environ['PATH'] += os.pathsep + maatPath
 	print("Done.")
 	print("-" * 60)
-	# need to create an exception if folder already exists
+	# need to create an exception if csv_files folder already exists
 	# global owd
 	# owd = os.getcwd()
+	# creates folder for the rootPath variable if none exists
 	os.system("mkdir csv_files")
 	os.chdir("csv_files")
 
 def create():
 	print("Obtaining repository logs...")
-	os.system("git --git-dir /home/tramain/mcshake/.git log --pretty=format:'[%h] %aN %ad %s' --date=short --numstat > logfile.log")
+	# currently manually selects the repository
+	os.system('git --git-dir '+ repoDir +' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile.log')
 	print("Done.")
 	print("-" * 60)
 	print("Creating csv files from generated log...")
 	time.sleep(1)
 	print("Creating repository summary...")
+	# currently running codemaat via 'maat.bat' on windows creates extra lines of code in the csv files,
+	# causing them to break when requested from the site
 	os.system("maat -l logfile.log -c git -a summary > summary.csv")
 	# Reports an overview of mined data from git's log file
 	print("Creating organizational metrics summary...")
@@ -70,6 +85,7 @@ def parseCSV(uploadedFile, dataArray):
 	for row in reader:
 		length = len(row)
 		rowArray.append(row)
+	print (rowArray[0])
 	while i < length:
 		colArray = []
 		for r in rowArray:
