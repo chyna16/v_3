@@ -65,7 +65,7 @@ def generate_data():
 	# Reports how long ago the last change was made in measurement of months
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
-	os.chdir("..")
+	# os.chdir("..")
 
 
 def open_browser():
@@ -113,7 +113,7 @@ def obtain_data():
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
 		data = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
-		with open('/csv_files'.format(data), 'rt') as csv_file:  # variable data SHOULD be in form of 'csvname.csv'
+		with open('{}'.format(data), 'rt') as csv_file:  # variable data SHOULD be in form of 'csvname.csv'
 			parse_csv(csv_file, data_array)
 		return render_template('result.html', dataArray=json.dumps(data_array))
 		# csv_file.close()
