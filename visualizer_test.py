@@ -1,27 +1,30 @@
 import csv, os, time, fnmatch, json
+from flask.ext.bootstrap import Bootstrap
 from flask import Flask, request, render_template
 
 # this is the directory of where the html page obtains the list of files to select from
 # owd = obtain working directory
 owd = os.getcwd()
 
-# currently the repository and codemaat directory is hardcoded
+# currently the repository  and codemaat directory is hardcoded
 
 if os.name == 'nt':
 	root_dir = os.path.normpath(owd + '/csv_files')
 	maat_dir = os.path.normpath('C:/Users/bentinct/winmaat0.8.5/')
 	repo_dir = os.path.normpath('C:/Users/bentinct/repos/mcshake/.git')
+	test_dir = os.path.normpath('C:/Users/bentinct/repos')
+	repo_name = os.path.basename(os.path.normpath(repo_dir))
 else:
 	root_dir = owd + '/csv_files'
-	# maat_dir = '/home/tramain/ixmaat0.8.5'
-	maat_dir = '/home/farhat/ixmaat0.8.5'
-	# repo_dir = '/home/tramain/mcshake/.git'
-	repo_dir = '/home/farhat/Desktop/repos/mcshake/.git'
+	maat_dir = '/home/tramain/ixmaat0.8.5'
+	repo_dir = '/home/tramain/mcshake/.git'
 
 # this returns only files of this type to the html page to display.
 file_type = '*.csv'
+test_type = '/*'
 
 app = Flask(__name__)
+bootstrap = Bootstrap(app)
 
 # -------------------------------------------------------------------
 
@@ -98,7 +101,21 @@ def parse_csv(uploaded_file, data_array):
 		i += 1
 	return data_array
 
-
+# @app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
+def obtain_repository():
+	if request.method == 'GET':
+		test_list = []
+		for root, dirs, files in os.walk(test_dir):  # traverses filesystem of root_dir
+			for dirname in fnmatch.filter(dirs, test_type):  # picks out files of type in pattern
+				test_list.append(dirname)  # fills array with names of csv files in current directory
+		return render_template('index.html', test_list=test_list)  # returns array of csv filenames to webpage
+	elif request.method == 'POST':
+		data = request.form['dirname']  # gets name of csv filename that was selected by the user on webpage
+		with open("{}".format(data), 'rt') as test_file:  # variable data SHOULD be in form of 'csvname.csv'
+			parse_csv(csv_file, data_array)
+		return render_template('input.html')
+	
 @app.route('/', methods=['GET', 'POST'])
 def obtain_data():
 	data_array = []
@@ -109,22 +126,26 @@ def obtain_data():
 		for root, dirs, files in os.walk(root_dir):  # traverses filesystem of root_dir
 			for filename in fnmatch.filter(files, file_type):  # picks out files of type in pattern
 				csv_list.append(filename)  # fills array with names of csv files in current directory
-		return render_template('input.html', csvList=csv_list)  # returns array of csv filenames to webpage
+		return render_template('input.html', csv_list=csv_list)  # returns array of csv filenames to webpage
 
 	# when user selects a repo, the following runs codemaat and generates a csv file
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
-		print("1")
 		data = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
-		print("2")
 		with open("csv_files/{}".format(data), 'rt') as csv_file:  # variable data SHOULD be in form of 'csvname.csv'
-			print("3")
 			parse_csv(csv_file, data_array)
-			print("4")
-		return render_template('result.html', dataArray=json.dumps(data_array))
-		print("5")
+		return render_template('result.html', dataArray=json.dumps(data_array), repo_name=repo_name)
 		# csv_file.close()
 
+
+
+@app.errorhandler(404)
+def not_found(e):
+	return render_template ('404.html')
+
+@app.errorhandler(400)
+def not_found(e):
+	return render_template ('400.html')
 # THIS NEEDS TO BE WORKED ON
 # TRYING TO GET ROUTE('/') TO REDIRECT TO BELOW ROUTE AFTER RENDER_TEMPLATE
 # @app.route('/result', methods=['GET', 'POST'])
