@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+<!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">  -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<link rel=stylesheet type=text/css href='../static/bootstrap.css'>
+<script src = "../static/bootstrap.js"></script> 
+
+<title>V3</title>
+</head>
+
+<body>
+
+<style> body{
+  font-family: 'Roboto Slab', serif;
+}
+</style>
+
+  <nav class="navbar navbar-inverse" role="navigation">
+      <div class="container">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="#">Home</a></li>
+            <li role="presentation"><a href="about.html">About</a></li>
+            <li role="presentation"><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <a class="navbar-brand" href="/">V3</a>
+      </div>    
+  </nav>
+
+<h1>Welcome to the Viacom Value Visualizer</h1>
+
+<div class="row">
+        <div class="col-lg-6">
+          <h2>Select a Repository</h2>
+          <p>
+            <div class="list-group">
+              <button type="button" class="list-group-item">Cras justo odio</button>
+              <button type="button" class="list-group-item">Dapibus ac facilisis in</button>
+              <button type="button" class="list-group-item">Morbi leo risus</button>
+              <button type="button" class="list-group-item">Porta ac consectetur ac</button>
+              <button type="button" class="list-group-item">Vestibulum at eros</button>
+            </div>
+          </p>
+          <p><a class="btn btn-info" href="#" role="button">View details &raquo;</a></p>
+        </div>
+        <div class="col-lg-6">
+          <h2>Repository Details</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+        </div>
+      </div>
+<form method="POST" enctype="multipart/form-data">
+	{% for file in csv_list %}
+		<input type="radio" name="filename" value={{file}}>{{file}}</input>
+	{% endfor %}
+	 <p><button class="btn btn-lg btn-primary" role="button" type = "submit">Next</button></p>
+	<!-- <button type="submit">Show Results</button> -->
+</form> 
+<div class="btn-group" data-toggle="buttons">
+  <label class="btn btn-primary active">
+    <input type="radio" name="options" id="option1" autocomplete="off" checked> Radio 1 (preselected)
+  </label>
+  <label class="btn btn-primary">
+    <input type="radio" name="options" id="option2" autocomplete="off"> Radio 2
+  </label>
+  <label class="btn btn-primary">
+    <input type="radio" name="options" id="option3" autocomplete="off"> Radio 3
+  </label>
+</div>
+</body>
+</html>
