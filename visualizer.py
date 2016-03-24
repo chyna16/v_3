@@ -5,7 +5,7 @@ from flask import Flask, request, render_template
 # owd = obtain working directory
 owd = os.getcwd()
 
-# currently the repository  and codemaat directory is hardcoded
+# currently the repository and codemaat directory is hardcoded
 
 if os.name == 'nt':
 	root_dir = os.path.normpath(owd + '/csv_files')
@@ -13,8 +13,10 @@ if os.name == 'nt':
 	repo_dir = os.path.normpath('C:/Users/bentinct/repos/mcshake/.git')
 else:
 	root_dir = owd + '/csv_files'
-	maat_dir = '/home/tramain/ixmaat0.8.5'
-	repo_dir = '/home/tramain/mcshake/.git'
+	# maat_dir = '/home/tramain/ixmaat0.8.5'
+	maat_dir = '/home/farhat/ixmaat0.8.5'
+	# repo_dir = '/home/tramain/mcshake/.git'
+	repo_dir = '/home/farhat/Desktop/repos/mcshake/.git'
 
 # this returns only files of this type to the html page to display.
 file_type = '*.csv'

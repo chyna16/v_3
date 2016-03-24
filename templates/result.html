@@ -37,7 +37,7 @@
 <h1 onclick="scatterPlot()">Scatter Plot</h1>
 <h1 onclick="barGraph()">Bar Graph</h1>
 <h1 onclick="pieChart()">Pie Chart</h1>
-<div id="wrapper" class="chart"></div>
+<div id="wrapper"></div>
 
 <script>
 var dataArray = {{dataArray|safe}}
@@ -55,6 +55,7 @@ var height = 300, width = 500;
 var radius = height / 2 - 10;
 var padding = 50;
 
+// FIX: the axis values are determined manually here, not automated
 var type = [];
 var value = [];
 var value2 = [];
@@ -152,6 +153,7 @@ function pieChart() {
       .style("fill", function(d, i) { return color(i); })
       .attr("d", arc);
 }
+
 </script>
 
 </body>
