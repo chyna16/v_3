@@ -1,6 +1,6 @@
 import csv, os, time, fnmatch, json
-from flask.ext.bootstrap import Bootstrap
-from flask import Flask, request, render_template
+#from flask.ext.bootstrap import Bootstrap
+from flask import Flask, request, render_template, redirect, url_for
 
 # this is the directory of where the html page obtains the list of files to select from
 # owd = obtain working directory
@@ -16,61 +16,62 @@ if os.name == 'nt':
 	repo_name = os.path.basename(os.path.normpath(repo_dir))
 else:
 	root_dir = owd + '/csv_files'
-	maat_dir = '/home/tramain/ixmaat0.8.5'
-	repo_dir = '/home/tramain/mcshake/.git'
+	# maat_dir = '/home/tramain/ixmaat0.8.5'
+	maat_dir = '/home/farhat/ixmaat0.8.5'
+	# repo_dir = '/home/tramain/mcshake/.git'
+	repo_dir = '/home/farhat/Desktop/repos/mcshake/.git'
 
 # this returns only files of this type to the html page to display.
 file_type = '*.csv'
 test_type = '/*'
 
 app = Flask(__name__)
-bootstrap = Bootstrap(app)
+#bootstrap = Bootstrap(app)
 
 # -------------------------------------------------------------------
 
 # code below only works with codemaat downloaded
 
+def set_path():
+	print("Setting a path for codemaat...")
+	# path is set temporarily, per script run
+	os.environ['PATH'] += os.pathsep + maat_dir
+	print("Done.")
+	print("-" * 60)
+	# need to create an exception if csv_files folder already exists
+	# global owd
+	# owd = os.getcwd()
+	# creates folder for the root_dir variable if none exists
+	os.system("mkdir csv_files")
+	os.chdir("csv_files")
 
-# def set_path():
-# 	print("Setting a path for codemaat...")
-# 	# path is set temporarily, per script run
-# 	os.environ['PATH'] += os.pathsep + maat_dir
-# 	print("Done.")
-# 	print("-" * 60)
-# 	# need to create an exception if csv_files folder already exists
-# 	# global owd
-# 	# owd = os.getcwd()
-# 	# creates folder for the root_dir variable if none exists
-# 	os.system("mkdir csv_files")
-# 	os.chdir("csv_files")
 
-
-# def generate_data():
-# 	print("Obtaining repository logs...")
-# 	# currently manually selects the repository
-# 	os.system('git --git-dir ' + repo_dir + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile.log')
-# 	print("Done.")
-# 	print("-" * 60)
-# 	print("Creating csv files from generated log...")
-# 	time.sleep(1)
-# 	print("Creating repository summary...")
-# 	# currently running codemaat via 'maat.bat' on windows creates extra lines of code in the csv files,
-# 	# causing them to break when requested from the site
-# 	os.system("maat -l logfile.log -c git -a summary > summary.csv")
-# 	# Reports an overview of mined data from git's log file
-# 	print("Creating organizational metrics summary...")
-# 	os.system("maat -l logfile.log -c git > metrics.csv")
-# 	# Reports the number of authors/revisions made per module
-# 	print("Creating coupling summary...")
-# 	os.system("maat -l logfile.log -c git -a coupling > coupling.csv")
-# 	# Reports correlation of files that often commit together
-# 	# degree = % of commits where the two files were changed in the same commit
-# 	print("Creating code age summary...")
-# 	os.system("maat -l logfile.log -c git -a entity-churn > age.csv")
-# 	# Reports how long ago the last change was made in measurement of months
-# 	print("Done. Check your current folder for your files.")
-# 	print("-" * 60)
-# 	# os.chdir("..")
+def generate_data():
+	print("Obtaining repository logs...")
+	# currently manually selects the repository
+	os.system('git --git-dir ' + repo_dir + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile.log')
+	print("Done.")
+	print("-" * 60)
+	print("Creating csv files from generated log...")
+	time.sleep(1)
+	print("Creating repository summary...")
+	# currently running codemaat via 'maat.bat' on windows creates extra lines of code in the csv files,
+	# causing them to break when requested from the site
+	os.system("maat -l logfile.log -c git -a summary > summary.csv")
+	# Reports an overview of mined data from git's log file
+	print("Creating organizational metrics summary...")
+	os.system("maat -l logfile.log -c git > metrics.csv")
+	# Reports the number of authors/revisions made per module
+	print("Creating coupling summary...")
+	os.system("maat -l logfile.log -c git -a coupling > coupling.csv")
+	# Reports correlation of files that often commit together
+	# degree = % of commits where the two files were changed in the same commit
+	print("Creating code age summary...")
+	os.system("maat -l logfile.log -c git -a entity-churn > age.csv")
+	# Reports how long ago the last change was made in measurement of months
+	print("Done. Check your current folder for your files.")
+	print("-" * 60)
+	# os.chdir("..")
 
 
 def open_browser():
@@ -101,9 +102,10 @@ def parse_csv(uploaded_file, data_array):
 		i += 1
 	return data_array
 
-# @app.route('/', methods=['GET', 'POST'])
+
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
-def obtain_repository():
+def index():
 	if request.method == 'GET':
 		test_list = []
 		for root, dirs, files in os.walk(test_dir):  # traverses filesystem of root_dir
@@ -114,10 +116,11 @@ def obtain_repository():
 		data = request.form['dirname']  # gets name of csv filename that was selected by the user on webpage
 		with open("{}".format(data), 'rt') as test_file:  # variable data SHOULD be in form of 'csvname.csv'
 			parse_csv(csv_file, data_array)
-		return render_template('input.html')
+		# return render_template('input.html')
+		return redirect(url_for('dashboard'))
 	
-@app.route('/', methods=['GET', 'POST'])
-def obtain_data():
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
 	data_array = []
 
 	# upon opening the homepage, user is prompted with a selection of repos
@@ -134,8 +137,13 @@ def obtain_data():
 		data = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
 		with open("csv_files/{}".format(data), 'rt') as csv_file:  # variable data SHOULD be in form of 'csvname.csv'
 			parse_csv(csv_file, data_array)
-		return render_template('result.html', dataArray=json.dumps(data_array), repo_name=repo_name)
-		# csv_file.close()
+		csv_file.close()
+		return redirect(url_for('result'))
+
+@app.route('/result', methods=['GET', 'POST'])
+def result():
+	return render_template('result.html', 
+			dataArray=json.dumps(data_array), repo_name=repo_name)
 
 
 
@@ -146,11 +154,6 @@ def not_found(e):
 @app.errorhandler(400)
 def not_found(e):
 	return render_template ('400.html')
-# THIS NEEDS TO BE WORKED ON
-# TRYING TO GET ROUTE('/') TO REDIRECT TO BELOW ROUTE AFTER RENDER_TEMPLATE
-# @app.route('/result', methods=['GET', 'POST'])
-# def output():
-# 	return render_template('result.html')
 
 if __name__ == '__main__':
 	# debug mode causes generate_data() function to run twice
