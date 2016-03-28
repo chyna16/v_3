@@ -10,9 +10,9 @@ owd = os.getcwd()
 
 if os.name == 'nt':
 	# root_dir = os.path.normpath(owd + '/csv_files_' + repo_name)
-	maat_dir = os.path.normpath('C:/Users/teddy/winmaat0.8.5/')
-	repo_dir = os.path.normpath('C:/Users/teddy/repos/mcshake/.git')
-	repo_list = ('C:\\Users\\teddy\\repos\\')
+	maat_dir = os.path.normpath('C:/Users/bentinct/winmaat0.8.5/')
+	repo_dir = os.path.normpath('C:/Users/bentinct/repos/mcshake/.git')
+	repo_list = ('C:\\Users\\bentinct\\repos\\')
 	# repo_name = os.path.basename(os.path.normpath(repo_dir))
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 else:
@@ -24,7 +24,9 @@ else:
 file_type = '*.csv'
 
 app = Flask(__name__)
+
 # bootstrap = Bootstrap(app)
+
 
 
 # code below only works with codemaat downloaded
@@ -53,17 +55,17 @@ def generate_data(address):
 	print("Creating repository summary...")
 	# currently running codemaat via 'maat.bat' on windows creates extra lines of code in the csv files,
 	# causing them to break when requested from the site
-	os.system("maat -l logfile.log -c git -a summary > summary_" + repo_name + ".csv")
+	os.system("maat -l logfile_" + repo_name + ".log -c git -a summary > summary_" + repo_name + ".csv")
 	# Reports an overview of mined data from git's log file
 	print("Creating organizational metrics summary...")
-	os.system("maat -l logfile.log -c git > metrics_" + repo_name + ".csv")
+	os.system("maat -l logfile_" + repo_name + ".log -c git > metrics_" + repo_name + ".csv")
 	# Reports the number of authors/revisions made per module
 	print("Creating coupling summary...")
-	os.system("maat -l logfile.log -c git -a coupling > coupling_" + repo_name + ".csv")
+	os.system("maat -l logfile_" + repo_name + ".log -c git -a coupling > coupling_" + repo_name + ".csv")
 	# Reports correlation of files that often commit together
 	# degree = % of commits where the two files were changed in the same commit
 	print("Creating code age summary...")
-	os.system("maat -l logfile.log -c git -a entity-churn > age_" + repo_name + ".csv")
+	os.system("maat -l logfile_" + repo_name + ".log -c git -a entity-churn > age_" + repo_name + ".csv")
 	# Reports how long ago the last change was made in measurement of months
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
@@ -99,7 +101,7 @@ def parse_csv(uploaded_file, data_array):
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
-def obtain_repository():
+def index():
 	if request.method == 'GET':
 		folder_select = []
 		for folder_name in folder_list:
@@ -116,11 +118,11 @@ def obtain_repository():
 	# 	with open("{}".format(data), 'rt') as test_file:  # variable data SHOULD be in form of 'csvname.csv'
 	# 		parse_csv(csv_file, data_array)
 		print (os.getcwd())
-		return redirect('input')
-
+		return redirect(url_for('dashboard'))
 	
-@app.route('/input', methods=['GET', 'POST'])
-def obtain_data():
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+	global data_array
 	data_array = []
 
 	# upon opening the homepage, user is prompted with a selection of repos
@@ -141,8 +143,13 @@ def obtain_data():
 		data = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
 		with open("csv_files_" + repo_name + "/{}".format(data), 'rt') as csv_file:  # variable data SHOULD be in form of 'csvname.csv'
 			parse_csv(csv_file, data_array)
-		return render_template('result.html', dataArray=json.dumps(data_array), repo_name=repo_name)
-		# csv_file.close()
+		csv_file.close()
+		return redirect(url_for('result'))
+
+@app.route('/result', methods=['GET', 'POST'])
+def result():
+	return render_template('result.html', 
+			data_array=json.dumps(data_array), repo_name=repo_name)
 
 
 @app.errorhandler(404)
@@ -152,11 +159,6 @@ def not_found(e):
 @app.errorhandler(400)
 def bad_request(e):
 	return render_template ('400.html')
-# THIS NEEDS TO BE WORKED ON
-# TRYING TO GET ROUTE('/') TO REDIRECT TO BELOW ROUTE AFTER RENDER_TEMPLATE
-# @app.route('/result', methods=['GET', 'POST'])
-# def output():
-# 	return render_template('result.html')
 
 if __name__ == '__main__':
 	# debug mode causes generate_data() function to run twice

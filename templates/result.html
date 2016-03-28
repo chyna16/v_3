@@ -95,65 +95,23 @@
       window.history.back();
   }
   </script>
-<style>
-.chart div {
-  font: 10px sans-serif black;
-  background-color: steelblue;
-  text-align: right;
-  padding: 3px;
-  margin: 2px;
-}
-</style>
-<!-- <a class="btn btn-primary" role="button" data-toggle="collapse" href = "#" onclick="barGraph()" aria-expanded="false" aria-controls="collapseExample">
-  Bar Graph
-</a>
-<div class="collapse" id="collapseExample">
-  <div class="chart" onclick="barGraph()">
-    barGraph()
-  </div> -->
 
-  <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#wrapperBar" onclick="barGraph()">Bar Graph</button>
-  <div id="demo" class="collapse">
+<button type="button" class="btn btn-info" data-target="#wrapperBar" onclick="toggleBar()">Bar Graph</button>
+<button type="button" class="btn btn-info" data-target="#wrapperPie" onclick="togglePie()">Pie Chart</button>
+<button type="button" class="btn btn-info" data-target="#wrapperScatter" onclick="toggleScatter()">Scatter Plot</button>
 
-  </div>
-
-  <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#wrapperPie" onclick="pieChart()">Pie Chart</button>
-  <div id="demo" class="collapse">
-
-  </div>
-
-  <!-- onclick="pieChart()" -->
-
-<!-- <a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseBar" aria-expanded="false" onclick="barGraph()">
-  Bar Graph
-</a>
-<div class="collapse" id="collapseBar"> -->
-
-<!-- 
-<h2><a href= "#" onclick="scatterPlot()">Scatter Plot</a></h2>
-<h2><a href = "#" onclick="barGraph()">Bar Graph</a></h2>
-<h2><a href = "#" onclick="pieChart()">Pie Chart</a></h2> -->
-
-<div id="wrapperBar" class="chart"></div>
-<div id="wrapperPie"></div>
-<div id="wrapperScatter"></div>
+<div id="wrapperBar" style="display: none;"></div>
+<div id="wrapperPie" style="display: none;"></div>
+<div id="wrapperScatter" style="display: none;"></div>
 
 <script>
 var dataArray = {{dataArray|safe}}
-
-// {% for t in dataArray %}
-//   {% for i in t %}
-//     tempArr.push("{{t[i]}}");
-//   {% endfor %}
-//   alert(tempArr);
-//   dataArr.push(tempArr);
-// {% endfor %};
-
 
 var height = 300, width = 500;
 var radius = height / 2 - 10;
 var padding = 50;
 
+// FIX: the axis values are determined manually here, not automated
 var type = [];
 var value = [];
 var value2 = [];
@@ -168,10 +126,9 @@ for (i = 1; i < dataArray[2].length; i++) {
   value2.push(dataArray[2][i]);
 }
 
-function scatterPlot() {
+////////////////////////// S C A T T E R  P L O T ////////////////////////////
   // FIX: summary.csv shows a skewed range
   // FIX: automated spacing between plot points
-
   var plot = d3.select("#wrapperScatter").append('svg')
       .attr('id', 'plot')
       .attr('height', height + padding * 2)
@@ -213,23 +170,24 @@ function scatterPlot() {
       return i * 20 })
     .attr('cy', function(d) {
       return yScale(d) });
-}
+//////////////////////////////////////////////////////////////////////////////
 
-function barGraph() {
-  var x = d3.scale.linear()
-    .domain([0, d3.max(value)])
-    .range([0, 420]);
+///////////////////////////// B A R  G R A P H ///////////////////////////////
+  var canvas = d3.select("#wrapperBar")
+    .append("svg")
+    .attr("width", 500)
+    .attr("height", 500);
 
-  var bar = d3.select("#wrapperBar")
-    .selectAll("div")
-      .data(value)
-    .enter().append("div")
-      .style("width", function(d) { return d + "px"; })
-      .data(type)
-      .text(function(d) { return d; });
-}
-
-function pieChart() {
+  var bar = canvas.selectAll("rect")
+    .data(value)
+    .enter()
+      .append("rect")
+      .attr("height", function(d) { return d * 5; })
+      .attr("width", 20)
+      .attr("x", function(d, i) { return i * 25; });
+//////////////////////////////////////////////////////////////////////////////
+ 
+///////////////////////////// P I E  C H A R T ///////////////////////////////
   var arc = d3.svg.arc()
     .innerRadius(radius - 40)
     .outerRadius(radius);
@@ -245,11 +203,42 @@ function pieChart() {
     .append("g")
       .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-  svg.selectAll("path")
+  pieSVG.selectAll("path")
       .data(pie(value))
     .enter().append("path")
       .style("fill", function(d, i) { return color(i); })
       .attr("d", arc);
+//////////////////////////////////////////////////////////////////////////////
+
+function toggleBar() {
+  var display_status = document.getElementById("wrapperBar").style.display;
+
+  if (display_status == "none") {
+    document.getElementById("wrapperBar").style.display = "block";
+  }
+  else {
+    document.getElementById("wrapperBar").style.display = "none";
+  }
+}
+function toggleScatter() {
+  var display_status = document.getElementById("wrapperScatter").style.display;
+
+  if (display_status == "none") {
+    document.getElementById("wrapperScatter").style.display = "block";
+  }
+  else {
+    document.getElementById("wrapperScatter").style.display = "none";
+  }
+}
+function togglePie() {
+  var display_status = document.getElementById("wrapperPie").style.display;
+
+  if (display_status == "none") {
+    document.getElementById("wrapperPie").style.display = "block";
+  }
+  else {
+    document.getElementById("wrapperPie").style.display = "none";
+  }
 }
 
 </script>
