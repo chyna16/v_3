@@ -119,6 +119,7 @@ def index():
 		# return render_template('input.html')
 		return redirect(url_for('dashboard'))
 	
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
 	data_array = []
@@ -140,11 +141,11 @@ def dashboard():
 		csv_file.close()
 		return redirect(url_for('result'))
 
+
 @app.route('/result', methods=['GET', 'POST'])
 def result():
 	return render_template('result.html', 
 			dataArray=json.dumps(data_array), repo_name=repo_name)
-
 
 
 @app.errorhandler(404)
