@@ -17,8 +17,12 @@ if os.name == 'nt':
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 else:
 	# root_dir = owd + '/csv_files_' + repo_name
-	maat_dir = '/home/tramain/ixmaat0.8.5'
-	repo_dir = '/home/tramain/mcshake/.git'
+	# maat_dir = '/home/tramain/ixmaat0.8.5'
+	maat_dir = '/home/farhat/ixmaat0.8.5'
+	# repo_dir = '/home/tramain/mcshake/.git'
+	# repo_dir = '/home/farhat/Desktop/repos/mcshake/.git'
+	repo_list = '/home/farhat/Desktop/repos/'
+	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
@@ -78,22 +82,26 @@ def open_browser():
 
 # this function takes csv file and two empty arrays
 # reads each column from file into an array and returns the arrays
-def parse_csv(uploaded_file, data_array):
-	row_array = []
-	length = 0
-	i = 0
+def parse_csv(uploaded_file):
 	reader = csv.reader(uploaded_file)
-	for row in reader:
-		length = len(row)
-		row_array.append(row)
-	print(row_array[0])
-	while i < length:
+	data_dict = {}
+	key_array = []
+	row_array = []
+
+	for i, row in enumerate(reader):
+		if i == 0:
+			# length = len(row)
+			key_array = row
+		else:
+			row_array.append(row)
+
+	for i, key in enumerate(key_array):
 		col_array = []
 		for r in row_array:
 			col_array.append(r[i])
-		data_array.append(col_array)
-		i += 1
-	return data_array
+		data_dict[key] = col_array
+
+	return (data_dict, key_array)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -110,19 +118,22 @@ def index():
 		repo_name = request.form['folder_name']  # gets name of csv filename that was selected by the user on webpage
 		print (repo_name)
 		set_path(repo_name)
-		generate_data(address = repo_list + repo_name + '\.git')
+		if os.name == 'nt':
+			generate_data(address = repo_list + repo_name + '\.git')
+		else:
+			generate_data(address = repo_list + repo_name + '/.git')
 		# os.chdir(repo_list + repo_name + '/.git')
 	# 	with open("{}".format(data), 'rt') as test_file:  # variable data SHOULD be in form of 'csvname.csv'
 	# 		parse_csv(csv_file, data_array)
 		print (os.getcwd())
 		return redirect(url_for('dashboard'))
 	
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-	global data_array
-	data_array = []
+	global data
+	global keys
 
-	# upon opening the homepage, user is prompted with a selection of repos
 	if request.method == 'GET':
 		csv_list = []
 		if os.name == 'nt':
@@ -137,17 +148,23 @@ def dashboard():
 	# when user selects a repo, the following runs codemaat and generates a csv file
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
-		data = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
-		with open("csv_files_" + repo_name + "/{}".format(data), 'rt') as csv_file:  # variable data SHOULD be in form of 'csvname.csv'
-			parse_csv(csv_file, data_array)
+		csv_name = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
+		with open("csv_files_" + repo_name + "/{}".format(csv_name), 'rt') as csv_file:
+			data, keys = parse_csv(csv_file)
 		csv_file.close()
 		return redirect(url_for('result'))
+		# return render_template('result.html', data=json.dumps(data), keys=json.dumps(keys))
+
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	return render_template('result.html', 
-			data_array=json.dumps(data_array), repo_name=repo_name)
+	return render_template('result.html', data=json.dumps(data), keys=json.dumps(keys))
 
+
+# this filter allows using '|fromjson', which calls this json.loads function
+@app.template_filter('fromjson')
+def convert_json(s):
+	return json.loads(s)
 
 @app.errorhandler(404)
 def not_found(e):
@@ -160,8 +177,6 @@ def bad_request(e):
 if __name__ == '__main__':
 	# debug mode causes generate_data() function to run twice
 	app.debug = True
-	# set_path()
-	# generate_data()
 	# open_browser()
 	
 	app.run()
