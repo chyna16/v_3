@@ -20,15 +20,12 @@ else:
 	maat_dir = '/home/tramain/ixmaat0.8.5'
 	repo_dir = '/home/tramain/mcshake/.git'
 
-# this returns only files of this type to the html page to display.
+# this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
 app = Flask(__name__)
 
 # bootstrap = Bootstrap(app)
-
-
-
 # code below only works with codemaat downloaded
 def set_path(repo_name):
 	print("Setting a path for codemaat...")
