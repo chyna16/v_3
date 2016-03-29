@@ -7,7 +7,7 @@
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
 <script src = "{{ url_for('static', filename='bootstrap.js')}}"></script>
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script> -->
+<script src = "{{ url_for('static', filename='bootstrap.js')}}"></script>
 <title>Results</title>
 </head>
 
@@ -18,18 +18,18 @@
 }
 </style>
 
-  <nav class="navbar navbar-inverse" role="navigation">
-      <div class="container">
-        <nav>
-          <ul class="nav nav-pills pull-right">
-            <li role="presentation"><a href="#">Home</a></li>
-            <li role="presentation"><a href="about.html">About</a></li>
-            <li role="presentation"><a href="#">Contact</a></li>
-          </ul>
-        </nav>
-        <a class="navbar-brand" href="/">V3</a>
-      </div>    
-  </nav>
+<nav class="navbar navbar-inverse" role="navigation">
+  <div class="container">
+    <nav>
+      <ul class="nav nav-pills pull-right">
+        <li role="presentation"><a href="#">Home</a></li>
+        <li role="presentation"><a href="about.html">About</a></li>
+        <li role="presentation"><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+    <a class="navbar-brand" href="/">V3</a>
+  </div>
+</nav>
 
 <h1>Results for {{repo_name}} repository</h1>
 
@@ -51,27 +51,25 @@
 
 <p><button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button></p>
 
-<script>
-function goBack() {
-    window.history.back();
-}
-</script>
-
-<button type="button" class="btn btn-info" data-target="#wrapperBar" onclick="toggleBar()">Bar Graph</button>
-<button type="button" class="btn btn-info" data-target="#wrapperPie" onclick="togglePie()">Pie Chart</button>
-<button type="button" class="btn btn-info" data-target="#wrapperScatter" onclick="toggleScatter()">Scatter Plot</button>
+<button type="button" class="btn btn-info" data-target="#wrapperBar" name="wrapperBar" 
+    onclick="toggleGraph(this)">Bar Graph</button>
+<button type="button" class="btn btn-info" data-target="#wrapperPie" name="wrapperPie" 
+    onclick="toggleGraph(this)">Pie Chart</button>
+<button type="button" class="btn btn-info" data-target="#wrapperScatter" name="wrapperScatter" 
+    onclick="toggleGraph(this)">Scatter Plot</button>
 
 <div id="wrapperBar" style="display: none;"></div>
-<div id="wrapperPie" style="display: none;"></div>
-<div id="wrapperScatter" style="display: none;"></div>
+<div id="wrapperPie" style="display: none;">howdy</div>
+<div id="wrapperScatter" style="display: none;">herro</div>
 
 <script>
-var keys = {{keys|safe}}
-var json_data = {{data|safe}}
+var keys = {{keys|safe}}; // an array of the data type in original order
+var json_data = {{data|safe}}; // a dictionary w/ each key (data type) holding an array
 
 var keys_len = keys.length;
 var data_len = json_data[keys[0]].length;
 
+// parses data from dictionary using keys and fills each row.col with values
 var table = document.getElementById("tbody");
 for (i = 0; i < data_len; i++) {
   var row = document.createElement("tr");
@@ -83,18 +81,72 @@ for (i = 0; i < data_len; i++) {
   table.appendChild(row);
 }
 
-// var y_variable;
-
+// sets the y-axis values for the graphs to whichever column the user selects
+// calls function to create graph using the selected data
 function chooseColumn(elem) {
-  // var key = document.getElementById("type").getAttribute('value');
   var key = elem.getAttribute('value');
-  console.log(key);
   var y_values = json_data[key];
 
-  create_graph(y_values);
+  createGraph(y_values);
+  console.log(y_values);
 }
 
-////////////////////////// S C A T T E R  P L O T ////////////////////////////
+// changes the display of corresponding graph to show or hide
+function toggleGraph(elem) {
+  var display_status = document.getElementById(elem.getAttribute('name')).style.display;
+
+  if (display_status == "none") {
+    document.getElementById(elem.getAttribute('name')).style.display = "block";
+  }
+  else {
+    document.getElementById(elem.getAttribute('name')).style.display = "none";
+  }
+}
+
+// this is called by chooseColumn() when the user selects data for y-axis
+// NOTE: currently, only bar graph functions displays; needs to be modified
+function createGraph(values) {
+  d3.select("#wrapperBar").html("");
+  d3.select("#wrapperPie").html("");
+  d3.select("#wrapperScatter").html("");
+    // .html("") causes the wrapper to be emptied out
+    // this prevents copies from being made each time function is called
+    // NOTE: this apparently does not work in Safari; fix later
+
+///////////////////////////// B A R  G R A P H ////////////s///////////////////
+  var canvas = d3.select("#wrapperBar")
+      .append("svg")
+      .attr("width", 500)
+      .attr("height", 500);
+  var bar = canvas.selectAll("rect")
+      .data(values)
+      .enter()
+        .append("rect")
+        .attr("height", function(d) { return d * 50; })
+        .attr("width", 20)
+        .attr("x", function(d, i) { return i * 25; });
+
+///////////////////////////// P I E  C H A R T /////////////////////////////// {
+  // var arc = d3.svg.arc()
+  //   .innerRadius(radius - 40)
+  //   .outerRadius(radius);
+  // var pie = d3.layout.pie()
+  //     .padAngle(.02);
+  // var color = d3.scale.category10();
+  // var svg = d3.select("#wrapperPie").append("svg")
+  //     .attr("width", width)
+  //     .attr("height", height)
+  //   .append("g")
+  //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+  // pieSVG.selectAll("path")
+  //     .data(pie(values))
+  //   .enter().append("path")
+  //     .style("fill", function(d, i) { return color(i); })
+  //     .attr("d", arc);
+// }
+
+////////////////////////// S C A T T E R  P L O T //////////////////////////// {
   // FIX: summary.csv shows a skewed range
   // FIX: automated spacing between plot points
   // var plot = d3.select("#wrapperScatter").append('svg')
@@ -138,84 +190,12 @@ function chooseColumn(elem) {
   //     return i * 20 })
   //   .attr('cy', function(d) {
   //     return yScale(d) });
-//////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////// B A R  G R A P H ///////////////////////////////
-// for (i = 1; i < keys.length; i++) {
-  // var value = json_data[keys[i]];
-
-function create_graph(values) {
-  d3.select("#wrapperBar").html("");
-  d3.select("#wrapperPie").html("");
-
-  var canvas = d3.select("#wrapperBar")
-      .append("svg")
-      .attr("width", 500)
-      .attr("height", 500);
-  var bar = canvas.selectAll("rect")
-      .data(values)
-      .enter()
-        .append("rect")
-        .attr("height", function(d) { return d * 50; })
-        .attr("width", 20)
-        .attr("x", function(d, i) { return i * 25; });
-
-
-  var arc = d3.svg.arc()
-    .innerRadius(radius - 40)
-    .outerRadius(radius);
-  var pie = d3.layout.pie()
-      .padAngle(.02);
-  var color = d3.scale.category10();
-  var svg = d3.select("#wrapperPie").append("svg")
-      .attr("width", width)
-      .attr("height", height)
-    .append("g")
-      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-  pieSVG.selectAll("path")
-      .data(pie(values))
-    .enter().append("path")
-      .style("fill", function(d, i) { return color(i); })
-      .attr("d", arc);
-}
-
 // }
-//////////////////////////////////////////////////////////////////////////////
- 
-///////////////////////////// P I E  C H A R T ///////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-
-function toggleBar() {
-  var display_status = document.getElementById("wrapperBar").style.display;
-
-  if (display_status == "none") {
-    document.getElementById("wrapperBar").style.display = "block";
-  }
-  else {
-    document.getElementById("wrapperBar").style.display = "none";
-  }
 }
-function toggleScatter() {
-  var display_status = document.getElementById("wrapperScatter").style.display;
 
-  if (display_status == "none") {
-    document.getElementById("wrapperScatter").style.display = "block";
-  }
-  else {
-    document.getElementById("wrapperScatter").style.display = "none";
-  }
-}
-function togglePie() {
-  var display_status = document.getElementById("wrapperPie").style.display;
-
-  if (display_status == "none") {
-    document.getElementById("wrapperPie").style.display = "block";
-  }
-  else {
-    document.getElementById("wrapperPie").style.display = "none";
-  }
+// called when user clicks "Back" button
+function goBack() {
+    window.history.back();
 }
 
 </script>
