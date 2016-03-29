@@ -93,7 +93,6 @@ def parse_csv(uploaded_file):
 
 	for i, row in enumerate(reader):
 		if i == 0:
-			# length = len(row)
 			key_array = row
 		else:
 			row_array.append(row)
@@ -126,9 +125,6 @@ def index():
 		else:
 			generate_data(address = repo_list + repo_name + '/.git')
 		# os.chdir(repo_list + repo_name + '/.git')
-	# 	with open("{}".format(data), 'rt') as test_file:  # variable data SHOULD be in form of 'csvname.csv'
-	# 		parse_csv(csv_file, data_array)
-		print (os.getcwd())
 		return redirect(url_for('dashboard'))
 	
 
@@ -156,7 +152,6 @@ def dashboard():
 			data, keys = parse_csv(csv_file)
 		csv_file.close()
 		return redirect(url_for('result'))
-		# return render_template('result.html', data=json.dumps(data), keys=json.dumps(keys))
 
 
 @app.route('/result', methods=['GET', 'POST'])
