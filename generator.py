@@ -1,19 +1,14 @@
-import csv, os, time
+import csv, os, time, fnmatch
 
-# currently the codemaat directory is hardcoded
 if os.name == 'nt':
-	# root_dir = os.path.normpath(owd + '/csv_files_' + repo_name)
 	maat_dir = ('C:\\Users\\bentinct\\winmaat0.8.5\\')
-	# repo_dir = ('C:\\Users\\bentinct\\repos\\mcshake\\.git')
 	repo_list = ('C:\\Users\\bentinct\\repos\\')
-	# repo_name = os.path.basename(os.path.normpath(repo_dir))
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 else:
-	# root_dir = owd + '/csv_files_' + repo_name
-	# maat_dir = '/home/tramain/ixmaat0.8.5'
-	maat_dir = '/home/farhat/ixmaat0.8.5'
-	# repo_list = '/home/tramain/repos/'
-	repo_list = '/home/farhat/Desktop/repos/'
+	maat_dir = '/home/tramain/ixmaat0.8.5'
+	# maat_dir = '/home/farhat/ixmaat0.8.5'
+	repo_list = '/home/tramain/repos/'
+	# repo_list = '/home/farhat/Desktop/repos/'
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 
 # repo_name gets used once the flask script is run
@@ -31,6 +26,8 @@ def set_path(repo_name):
 	# global owd
 	# owd = os.getcwd()
 	# creates folder for the root_dir variable if none exists
+	# if os.name == 'nt':
+	# 	os.remove("csv_files_" + repo_name)
 	os.system("mkdir csv_files_" + repo_name)
 	os.chdir("csv_files_" + repo_name)
 
@@ -81,3 +78,34 @@ def parse_csv(uploaded_file):
 			col_array.append(r[i])
 		data_dict[key] = col_array
 	return (data_dict, key_array)
+
+# functions below remove the garbage lines added to the csv files on windows
+def skip_lines(file, lines):
+	for i, rows in enumerate(file):
+		if i >= lines:
+			yield rows
+
+
+def win_csv(root_dir, csv_name):
+	junk_file = open(root_dir + "/" + csv_name, 'rt')
+	reader = csv.reader(junk_file)
+	row1 = next(reader)
+	if row1 == []:
+		clean_file = open(root_dir + '\\_' + csv_name, 'wt', newline = '')
+		write = csv.writer(clean_file, csv.QUOTE_ALL)
+		for row in skip_lines(reader, 3):
+			write.writerow(row)
+	else:
+		return False
+		quit()
+
+# def clear_folder():
+# 	for root, dirs, files in os.walk(root_dir):  # traverses filesystem of root_dir
+# 		for filename in fnmatch.filter(files, file_type):
+# 			os.remove(filename)
+
+# def run_win(root_dir, csv_name):
+# 	for root, dirs, files in os.walk(root_dir):  # traverses filesystem of root_dir
+# 		for filename in fnmatch.filter(files, generator.file_type):
+# 			win_csv(root_dir = root_dir, csv_name =  filename)
+# 			os.remove(root_dir + '\\' + filename)

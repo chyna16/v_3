@@ -1,3 +1,5 @@
+########## All experimental tests are made in this file. Debug enabled ##########
+########## Once stable, move changes over to visualizer script ##########
 import csv, os, time, fnmatch, json, generator
 # from flask.ext.bootstrap import Bootstrap
 from flask import Flask, request, render_template, redirect, url_for
@@ -10,7 +12,7 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
-	global repo_name
+	global root_dir
 	if request.method == 'GET':
 		folder_select = []
 		for folder_name in generator.folder_list:
@@ -23,8 +25,18 @@ def index():
 		generator.set_path(generator.repo_name)
 		if os.name == 'nt':
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '\.git')
+			print ("Windows detected. Creating dedicated CSV files.")
+			print ("-" * 60)
+			root_dir = os.path.normpath(owd + '/csv_files_' + generator.repo_name)
+			for root, dirs, files in os.walk(root_dir):  # traverses filesystem of root_dir
+				for filename in fnmatch.filter(files, generator.file_type):
+					if generator.win_csv(root_dir = root_dir, csv_name = filename) == False:
+						continue	
+					else:
+						os.remove(root_dir + '\\' + filename)
 		else:
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
+			root_dir = owd + '/csv_files_' + generator.repo_name
 		# os.chdir(repo_list + repo_name + '/.git')
 		return redirect(url_for('dashboard'))
 	
@@ -33,13 +45,10 @@ def index():
 def dashboard():
 	global data
 	global keys
+	# global root_dir
 	if request.method == 'GET':
 		csv_list = []
 		# this is the directory of where the html page obtains the list of files to select from
-		if os.name == 'nt':
-			root_dir = os.path.normpath(owd + '/csv_files_' + generator.repo_name)
-		else:
-			root_dir = owd + '/csv_files_' + generator.repo_name
 		for root, dirs, files in os.walk(root_dir):  # traverses filesystem of root_dir
 			for filename in fnmatch.filter(files, generator.file_type):  # picks out files of type in pattern
 				csv_list.append(filename)  # fills array with names of csv files in current directory
