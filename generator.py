@@ -10,11 +10,10 @@ if os.name == 'nt':
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 else:
 	# root_dir = owd + '/csv_files_' + repo_name
-	maat_dir = '/home/tramain/ixmaat0.8.5'
-	# maat_dir = '/home/farhat/ixmaat0.8.5'
-	# repo_dir = '/home/tramain/mcshake/.git'
-	# repo_dir = '/home/farhat/Desktop/repos/mcshake/.git'
-	repo_list = '/home/tramain/repos/'
+	# maat_dir = '/home/tramain/ixmaat0.8.5'
+	maat_dir = '/home/farhat/ixmaat0.8.5'
+	# repo_list = '/home/tramain/repos/'
+	repo_list = '/home/farhat/Desktop/repos/'
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 
 # repo_name gets used once the flask script is run
