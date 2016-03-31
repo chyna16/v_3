@@ -16,6 +16,18 @@
 <style> body{
   font-family: 'Roboto Slab', serif;
 }
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font-family: sans-serif;
+  font-size: 11px;
+}
 </style>
 
 <nav class="navbar navbar-inverse" role="navigation">
@@ -113,18 +125,68 @@ function createGraph(values) {
     // this prevents copies from being made each time function is called
     // NOTE: this apparently does not work in Safari; fix later
 
-///////////////////////////// B A R  G R A P H ////////////s///////////////////
+///////////////////////////// B A R  G R A P H ///////////////////////////////
+  var type = json_data[keys[0]];
+
+  var vlength = values.length;
+
+  var margin = {top: 20, left: 50, right: 20, bottom: 130};
+  var height = 450 - margin.top - margin.bottom;
+  var width = 800 - margin.left - margin.right;
+  var padding = 1;
+
+  var xScale = d3.scale.ordinal()
+        .domain(type).rangePoints([0, width - (width / values.length)]);
+  var yScale = d3.scale.linear()
+        .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
+
+  var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom")
+        .ticks(type.length);
+  var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .ticks(values.length);
+
   var canvas = d3.select("#wrapperBar")
       .append("svg")
-      .attr("width", 500)
-      .attr("height", 500);
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
   var bar = canvas.selectAll("rect")
       .data(values)
       .enter()
         .append("rect")
-        .attr("height", function(d) { return d * 50; })
-        .attr("width", 20)
-        .attr("x", function(d, i) { return i * 25; });
+        .attr("height", function(d) { return height - yScale(d); })
+        .attr("width", width / vlength - padding)
+        .attr("x", function(d, i) { return i * (width / vlength) })
+        .attr("y", function(d) { return height - (height-yScale(d)) });
+
+  canvas.selectAll("text")
+      .data(values)
+      .enter()
+        .append("text")
+        .attr("fill", "steelblue")
+        .style("font-size", ".7em")
+        .attr("x", function(d, i) { return i * (width/vlength) + (width/vlength) / 2})
+        .attr("y", function(d) { return height - (height-yScale(d)) - 5 })
+        .text(function(d) { return d; })
+        .style("text-anchor", "middle");
+
+  canvas.append("g")
+        .attr('class', 'x axis')
+        .attr('transform', 'translate(' + (width/vlength) / 2 + ',' + (height) + ')')
+        .call(xAxis)
+        .selectAll("text")  
+        .style("text-anchor", "end")
+        .attr("dx", "-1em")
+        .attr("dy", ".15em")
+        .attr("transform", function(d) { return "rotate(-65)"; })
+        .style("font-size", ".6em")
+        .attr("fill", "steelblue");
 
 ///////////////////////////// P I E  C H A R T /////////////////////////////// {
   // var arc = d3.svg.arc()
