@@ -12,9 +12,37 @@
 
 <body>
 
-<style> body{
+<style> 
+
+body{
   font-family: 'Roboto Slab', serif;
 }
+
+/* Scroll feature acquired from:
+ * http://stackoverflow.com/questions/21168521/scrollable-table-with-fixed-header-in-bootstrap
+ */
+table {
+  width: 100%;
+}
+thead, tbody, tr, td, th { display: block; }
+tr:after {
+    content: ' ';
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+thead th {
+    height: 30px;
+}
+tbody {
+    height: 225px;
+    overflow-y: auto;
+}
+tbody td, thead th {
+    width: 33%;
+    float: left;
+} 
+/* end scroll feature */
 
 .axis path,
 .axis line {
@@ -45,19 +73,17 @@
 <h1>Results for {{repo_name}} repository</h1>
 
 <h2> Table </h2>
-<div class="row">
-  <div class="col-md-6">
-    <table class="table">
-      <thead>
-        <tr>
-        {% for key in keys|fromjson %}
-        <th id="type" value={{key}} onclick="chooseColumn(this)"> {{key}} </th>
-        {% endfor %}
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
+<div class="col-md-8">
+  <table class="table">
+    <thead>
+      <tr>
+      {% for key in keys|fromjson %}
+      <th id="type" value={{key}} onclick="chooseColumn(this)"> {{key}} </th>
+      {% endfor %}
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 </div>
 
 <p><button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button></p>
@@ -184,7 +210,7 @@ function createGraph(values) {
         .attr("dx", "-1em")
         .attr("dy", ".15em")
         .attr("transform", function(d) { return "rotate(-65)"; })
-        .style("font-size", ".6em")
+        .style("font-size", ".7em")
         .attr("fill", "steelblue");
 
 ///////////////////////////// P I E  C H A R T /////////////////////////////// {
