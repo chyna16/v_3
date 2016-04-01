@@ -7,55 +7,11 @@
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
 <script src = "{{ url_for('static', filename='bootstrap.js')}}"></script>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <title>Results</title>
 </head>
 
 <body>
-
-<style> 
-
-body{
-  font-family: 'Roboto Slab', serif;
-}
-
-/* Scroll feature acquired from:
- * http://stackoverflow.com/questions/21168521/scrollable-table-with-fixed-header-in-bootstrap
- */
-table {
-  width: 100%;
-}
-thead, tbody, tr, td, th { display: block; }
-tr:after {
-    content: ' ';
-    display: block;
-    visibility: hidden;
-    clear: both;
-}
-thead th {
-    height: 30px;
-}
-tbody {
-    height: 225px;
-    overflow-y: auto;
-}
-tbody td, thead th {
-    width: 33%;
-    float: left;
-} 
-/* end scroll feature */
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: black;
-  shape-rendering: crispEdges;
-}
-
-.axis text {
-  font-family: sans-serif;
-  font-size: 11px;
-}
-</style>
 
 <nav class="navbar navbar-inverse" role="navigation">
   <div class="container">
@@ -96,8 +52,8 @@ tbody td, thead th {
     onclick="toggleGraph(this)">Scatter Plot</button>
 
 <div id="wrapperBar" style="display: none;"></div>
-<div id="wrapperPie" style="display: none;">howdy</div>
-<div id="wrapperScatter" style="display: none;">herro</div>
+<div id="wrapperPie" style="display: none;"></div>
+<div id="wrapperScatter" style="display: none;"></div>
 
 <script>
 var keys = {{keys|safe}}; // an array of the data type in original order
@@ -140,6 +96,12 @@ function toggleGraph(elem) {
   }
 }
 
+// graph dimensions that don't change
+var margin = {top: 20, left: 50, right: 20, bottom: 130};
+var height = 450 - margin.top - margin.bottom;
+var width = 800 - margin.left - margin.right;
+var padding = 1;
+
 // this is called by chooseColumn() when the user selects data for y-axis
 // NOTE: currently, only bar graph functions displays; needs to be modified
 function createGraph(values) {
@@ -152,13 +114,7 @@ function createGraph(values) {
 
 ///////////////////////////// B A R  G R A P H ///////////////////////////////
   var type = json_data[keys[0]];
-
   var vlength = values.length;
-
-  var margin = {top: 20, left: 50, right: 20, bottom: 130};
-  var height = 450 - margin.top - margin.bottom;
-  var width = 800 - margin.left - margin.right;
-  var padding = 1;
 
   var xScale = d3.scale.ordinal()
         .domain(type).rangePoints([0, width - (width / values.length)]);
@@ -212,72 +168,6 @@ function createGraph(values) {
         .attr("transform", function(d) { return "rotate(-65)"; })
         .style("font-size", ".7em")
         .attr("fill", "steelblue");
-
-///////////////////////////// P I E  C H A R T /////////////////////////////// {
-  // var arc = d3.svg.arc()
-  //   .innerRadius(radius - 40)
-  //   .outerRadius(radius);
-  // var pie = d3.layout.pie()
-  //     .padAngle(.02);
-  // var color = d3.scale.category10();
-  // var svg = d3.select("#wrapperPie").append("svg")
-  //     .attr("width", width)
-  //     .attr("height", height)
-  //   .append("g")
-  //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-  // pieSVG.selectAll("path")
-  //     .data(pie(values))
-  //   .enter().append("path")
-  //     .style("fill", function(d, i) { return color(i); })
-  //     .attr("d", arc);
-// }
-
-////////////////////////// S C A T T E R  P L O T //////////////////////////// {
-  // FIX: summary.csv shows a skewed range
-  // FIX: automated spacing between plot points
-  // var plot = d3.select("#wrapperScatter").append('svg')
-  //     .attr('id', 'plot')
-  //     .attr('height', height + padding * 2)
-  //     .attr('width', width + padding * 2)
-  //     .style('padding', padding)
-  //     .append('g')
-  //     .attr('id', 'viz')
-  //     .attr('transform', 'translate(' + padding + ',' + padding + ')');
-
-  // var xScale = d3.scale.ordinal().domain(type).rangePoints([0, width]);
-  // var yScale = d3.scale.linear().range([height, 10]);
-  // var yDomain = [0, d3.max(value)]
-  // yScale.domain(yDomain);
-
-  // var xAxis = d3.svg.axis()
-  //       .scale(xScale)
-  //       .orient("bottom")
-  //       .ticks(6);
-  // var yAxis = d3.svg.axis()
-  //       .scale(yScale)
-  //       .orient("left")
-  //       .ticks(3);
-
-  // plot.append("g")
-  //       .attr('class', 'y axis')
-  //       .call(yAxis);
-  // plot.append("g")
-  //       .attr('class', 'x axis')
-  //       .attr('transform', 'translate(0,' + height + ')')
-  //       .call(xAxis);
-
-  // var dots = plot.selectAll('circle')
-  //       .data(value)
-  //       .enter()
-  //       .append('circle');
-
-  // dots.attr('r', 5)
-  //   .attr('cx', function(d, i) {
-  //     return i * 20 })
-  //   .attr('cy', function(d) {
-  //     return yScale(d) });
-// }
 }
 
 // called when user clicks "Back" button
