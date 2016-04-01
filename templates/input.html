@@ -2,20 +2,55 @@
 
 <html>
 <head>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
-<title>V3</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src = "{{ url_for('static', filename='bootstrap.js')}}"></script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+	<title>V3 - Select an Analysis</title>
 </head>
 
 <body>
 
-<h1>Select the Data You Want Displayed</h1>
+	<style> body{
+	  font-family: 'Roboto Slab', serif;
+	}
+	</style>
 
-<form method="POST" enctype="multipart/form-data">
-	{% for file in csvList %}
-		<input type="radio" name="filename" value={{file}}>{{file}}</input>
-	{% endfor %}
-	<button type="submit">Show Results</button>
-</form> 
+	<nav class="navbar navbar-inverse" role="navigation">
+	  <div class="container">
+	    <nav>
+	      <ul class="nav nav-pills pull-right">
+	        <li role="presentation"><a href="index">Home</a></li>
+	        <li role="presentation"><a href="#">About</a></li>
+	        <li role="presentation"><a href="#">Contact</a></li>
+	      </ul>
+	    </nav>
+	    <a class="navbar-brand" href="/">V3</a>
+	  </div>    
+	</nav>
+
+	<h1>Select an Analysis to Display</h1>
+
+	<form method="POST" enctype="multipart/form-data">
+		<div class="btn-group" data-toggle="buttons">
+		{% for file in csv_list %}
+		  <label class="btn btn-primary">
+		    <input type="radio" name="filename" value={{file}} autocomplete="off">{{file}}
+		  </label>
+		{% endfor %}
+		  <label class="btn btn-primary">
+		    <input type="radio" name="options" id="option2" autocomplete="off"> Blank Radio
+		  </label>
+		</div>
+		<p><button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button></p>
+		<p><button  type="submit" class="btn btn-lg btn-success" role="button">Show Results</button></p>
+	</form>
+
+	<script>
+	function goBack() {
+	    window.history.back();
+	}
+	</script>
 
 </body>
 </html>
