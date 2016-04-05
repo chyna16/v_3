@@ -2,178 +2,194 @@
 
 <html>
 <head>
-<link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-<script src="https://d3js.org/d3.v3.min.js"></script>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
-<script src = "{{ url_for('static', filename='bootstrap.js')}}"></script>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<title>Results</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <title>Results</title>
 </head>
 
 <body>
 
 <nav class="navbar navbar-inverse" role="navigation">
-  <div class="container">
-    <nav>
-      <ul class="nav nav-pills pull-right">
-        <li role="presentation"><a href="#">Home</a></li>
-        <li role="presentation"><a href="about.html">About</a></li>
-        <li role="presentation"><a href="#">Contact</a></li>
-      </ul>
-    </nav>
-    <a class="navbar-brand" href="/">V3</a>
-  </div>
+    <div class="container">
+        <nav>
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation"><a href="#">Home</a></li>
+                <li role="presentation"><a href="about.html">About</a></li>
+                <li role="presentation"><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+        <a class="navbar-brand" href="/">V3</a>
+    </div>
 </nav>
 
-<h1>Results for {{repo_name}} repository</h1>
+<h1>Results for {{ repo_name }} repository</h1>
 
 <h2> Table </h2>
 <div class="col-md-8">
-  <table class="table">
-    <thead>
-      <tr>
-      {% for key in keys|fromjson %}
-      <th id="type" value={{key}} onclick="chooseColumn(this)"> {{key}} </th>
-      {% endfor %}
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
+    <table class="table" align="center">
+        <thead>
+        <tr>
+            {% for key in keys|fromjson %}
+                <th id="type" value={{ key }} onclick="chooseColumn(this)"> {{ key }} </th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
 </div>
+<p>
+    <button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button>
+</p>
 
-<p><button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button></p>
-
-<button type="button" class="btn btn-info" data-target="#wrapperBar" name="wrapperBar" 
-    onclick="toggleGraph(this)">Bar Graph</button>
-<button type="button" class="btn btn-info" data-target="#wrapperPie" name="wrapperPie" 
-    onclick="toggleGraph(this)">Pie Chart</button>
-<button type="button" class="btn btn-info" data-target="#wrapperScatter" name="wrapperScatter" 
-    onclick="toggleGraph(this)">Scatter Plot</button>
-
-<div id="wrapperBar" style="display: none;"></div>
-<div id="wrapperPie" style="display: none;"></div>
-<div id="wrapperScatter" style="display: none;"></div>
-
+<button type="button" class="btn btn-info" data-target="#wrapperBar" name="wrapperBar"
+        onclick="toggleGraph(this)">Bar Graph
+</button>
+<button type="button" class="btn btn-info" data-target="#wrapperPie" name="wrapperPie"
+        onclick="toggleGraph(this)">Pie Chart
+</button>
+<button type="button" class="btn btn-info" data-target="#wrapperScatter" name="wrapperScatter"
+        onclick="toggleGraph(this)">Scatter Plot
+</button>
+<center>
+    <div id="wrapperBar" style="display: none;"></div>
+    <div id="wrapperPie" style="display: none;"></div>
+    <div id="wrapperScatter" style="display: none;"></div>
+</center>
 <script>
-var keys = {{keys|safe}}; // an array of the data type in original order
-var json_data = {{data|safe}}; // a dictionary w/ each key (data type) holding an array
+    var keys = {{keys|safe}}; // an array of the data type in original order
+    var json_data = {{data|safe}}; // a dictionary w/ each key (data type) holding an array
 
-var keys_len = keys.length;
-var data_len = json_data[keys[0]].length;
+    var keys_len = keys.length;
+    var data_len = json_data[keys[0]].length;
 
-// parses data from dictionary using keys and fills each row.col with values
-var table = document.getElementById("tbody");
-for (i = 0; i < data_len; i++) {
-  var row = document.createElement("tr");
-  for (j = 0; j < keys_len; j++) {
-    var col = document.createElement("td");
-    col.appendChild(document.createTextNode(json_data[keys[j]][i]));
-    row.appendChild(col);
-  }
-  table.appendChild(row);
-}
+    // parses data from dictionary using keys and fills each row.col with values
+    var table = document.getElementById("tbody");
+    for (i = 0; i < data_len; i++) {
+        var row = document.createElement("tr");
+        for (j = 0; j < keys_len; j++) {
+            var col = document.createElement("td");
+            col.appendChild(document.createTextNode(json_data[keys[j]][i]));
+            row.appendChild(col);
+        }
+        table.appendChild(row);
+    }
 
-// sets the y-axis values for the graphs to whichever column the user selects
-// calls function to create graph using the selected data
-function chooseColumn(elem) {
-  var key = elem.getAttribute('value');
-  var y_values = json_data[key];
+    // sets the y-axis values for the graphs to whichever column the user selects
+    // calls function to create graph using the selected data
+    function chooseColumn(elem) {
+        var key = elem.getAttribute('value');
+        var y_values = json_data[key];
 
-  createGraph(y_values);
-  console.log(y_values);
-}
+        createGraph(y_values);
+        console.log(y_values);
+    }
 
-// changes the display of corresponding graph to show or hide
-function toggleGraph(elem) {
-  var display_status = document.getElementById(elem.getAttribute('name')).style.display;
+    // changes the display of corresponding graph to show or hide
+    function toggleGraph(elem) {
+        var display_status = document.getElementById(elem.getAttribute('name')).style.display;
 
-  if (display_status == "none") {
-    document.getElementById(elem.getAttribute('name')).style.display = "block";
-  }
-  else {
-    document.getElementById(elem.getAttribute('name')).style.display = "none";
-  }
-}
+        if (display_status == "none") {
+            document.getElementById(elem.getAttribute('name')).style.display = "block";
+        }
+        else {
+            document.getElementById(elem.getAttribute('name')).style.display = "none";
+        }
+    }
+    // graph dimensions that do not change
+    var margin = {top: 20, left: 50, right: 20, bottom: 130};
+    var height = 450 - margin.top - margin.bottom;
+    var width = 800 - margin.left - margin.right;
+    var padding = 1;
 
-// graph dimensions that don't change
-var margin = {top: 20, left: 50, right: 20, bottom: 130};
-var height = 450 - margin.top - margin.bottom;
-var width = 800 - margin.left - margin.right;
-var padding = 1;
-
-// this is called by chooseColumn() when the user selects data for y-axis
-// NOTE: currently, only bar graph functions displays; needs to be modified
-function createGraph(values) {
-  d3.select("#wrapperBar").html("");
-  d3.select("#wrapperPie").html("");
-  d3.select("#wrapperScatter").html("");
-    // .html("") causes the wrapper to be emptied out
-    // this prevents copies from being made each time function is called
-    // NOTE: this apparently does not work in Safari; fix later
+    // this is called by chooseColumn() when the user selects data for y-axis
+    // NOTE: currently, only bar graph functions displays; needs to be modified
+    function createGraph(values) {
+        d3.select("#wrapperBar").html("");
+        d3.select("#wrapperPie").html("");
+        d3.select("#wrapperScatter").html("");
+        // .html("") causes the wrapper to be emptied out
+        // this prevents copies from being made each time function is called
+        // NOTE: this apparently does not work in Safari; fix later
 
 ///////////////////////////// B A R  G R A P H ///////////////////////////////
-  var type = json_data[keys[0]];
-  var vlength = values.length;
+        var type = json_data[keys[0]];
+        var vlength = values.length;
 
-  var xScale = d3.scale.ordinal()
-        .domain(type).rangePoints([0, width - (width / values.length)]);
-  var yScale = d3.scale.linear()
-        .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
+        var xScale = d3.scale.ordinal()
+                .domain(type).rangePoints([0, width - (width / values.length)]);
+        var yScale = d3.scale.linear()
+                .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
 
-  var xAxis = d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom")
-        .ticks(type.length);
-  var yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient("left")
-        .ticks(values.length);
+        var xAxis = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(type.length);
+        var yAxis = d3.svg.axis()
+                .scale(yScale)
+                .orient("left")
+                .ticks(values.length);
 
-  var canvas = d3.select("#wrapperBar")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var canvas = d3.select("#wrapperBar")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var bar = canvas.selectAll("rect")
-      .data(values)
-      .enter()
-        .append("rect")
-        .attr("height", function(d) { return height - yScale(d); })
-        .attr("width", width / vlength - padding)
-        .attr("x", function(d, i) { return i * (width / vlength) })
-        .attr("y", function(d) { return height - (height-yScale(d)) });
+        var bar = canvas.selectAll("rect")
+                .data(values)
+                .enter()
+                .append("rect")
+                .attr("height", function (d) {
+                    return height - yScale(d);
+                })
+                .attr("width", width / vlength - padding)
+                .attr("x", function (d, i) {
+                    return i * (width / vlength)
+                })
+                .attr("y", function (d) {
+                    return height - (height - yScale(d))
+                });
 
-  canvas.selectAll("text")
-      .data(values)
-      .enter()
-        .append("text")
-        .attr("fill", "steelblue")
-        .style("font-size", ".7em")
-        .attr("x", function(d, i) { return i * (width/vlength) + (width/vlength) / 2})
-        .attr("y", function(d) { return height - (height-yScale(d)) - 5 })
-        .text(function(d) { return d; })
-        .style("text-anchor", "middle");
+        canvas.selectAll("text")
+                .data(values)
+                .enter()
+                .append("text")
+                .attr("fill", "steelblue")
+                .style("font-size", ".7em")
+                .attr("x", function (d, i) {
+                    return i * (width / vlength) + (width / vlength) / 2
+                })
+                .attr("y", function (d) {
+                    return height - (height - yScale(d)) - 5
+                })
+                .text(function (d) {
+                    return d;
+                })
+                .style("text-anchor", "middle");
 
-  canvas.append("g")
-        .attr('class', 'x axis')
-        .attr('transform', 'translate(' + (width/vlength) / 2 + ',' + (height) + ')')
-        .call(xAxis)
-        .selectAll("text")  
-        .style("text-anchor", "end")
-        .attr("dx", "-1em")
-        .attr("dy", ".15em")
-        .attr("transform", function(d) { return "rotate(-65)"; })
-        .style("font-size", ".7em")
-        .attr("fill", "steelblue");
-}
-
-// called when user clicks "Back" button
-function goBack() {
-    window.history.back();
-}
+        canvas.append("g")
+                .attr('class', 'x axis')
+                .attr('transform', 'translate(' + (width / vlength) / 2 + ',' + (height) + ')')
+                .call(xAxis)
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-1em")
+                .attr("dy", ".15em")
+                .attr("transform", function (d) {
+                    return "rotate(-65)";
+                })
+                .style("font-size", ".7em")
+                .attr("fill", "steelblue");
+    }
+    // called when user clicks "Back" button
+    function goBack() {
+        window.history.back();
+    }
 
 </script>
 
