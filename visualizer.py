@@ -1,9 +1,10 @@
-import csv, os, time, fnmatch, json, generator
+import os, fnmatch, json, generator
 from flask import Flask, request, render_template, redirect, url_for
 
 # owd = obtain working directory
 owd = os.getcwd()
 app = Flask(__name__)
+
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
@@ -20,20 +21,20 @@ def index():
 		generator.set_path(generator.repo_name)
 		if os.name == 'nt':
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '\.git')
-			print ("Windows detected. Creating dedicated CSV files.")
+			print ('Windows detected. Creating dedicated CSV files.')
 			print ("-" * 60)
 			root_dir = os.path.normpath(owd + '/csv_files_' + generator.repo_name)
 			for root, dirs, files in os.walk(root_dir):
 				for filename in fnmatch.filter(files, generator.file_type):
-					if generator.win_csv(root_dir = root_dir, csv_name = filename) == False:
-						continue	
+					if generator.win_csv(root_dir=root_dir, csv_name=filename) == False:
+						continue
 					else:
 						os.remove(root_dir + '\\' + filename)
 		else:
-			generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
+			generator.generate_data(address=generator.repo_list + generator.repo_name + '/.git')
 			root_dir = owd + '/csv_files_' + generator.repo_name
 		return redirect(url_for('dashboard'))
-	
+
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -69,12 +70,12 @@ def convert_json(s):
 
 @app.errorhandler(404)
 def not_found(e):
-	return render_template ('404.html')
+	return render_template('404.html')
 
 
 @app.errorhandler(400)
 def bad_request(e):
-	return render_template ('400.html')
+	return render_template('400.html')
 
 if __name__ == '__main__':
 	app.run()

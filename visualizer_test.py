@@ -22,6 +22,8 @@ def index():
 		# print(repo_list + '\\' + folder_name)		
 		generator.repo_name = request.form['folder_name']  # gets name of csv filename that was selected by the user on webpage
 		print (generator.repo_name)
+		generator.date_select = request.form['date']
+		print (generator.date_select)
 		generator.set_path(generator.repo_name)
 		if os.name == 'nt':
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '\.git')
@@ -72,7 +74,7 @@ def result():
 def convert_json(s):
 	return json.loads(s)
 
-
+# customized error pages that follow the style of the website
 @app.errorhandler(404)
 def not_found(e):
 	return render_template ('404.html')

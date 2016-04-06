@@ -14,6 +14,7 @@ else:
 
 # repo_name gets the name of the repository selected once chosen on the HTML page
 repo_name = ""
+date_select = ""
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
