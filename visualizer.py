@@ -18,6 +18,8 @@ def index():
 	elif request.method == 'POST':
 		generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
 		print (generator.repo_name)
+		generator.date_select = request.form['date']
+		print (generator.date_select)
 		generator.set_path(generator.repo_name)
 		if os.name == 'nt':
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '\.git')
