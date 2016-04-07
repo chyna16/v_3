@@ -77,5 +77,5 @@ def bad_request(e):
 	return render_template ('400.html')
 
 if __name__ == '__main__':
-	app.run()
+	app.run(debug=True)
 	# app.run(host='0.0.0.0')
