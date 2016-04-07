@@ -56,7 +56,7 @@
         onclick="toggleGraph(this)">Scatter Plot
 </button>
 <center>
-    <div id="wrapperBar" style="display: none;"></div>
+    <div id="wrapperBar" style="display: none; width: 1000px; overflow-x: scroll;"></div>
     <div id="wrapperPie" style="display: none;"></div>
     <div id="wrapperScatter" style="display: none;"></div>
 </center>
@@ -74,10 +74,13 @@
         for (j = 0; j < keys_len; j++) {
             var col = document.createElement("td");
             col.appendChild(document.createTextNode(json_data[keys[j]][i]));
+            col.setAttribute("style", "overflow-x: hidden;");
             row.appendChild(col);
         }
         table.appendChild(row);
     }
+
+
 
     // sets the y-axis values for the graphs to whichever column the user selects
     // calls function to create graph using the selected data
@@ -100,10 +103,16 @@
             document.getElementById(elem.getAttribute('name')).style.display = "none";
         }
     }
+
     // graph dimensions that do not change
+    var w = 1000;
+    if (data_len < 800) {
+      var w = 3000;
+    }
+
     var margin = {top: 20, left: 50, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
-    var width = 800 - margin.left - margin.right;
+    var width = w - margin.left - margin.right;
     var padding = 1;
 
     // this is called by chooseColumn() when the user selects data for y-axis
@@ -191,6 +200,8 @@
     function goBack() {
         window.history.back();
     }
+
+    window.onload = createGraph(json_data[keys[1]]);
 
 </script>
 
