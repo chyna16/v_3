@@ -13,6 +13,7 @@ else:
 
 # repo_name gets used once the flask script is run
 repo_name = ""
+date_select = ""
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
