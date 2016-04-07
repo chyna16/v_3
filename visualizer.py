@@ -1,4 +1,4 @@
-import csv, os, time, fnmatch, json, generator
+import os, fnmatch, json, generator
 from flask import Flask, request, render_template, redirect, url_for
 
 # owd = obtain working directory
@@ -18,6 +18,8 @@ def index():
 		generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
 		print (generator.repo_name)
 		generator.set_path(generator.repo_name)
+		generator.date_select = request.form['date']
+		print (generator.date_select)
 		if os.name == 'nt':
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '\.git')
 			print ("Windows detected. Creating dedicated CSV files.")
@@ -66,7 +68,7 @@ def result():
 def convert_json(s):
 	return json.loads(s)
 
-
+# customized error pages that follow the style of the website
 @app.errorhandler(404)
 def not_found(e):
 	return render_template ('404.html')
