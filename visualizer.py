@@ -21,7 +21,6 @@ def index():
 		generator.set_path(generator.repo_name)
 		generator.date_after = request.form['date']
 		print (generator.date_after)
-
 		if os.name == 'nt':
 			root_dir = os.path.normpath(owd + '/csv_files_' + generator.repo_name)
 			#if directory already exists, skip function and go to the next page
