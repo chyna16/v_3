@@ -14,7 +14,7 @@ else:
 
 # repo_name gets the name of the repository selected once chosen on the HTML page
 repo_name = ""
-date_select = ""
+date_after = ""
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
@@ -26,13 +26,16 @@ def set_path(repo_name):
 	print("Done.")
 	print("-" * 60)
 	# creates folder for the root_dir variable if none exists
-	os.system("mkdir csv_files_" + repo_name)
-	os.chdir("csv_files_" + repo_name)
 
 
 def generate_data(address):
+	os.system("mkdir csv_files_" + repo_name)
+	os.chdir("csv_files_" + repo_name)
 	print("Obtaining repository logs...")
-	os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile_' + repo_name + '.log')
+	if date_after == "":
+		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile_' + repo_name + '.log')
+	else:
+		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --after=' + date_after + ' > logfile_' + repo_name + '_' + date_after + '.log')
 	print("Done.")
 	print("-" * 60)
 	print("Creating csv files from generated log...")
@@ -43,8 +46,8 @@ def generate_data(address):
 	print("Creating organizational metrics summary...")
 	os.system("maat -l logfile_" + repo_name + ".log -c git > metrics_" + repo_name + ".csv")
 	# Reports the number of authors/revisions made per module
-	print("Creating coupling summary...")
-	os.system("maat -l logfile_" + repo_name + ".log -c git -a coupling > coupling_" + repo_name + ".csv")
+	# print("Creating coupling summary...")
+	# os.system("maat -l logfile_" + repo_name + ".log -c git -a coupling > coupling_" + repo_name + ".csv")
 	# Reports correlation of files that often commit together, currently broken
 	# degree = % of commits where the two files were changed in the same commit
 	print("Creating code age summary...")

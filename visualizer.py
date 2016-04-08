@@ -15,25 +15,37 @@ def index():
 			folder_select.append(folder_name)  # fills array with names of csv files in current directory
 		return render_template('index.html', folder_select=folder_select)  # returns array of csv filenames to webpage
 	elif request.method == 'POST':
+		print (request.form['folder_name'])
 		generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
 		print (generator.repo_name)
 		generator.set_path(generator.repo_name)
-		generator.date_select = request.form['date']
-		print (generator.date_select)
+		generator.date_after = request.form['date']
+		print (generator.date_after)
+
 		if os.name == 'nt':
-			generator.generate_data(address = generator.repo_list + generator.repo_name + '\.git')
-			print ("Windows detected. Creating dedicated CSV files.")
-			print ("-" * 60)
 			root_dir = os.path.normpath(owd + '/csv_files_' + generator.repo_name)
-			for root, dirs, files in os.walk(root_dir):
-				for filename in fnmatch.filter(files, generator.file_type):
-					if generator.win_csv(root_dir = root_dir, csv_name = filename) == False:
-						continue	
-					else:
-						os.remove(root_dir + '\\' + filename)
+			#if directory already exists, skip function and go to the next page
+			if(os.path.exists(generator.repo_list + generator.repo_name)):
+				print("folder exists!")
+				return redirect(url_for('dashboard'))
+			else:
+				generator.generate_data(address = generator.repo_list + generator.repo_name + '\.git')
+				print ("Windows detected. Creating dedicated CSV files.")
+				print ("-" * 60)
+				for root, dirs, files in os.walk(root_dir):
+					for filename in fnmatch.filter(files, generator.file_type):
+						if generator.win_csv(root_dir = root_dir, csv_name = filename) == False:
+							continue	
+						else:
+							os.remove(root_dir + '\\' + filename)
 		else:
-			generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
 			root_dir = owd + '/csv_files_' + generator.repo_name
+			# if directory already exists, skip function and go to the next page
+			if(os.path.exists(generator.repo_list + generator.repo_name)): 
+				print("folder exists!")
+				return redirect(url_for('dashboard'))
+			else:
+				generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
 		return redirect(url_for('dashboard'))
 	
 
@@ -79,5 +91,5 @@ def bad_request(e):
 	return render_template ('400.html')
 
 if __name__ == '__main__':
-	app.run()
+	app.run(debug=True)
 	# app.run(host='0.0.0.0')
