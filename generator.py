@@ -2,18 +2,12 @@ import csv
 import os
 import time
 import fnmatch 
-import settings
 
-if os.name == 'nt':
-	maat_dir = 'C:\\Users\\bentinct\\winmaat0.8.5\\'
-	repo_list = 'C:\\Users\\bentinct\\repos\\'
-	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
-else:
-	maat_dir = '/home/tramain/ixmaat0.8.5'
-	# maat_dir = '/home/farhat/ixmaat0.8.5'
-	repo_list = '/home/tramain/repos/'
-	# repo_list = '/home/farhat/Desktop/repos/'
-	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
+maat_dir = '/home/tramain/ixmaat0.8.5'
+# maat_dir = '/home/farhat/ixmaat0.8.5'
+repo_list = '/home/tramain/repos/'
+# repo_list = '/home/farhat/Desktop/repos/'
+folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 
 # repo_name is used for later functions once a repository is selected from the home page
 repo_name = ""
@@ -89,23 +83,3 @@ def parse_csv(uploaded_file):
 			col_array.append(r[i])
 		data_dict[key] = col_array
 	return (data_dict, key_array)
-
-
-# functions below remove the garbage lines added to the csv files on windows
-def skip_lines(file, lines):
-	for i, rows in enumerate(file):
-		if i >= lines:
-			yield rows
-
-
-def win_csv(root_dir, csv_name):
-	junk_file = open(root_dir + "/" + csv_name, 'rt')
-	reader = csv.reader(junk_file)
-	row1 = next(reader)
-	if row1 == []:
-		clean_file = open(root_dir + '\\_' + csv_name, 'wt', newline = '')
-		write = csv.writer(clean_file, csv.QUOTE_ALL)
-		for row in skip_lines(reader, 3):
-			write.writerow(row)
-	else:
-		return False

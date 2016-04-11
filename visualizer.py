@@ -1,4 +1,7 @@
-import os, fnmatch, json, generator
+import os
+import fnmatch
+import json
+import generator
 from flask import Flask, request, render_template, redirect, url_for
 
 # owd = obtain working directory
@@ -21,31 +24,13 @@ def index():
 		generator.set_path(generator.repo_name)
 		generator.date_after = request.form['date']
 		print (generator.date_after)
-		if os.name == 'nt':
-			root_dir = os.path.normpath(owd + '/csv_files_' + generator.repo_name)
-			#if directory already exists, skip function and go to the next page
-			if(os.path.exists(generator.repo_list + "v3\\csv_files_" + generator.repo_name)):
-				print(generator.repo_list + "v3\\csv_files_" + generator.repo_name)
-				print("folder exists!")
-				return redirect(url_for('dashboard'))
-			else:
-				generator.generate_data(address = generator.repo_list + generator.repo_name + '\.git')
-				print ("Windows detected. Creating dedicated CSV files.")
-				print ("-" * 60)
-				for root, dirs, files in os.walk(root_dir):
-					for filename in fnmatch.filter(files, generator.file_type):
-						if generator.win_csv(root_dir = root_dir, csv_name = filename) == False:
-							continue	
-						else:
-							os.remove(root_dir + '\\' + filename)
+		root_dir = owd + '/csv_files_' + generator.repo_name
+		# if directory already exists, skip function and go to the next page
+		if(os.path.exists(generator.repo_list + "v3/csv_files_" + generator.repo_name)): 
+			print("folder exists:" + generator.repo_list + "v3/csv_files_" + generator.repo_name)
+			return redirect(url_for('dashboard'))
 		else:
-			root_dir = owd + '/csv_files_' + generator.repo_name
-			# if directory already exists, skip function and go to the next page
-			if(os.path.exists(generator.repo_list + generator.repo_name)): 
-				print("folder exists!")
-				return redirect(url_for('dashboard'))
-			else:
-				generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
+			generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
 		return redirect(url_for('dashboard'))
 	
 
