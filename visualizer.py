@@ -4,6 +4,7 @@ from flask import Flask, request, render_template, redirect, url_for
 # owd = obtain working directory
 owd = os.getcwd()
 app = Flask(__name__)
+# bootstrap = Bootstrap(app)
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
@@ -15,8 +16,11 @@ def index():
 			folder_select.append(folder_name)  # fills array with names of csv files in current directory
 		return render_template('index.html', folder_select=folder_select)  # returns array of csv filenames to webpage
 	elif request.method == 'POST':
-		generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
+		# print(repo_list + '\\' + folder_name)		
+		generator.repo_name = request.form['folder_name']  # gets name of csv filename that was selected by the user on webpage
 		print (generator.repo_name)
+		generator.date_select = request.form['date']
+		print (generator.date_select)
 		generator.set_path(generator.repo_name)
 		generator.date_select = request.form['date']
 		print (generator.date_select)
@@ -25,7 +29,7 @@ def index():
 			print ("Windows detected. Creating dedicated CSV files.")
 			print ("-" * 60)
 			root_dir = os.path.normpath(owd + '/csv_files_' + generator.repo_name)
-			for root, dirs, files in os.walk(root_dir):
+			for root, dirs, files in os.walk(root_dir):  # traverses filesystem of root_dir
 				for filename in fnmatch.filter(files, generator.file_type):
 					if generator.win_csv(root_dir = root_dir, csv_name = filename) == False:
 						continue	
@@ -34,6 +38,7 @@ def index():
 		else:
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
 			root_dir = owd + '/csv_files_' + generator.repo_name
+		# os.chdir(repo_list + repo_name + '/.git')
 		return redirect(url_for('dashboard'))
 	
 
@@ -41,7 +46,7 @@ def index():
 def dashboard():
 	global data
 	global keys
-	global root_dir
+	# global root_dir
 	if request.method == 'GET':
 		csv_list = []
 		# this is the directory of where the html page obtains the list of files to select from
@@ -79,5 +84,7 @@ def bad_request(e):
 	return render_template ('400.html')
 
 if __name__ == '__main__':
+	# debug mode causes generate_data() function to run twice
+	app.debug = True
 	app.run()
 	# app.run(host='0.0.0.0')
