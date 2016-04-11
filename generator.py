@@ -1,8 +1,12 @@
-import csv, os, time, fnmatch
+import csv
+import os
+import time
+import fnmatch 
+import settings
 
 if os.name == 'nt':
-	maat_dir = ('C:\\Users\\bentinct\\winmaat0.8.5\\')
-	repo_list = ('C:\\Users\\bentinct\\repos\\')
+	maat_dir = 'C:\\Users\\bentinct\\winmaat0.8.5\\'
+	repo_list = 'C:\\Users\\bentinct\\repos\\'
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 else:
 	maat_dir = '/home/tramain/ixmaat0.8.5'
