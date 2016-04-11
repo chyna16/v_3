@@ -24,8 +24,8 @@ def index():
 		if os.name == 'nt':
 			root_dir = os.path.normpath(owd + '/csv_files_' + generator.repo_name)
 			#if directory already exists, skip function and go to the next page
-			if(not os.path.exists(generator.repo_list + generator.repo_name)):
-				print(generator.repo_list + generator.repo_name)
+			if(os.path.exists(generator.repo_list + "v3\\csv_files_" + generator.repo_name)):
+				print(generator.repo_list + "v3\\csv_files_" + generator.repo_name)
 				print("folder exists!")
 				return redirect(url_for('dashboard'))
 			else:
@@ -41,7 +41,7 @@ def index():
 		else:
 			root_dir = owd + '/csv_files_' + generator.repo_name
 			# if directory already exists, skip function and go to the next page
-			if(not os.path.exists(generator.repo_list + generator.repo_name)): 
+			if(os.path.exists(generator.repo_list + generator.repo_name)): 
 				print("folder exists!")
 				return redirect(url_for('dashboard'))
 			else:
@@ -72,7 +72,7 @@ def dashboard():
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	return render_template('result.html', data=json.dumps(data), keys=json.dumps(keys))
+	return render_template('result.html', repo_name=generator.repo_name, data=json.dumps(data), keys=json.dumps(keys))
 
 
 # this filter allows using '|fromjson', which calls this json.loads function
