@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-import os, fnmatch, json, generator
-=======
 import os
 import fnmatch
 import json
 import generator
->>>>>>> 38248f29103abd1bf3bc43f7dd9d30b7734abc68
 from flask import Flask, request, render_template, redirect, url_for
 
 # owd = obtain working directory
@@ -26,12 +22,14 @@ def index():
 		generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
 		print (generator.repo_name)
 		generator.set_path(generator.repo_name)
-		generator.date_after = request.form['date']
+		generator.date_after = request.form['date_after']
+		generator.date_before = request.form['date_before']
 		print (generator.date_after)
+		print (generator.date_before)
 		root_dir = owd + '/csv_files_' + generator.repo_name
 		# if directory already exists, skip function and go to the next page
-		if(os.path.exists(generator.repo_list + "v3/csv_files_" + generator.repo_name)): 
-			print("folder exists:" + generator.repo_list + "v3/csv_files_" + generator.repo_name)
+		if(os.path.exists(generator.repo_list + "v3/csv_files_" + generator.repo_name + "_" + generator.date_after + "_" + generator.date_before)): 
+			print("folder exists:" + generator.repo_list + "v3/csv_files_" + generator.repo_name + "_" + generator.date_after + "_" + generator.date_before)
 			return redirect(url_for('dashboard'))
 		else:
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')

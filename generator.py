@@ -13,6 +13,7 @@ folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.
 repo_name = ""
 # once a date is selected on the home page, this variable is used
 date_after = ""
+date_before = ""
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
@@ -29,13 +30,21 @@ def set_path(repo_name):
 
 def generate_data(address):
 	# creates folder for the root_dir variable if none exists
-	os.system("mkdir csv_files_" + repo_name)
-	os.chdir("csv_files_" + repo_name)
+	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
+	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
 	print("Obtaining repository logs...")
-	if date_after == "":
+	if date_after == "" and date_before == "":
+		print("no date after or before")
 		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile_' + repo_name + '.log')
-	else:
+	elif not date_after == "" and date_before == "":
+		print("date after selected")
 		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --after=' + date_after + ' > logfile_' + repo_name + '_' + date_after + '.log')
+	elif not date_before == "" and date_after == "":
+		print("date before selected")
+		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --before=' + date_before + ' > logfile_' + repo_name + '_' + date_before + '.log')
+	elif not date_after == "" and not date_before == "":
+		print("date_after and date_before selected")
+		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --after=' + date_after + ' --before=' + date_before + ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log')
 	print("Done.")
 	print("-" * 60)
 	print("Creating csv files from generated log...")
@@ -48,9 +57,9 @@ def generate_data(address):
 	print("Creating organizational metrics summary...")
 	os.system("maat -l logfile_" + repo_name + ".log -c git > metrics_" + repo_name + ".csv")
 	# Reports the number of authors/revisions made per module
-	# print("Creating coupling summary...")
-	# os.system("maat -l logfile_" + repo_name + ".log -c git -a coupling > coupling_" + repo_name + ".csv")
-	# Reports correlation of files that often commit together, currently broken
+	print("Creating coupling summary...")
+	os.system("maat -l logfile_" + repo_name + ".log -c git -a coupling > coupling_" + repo_name + ".csv")
+	# Reports correlation of files that often commit together
 	# degree = % of commits where the two files were changed in the same commit
 	print("Creating code age summary...")
 	os.system("maat -l logfile_" + repo_name + ".log -c git -a entity-churn > age_" + repo_name + ".csv")
