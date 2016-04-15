@@ -5,10 +5,10 @@ if os.name == 'nt':
 	repo_list = ('C:\\Users\\bentinct\\repos\\')
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 else:
-	maat_dir = '/home/tramain/ixmaat0.8.5'
-	# maat_dir = '/home/farhat/ixmaat0.8.5'
-	repo_list = '/home/tramain/repos/'
-	# repo_list = '/home/farhat/Desktop/repos/'
+	# maat_dir = '/home/tramain/ixmaat0.8.5'
+	maat_dir = '/home/farhat/ixmaat0.8.5'
+	# repo_list = '/home/tramain/repos/'
+	repo_list = '/home/farhat/Desktop/repos/'
 	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 
 # repo_name gets used once the flask script is run
@@ -44,17 +44,17 @@ def generate_data(address):
 	print("Creating repository summary...")
 	# currently running codemaat via 'maat.bat' on windows creates extra lines of code in the csv files,
 	# causing them to break when requested from the site
-	os.system("maat -l logfile_" + repo_name + ".log -c git -a summary > summary_" + repo_name + ".csv")
+	# os.system("maat -l logfile_" + repo_name + ".log -c git -a summary > summary_" + repo_name + ".csv")
 	# Reports an overview of mined data from git's log file
 	print("Creating organizational metrics summary...")
-	os.system("maat -l logfile_" + repo_name + ".log -c git > metrics_" + repo_name + ".csv")
+	# os.system("maat -l logfile_" + repo_name + ".log -c git > metrics_" + repo_name + ".csv")
 	# Reports the number of authors/revisions made per module
 	print("Creating coupling summary...")
-	os.system("maat -l logfile_" + repo_name + ".log -c git -a coupling > coupling_" + repo_name + ".csv")
+	# os.system("maat -l logfile_" + repo_name + ".log -c git -a coupling > coupling_" + repo_name + ".csv")
 	# Reports correlation of files that often commit together
 	# degree = % of commits where the two files were changed in the same commit
 	print("Creating code age summary...")
-	os.system("maat -l logfile_" + repo_name + ".log -c git -a entity-churn > age_" + repo_name + ".csv")
+	# os.system("maat -l logfile_" + repo_name + ".log -c git -a entity-churn > age_" + repo_name + ".csv")
 	# Reports how long ago the last change was made in measurement of months
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
@@ -65,24 +65,37 @@ def generate_data(address):
 # reads each column from file into an array and returns the arrays
 def parse_csv(uploaded_file):
 	reader = csv.reader(uploaded_file)
-	data_dict = {}
+	
+	# data_dict = {}
+	# key_array = []
+	# row_array = []
+	# for i, row in enumerate(reader):
+	# 	if i == 0:
+	# 		key_array = row
+	# 	else:
+	# 		# # temporary feature to narrow crabapple's age analysis
+	# 		# if 'age_crabapple' in str(uploaded_file): 
+	# 		# 	if row[2] != '0':
+	# 		# 		row_array.append(row)
+	# 		# else:
+	# 		row_array.append(row)
+	# for i, key in enumerate(key_array):
+	# 	col_array = []
+	# 	for r in row_array:
+	# 		col_array.append(r[i])
+	# 	data_dict[key] = col_array
+	data_dict = []
 	key_array = []
-	row_array = []
+
 	for i, row in enumerate(reader):
+		row_array = {}
 		if i == 0:
 			key_array = row
 		else:
-			# temporary feature to narrow crabapple's age analysis
-			if 'age_crabapple' in str(uploaded_file): 
-				if row[2] != '0':
-					row_array.append(row)
-			else:
-				row_array.append(row)
-	for i, key in enumerate(key_array):
-		col_array = []
-		for r in row_array:
-			col_array.append(r[i])
-		data_dict[key] = col_array
+			for j, key in enumerate(key_array):
+				row_array[key] = row[j]
+			data_dict.append(row_array)
+			
 	return (data_dict, key_array)
 
 
