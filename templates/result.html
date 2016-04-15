@@ -54,6 +54,14 @@
 <button type="button" class="btn btn-info" data-target="#wrapperScatter" name="wrapperScatter"
         onclick="toggleGraph(this)">Scatter Plot
 </button>
+
+<form id="filter" action="form_action.asp">
+    Column: <input type="text" name="key"><br>
+    From: <input type="text" name="start"><br>
+    To: <input type="text" name="end"><br>
+    <input type="button" value="Filter" onclick="setFilter()">
+</form> 
+
 <center>
     <div id="wrapperBar" style="display: none; width: 1000px; overflow-x: scroll;"></div>
     <div id="wrapperPie" style="display: none;"></div>
@@ -62,24 +70,58 @@
 <script>
     var keys = {{keys|safe}}; // an array of the data type in original order
     var json_data = {{data|safe}}; // a dictionary w/ each key (data type) holding an array
-        console.log(json_data);
     var keys_len = keys.length;
-        console.log(keys_len);
     var data_len = json_data.length;
-        console.log(data_len);
-        
+
+    var filter_key = "blank";
+    var filter_start;
+    var filter_end;
+
+    function setFilter(filter_value) {
+        filter_key = document.forms["filter"]["key"].value;
+        filter_start = parseInt(document.forms["filter"]["start"].value);
+            if (filter_start == null || filter_start == "") { filter_start = 0; }
+        console.log(filter_start);
+        filter_end = parseInt(document.forms["filter"]["end"].value);
+            if (filter_end == null || filter_end == "") { filter_end = 100000; }
+        console.log(filter_end);
+
+        for (i=0; i<keys_len; i++) {
+            if (filter_key == keys[i]) { createTable(); }
+        }
+    }
+
+    function applyFilter(filter_value) {
+        if (filter_value == undefined) { return 0; }
+
+        if (parseInt(filter_value) < filter_start || parseInt(filter_value) > filter_end) { 
+            return 1;
+        }
+
+        return 0;
+    }
+
+
     // parses data from dictionary using keys and fills each row.col with values
     var table = document.getElementById("tbody");
-    for (i=0; i<data_len; i++) {
-        var row = document.createElement("tr");
-        for (j=0; j<keys_len; j++) {
-            var col = document.createElement("td");
-            col.appendChild(document.createTextNode(json_data[i][keys[j]]));
-            // if (j==0) { col.addEventListener('click', chooseModule); }
-            row.appendChild(col);
-        }
-    table.appendChild(row);
-    }   
+
+    function createTable() {
+        d3.select("#tbody").html("");
+        console.log(filter_key);
+        console.log(json_data[0][filter_key]);
+        for (i=0; i<data_len; i++) {
+            if (applyFilter(json_data[i][filter_key]) == 1) { continue; }
+
+            var row = document.createElement("tr");
+            for (j=0; j<keys_len; j++) {
+                var col = document.createElement("td");
+                col.appendChild(document.createTextNode(json_data[i][keys[j]]));
+                // if (j==0) { col.addEventListener('click', chooseModule); }
+                row.appendChild(col);
+            }
+        table.appendChild(row);
+        } 
+    }  
 
 
     // sets the y-axis values for the graphs to whichever column the user selects
@@ -239,6 +281,7 @@
         window.history.back();
     }
 
+    window.onload = createTable();
     window.onload = createGraph('default');
 
 </script>
