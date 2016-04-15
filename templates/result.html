@@ -62,32 +62,34 @@
 <script>
     var keys = {{keys|safe}}; // an array of the data type in original order
     var json_data = {{data|safe}}; // a dictionary w/ each key (data type) holding an array
-
+        console.log(json_data);
     var keys_len = keys.length;
-    var data_len = json_data[keys[0]].length;
-
+        console.log(keys_len);
+    var data_len = json_data.length;
+        console.log(data_len);
+        
     // parses data from dictionary using keys and fills each row.col with values
     var table = document.getElementById("tbody");
-    for (i = 0; i < data_len; i++) {
+    for (i=0; i<data_len; i++) {
         var row = document.createElement("tr");
-        for (j = 0; j < keys_len; j++) {
+        for (j=0; j<keys_len; j++) {
             var col = document.createElement("td");
-            col.appendChild(document.createTextNode(json_data[keys[j]][i]));
-            col.setAttribute("style", "overflow-x: hidden;");
+            col.appendChild(document.createTextNode(json_data[i][keys[j]]));
+            // if (j==0) { col.addEventListener('click', chooseModule); }
             row.appendChild(col);
         }
-        table.appendChild(row);
-    }
-
+    table.appendChild(row);
+    }   
 
 
     // sets the y-axis values for the graphs to whichever column the user selects
     // calls function to create graph using the selected data
     function chooseColumn(elem) {
         var key = elem.getAttribute('value');
-        var y_values = json_data[key];
+        // var y_values = json_data[key];
 
-        createGraph(y_values);
+        // createGraph(y_values);
+        createGraph(key);
         console.log(y_values);
     }
 
@@ -105,8 +107,8 @@
 
     // graph dimensions that do not change
     var w = 1000;
-    if (data_len < 800) {
-      var w = 3000;
+    if (data_len > 50) {
+      w = data_len * 20;
     }
 
     var margin = {top: 20, left: 50, right: 20, bottom: 130};
@@ -114,9 +116,11 @@
     var width = w - margin.left - margin.right;
     var padding = 1;
 
+    var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
+
     // this is called by chooseColumn() when the user selects data for y-axis
     // NOTE: currently, only bar graph functions displays; needs to be modified
-    function createGraph(values) {
+    function createGraph(chosen_key) {
         d3.select("#wrapperBar").html("");
         d3.select("#wrapperPie").html("");
         d3.select("#wrapperScatter").html("");
@@ -125,74 +129,109 @@
         // NOTE: this apparently does not work in Safari; fix later
 
 ///////////////////////////// B A R  G R A P H ///////////////////////////////
-        var type = json_data[keys[0]];
-        var vlength = values.length;
+        // var type = json_data[keys[0]];
+        // var vlength = values.length;
+        if (chosen_key == 'default') { var labels = d3.keys(json_data[0]).filter(function(key) { return key !== json_data.keys[0]; }); 
+        }
+        else { 
+            var labels = d3.keys(json_data[0]).filter(function(key) { return key == chosen_key; });
+        }
+        console.log(labels);
 
-        var xScale = d3.scale.ordinal()
-                .domain(type).rangePoints([0, width - (width / values.length)]);
-        var yScale = d3.scale.linear()
-                .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
+        json_data.forEach(function(d) {
+            d.values = labels.map(function(label) {
+                return {type: label, value: +d[label]};
+            });
+            // console.log(d.values);
+        });
+
+        // var xScale = d3.scale.ordinal()
+        //         .domain(type).rangePoints([0, width - (width / values.length)]);
+        // var yScale = d3.scale.linear()
+        //         .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
+
+        var x0Scale = d3.scale.ordinal().rangeRoundBands([0, width], .05);
+        var x1Scale = d3.scale.ordinal();
+        var yScale = d3.scale.linear().range([height, 0]);
+        yScale.domain([0, d3.max(json_data, function(d) { return d3.max(d.values, function(d) { return d.value; }); })]);
 
         var xAxis = d3.svg.axis()
-                .scale(xScale)
-                .orient("bottom")
-                .ticks(type.length);
-        var yAxis = d3.svg.axis()
-                .scale(yScale)
-                .orient("left")
-                .ticks(values.length);
+                .scale(x0Scale)
+                .orient("bottom");
+        // var yAxis = d3.svg.axis()
+        //         .scale(yScale)
+        //         .orient("left")
+        //         .ticks(values.length);
+
+        x0Scale.domain(json_data.map(function(d) { return d[keys[0]]; }));
+        x1Scale.domain(labels).rangeRoundBands([0, x0Scale.rangeBand()]);
 
         var canvas = d3.select("#wrapperBar")
-                .append("svg")
+            .append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
-                .append("g")
+            .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        var bar = canvas.selectAll("rect")
-                .data(values)
+        
+        var category = canvas.selectAll(".category")
+                .data(json_data)
                 .enter()
-                .append("rect")
-                .attr("height", function (d) {
-                    return height - yScale(d);
-                })
-                .attr("width", width / vlength - padding)
-                .attr("x", function (d, i) {
-                    return i * (width / vlength)
-                })
-                .attr("y", function (d) {
-                    return height - (height - yScale(d))
-                });
+            .append("g")
+                .attr("class", "category")
+                .attr("transform", function(d) { return "translate("+ x0Scale(d[keys[0]]) + ",0)"; });
 
-        canvas.selectAll("text")
-                .data(values)
+        var bar = category.selectAll("rect")
+                .data(function(d) { return d.values; })
                 .enter()
-                .append("text")
-                .attr("fill", "steelblue")
-                .style("font-size", ".7em")
-                .attr("x", function (d, i) {
-                    return i * (width / vlength) + (width / vlength) / 2
-                })
-                .attr("y", function (d) {
-                    return height - (height - yScale(d)) - 5
-                })
-                .text(function (d) {
-                    return d;
-                })
-                .style("text-anchor", "middle");
+            .append("rect")
+                .attr("height", function(d) { return height - yScale(d.value); })
+                .attr("width", x1Scale.rangeBand())
+                .attr("x", function(d) { return x1Scale(d.type) + 15; })
+                .attr("y", function(d) { return yScale(d.value); })
+                .style("fill", function(d) { return color(d.type); });
+
+        // var bar = canvas.selectAll("rect")
+        //         .data(values)
+        //         .enter()
+        //     .append("rect")
+        //         .attr("height", function (d) {
+        //             return height - yScale(d);
+        //         })
+        //         .attr("width", width / vlength - padding)
+        //         .attr("x", function (d, i) {
+        //             return i * (width / vlength)
+        //         })
+        //         .attr("y", function (d) {
+        //             return height - (height - yScale(d))
+        //         });
+
+        // canvas.selectAll("text")
+        //         .data(values)
+        //         .enter()
+        //         .append("text")
+        //         .attr("fill", "steelblue")
+        //         .style("font-size", ".7em")
+        //         .attr("x", function (d, i) {
+        //             return i * (width / vlength) + (width / vlength) / 2
+        //         })
+        //         .attr("y", function (d) {
+        //             return height - (height - yScale(d)) - 5
+        //         })
+        //         .text(function (d) {
+        //             return d;
+        //         })
+        //         .style("text-anchor", "middle");
 
         canvas.append("g")
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + (width / vlength) / 2 + ',' + (height) + ')')
+                .attr('transform', 'translate(' + (width / data_len) / 2 + ',' + (height) + ')')
                 .call(xAxis)
-                .selectAll("text")
+                .selectAll("text")  
                 .style("text-anchor", "end")
                 .attr("dx", "-1em")
                 .attr("dy", ".15em")
-                .attr("transform", function (d) {
-                    return "rotate(-65)";
-                })
-                .style("font-size", ".7em")
+                .attr("transform", function(d) { return "rotate(-65)" })
+                .style("font-size", ".6em")
                 .attr("fill", "steelblue");
     }
     // called when user clicks "Back" button
@@ -200,7 +239,7 @@
         window.history.back();
     }
 
-    window.onload = createGraph(json_data[keys[1]]);
+    window.onload = createGraph('default');
 
 </script>
 
