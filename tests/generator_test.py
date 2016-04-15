@@ -28,9 +28,8 @@ class generatorTest(unittest.TestCase):
 		with open('testfile.csv') as uploaded_file:
 			dict_test, array_test = parse_csv(uploaded_file)
 
-		self.assertEqual(dict_test, {'stat': ['commits', 'entities'], 'value': ['26', '24']})
+		self.assertEqual(dict_test, [{'stat': 'commits', 'value': '26'}, {'stat': 'entities', 'value': '24'}])
 		self.assertEqual(array_test, ['stat', 'value'])
-
 
 
 if __name__ == '__main__':
