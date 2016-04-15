@@ -1,5 +1,6 @@
 import sys
-sys.path.append('/home/farhat/Desktop/repos/v3.2')
+import settings
+sys.path.append(settings.t_test_dir)
 
 from flask import Flask
 import unittest
@@ -30,7 +31,6 @@ class generatorTest(unittest.TestCase):
 		self.assertEqual(dict_test, {'stat': ['commits', 'entities'], 'value': ['26', '24']})
 		self.assertEqual(array_test, ['stat', 'value'])
 
-	ss
 
 
 if __name__ == '__main__':
