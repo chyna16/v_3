@@ -2,13 +2,17 @@
 
 <html>
 <head>
-<link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
-<!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">  -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-<link rel=stylesheet type=text/css href='../static/bootstrap.css'>
-<script src = "../static/bootstrap.js"></script> 
-
-<title>V3</title>
+  {% block head %}
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
+    <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    <!-- <script src = "../static/jquery-1.12.3.js"></script> -->
+    <!-- <link rel=stylesheet type=text/css href='../static/bootstrap.css'> -->
+    <!-- <script src = "../static/bootstrap.js"></script>  -->
+    <title>{% block title %}{% endblock %} - V3</title>
+  {% endblock %}
 </head>
 
 <body>
@@ -71,33 +75,45 @@
   <!-- buttons below work -->
   
   <form method="POST" enctype="multipart/form-data">
-    <div class="btn-group" data-toggle="buttons">
+    <div class="list-group" data-toggle="buttons">
     {% for folder in folder_select %}
       <label class="btn btn-primary">
         <input type="radio" name="folder_name" value={{folder}} autocomplete="off">{{folder}}
       </label>
     {% endfor %}
       <label class="btn btn-primary">
-        <input type="radio" name="options" id="option2" autocomplete="off"> Blank Radio
+        <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
       </label>
     </div>
     <p>
       <div class="col-lg-6">        
       <div class="form-group">
         <label for="formInput">Enter Start Date:</label>
-        <input type="date" class="form-control" id="formInput" name="date">
+        <p>(From selected date to today unless End Date is filled)</p>
+        <input type="date" class="form-control" id="formInput" name="date_after">
       </div>
       </div>
     </p>
     <p>
-      <button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button>
+      <div class="col-lg-6">
+      <div class="form-group">
+        <label for="formInput">Enter End Date:</label>
+        <input type="date" class="form-control" id="formInput" name="date_before">
+      </div>
+      </div>
     </p>
     <p>
-      <button type="submit" class="btn btn-lg btn-success" role="button">
-        Show Results
+      <button type="submit" id="nextbutton" class="btn btn-lg btn-success" role="button">
+        Show Files
       </button>
     </p>
   </form>
-
+<script>
+    $.('#nextbutton').click(function () {
+    var $btn = $(this);
+    $btn.button('loading');
+    // $btn.button('reset')
+  })
+</script>
 </body>
 </html>

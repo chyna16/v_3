@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/farhat/Desktop/repos/v3.2')
+sys.path.append('C:\\Users\\bentinct\\repos\\v3\\')
 
 from flask import Flask
 import unittest

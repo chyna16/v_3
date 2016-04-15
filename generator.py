@@ -1,19 +1,21 @@
-import csv, os, time, fnmatch
+import csv
+import os
+import time
+import fnmatch 
 
-if os.name == 'nt':
-	maat_dir = ('C:\\Users\\bentinct\\winmaat0.8.5\\')
-	repo_list = ('C:\\Users\\bentinct\\repos\\')
-	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
-else:
-	# maat_dir = '/home/tramain/ixmaat0.8.5'
-	maat_dir = '/home/farhat/ixmaat0.8.5'
-	# repo_list = '/home/tramain/repos/'
-	repo_list = '/home/farhat/Desktop/repos/'
-	folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
 
-# repo_name gets used once the flask script is run
+maat_dir = '/home/tramain/ixmaat0.8.5'
+# maat_dir = '/home/farhat/ixmaat0.8.5'
+repo_list = '/home/tramain/repos/'
+# repo_list = '/home/farhat/Desktop/repos/'
+folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.join(repo_list, item)) ]
+
+
+# repo_name is used for later functions once a repository is selected from the home page
 repo_name = ""
-date_select = ""
+# once a date is selected on the home page, this variable is used
+date_after = ""
+date_before = ""
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
@@ -26,17 +28,25 @@ def set_path(repo_name):
 	# need to create an exception if csv_files folder already exists
 	# global owd
 	# owd = os.getcwd()
-	# creates folder for the root_dir variable if none exists
-	# if os.name == 'nt':
-	# 	os.remove("csv_files_" + repo_name)
-	os.system("mkdir csv_files_" + repo_name)
-	os.chdir("csv_files_" + repo_name)
 
 
 def generate_data(address):
+	# creates folder for the root_dir variable if none exists
+	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
+	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
 	print("Obtaining repository logs...")
-	# currently manually selects the repository
-	os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile_' + repo_name + '.log')
+	if date_after == "" and date_before == "":
+		print("no date after or before")
+		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile_' + repo_name + '.log')
+	elif not date_after == "" and date_before == "":
+		print("date after selected")
+		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --after=' + date_after + ' > logfile_' + repo_name + '_' + date_after + '.log')
+	elif not date_before == "" and date_after == "":
+		print("date before selected")
+		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --before=' + date_before + ' > logfile_' + repo_name + '_' + date_before + '.log')
+	elif not date_after == "" and not date_before == "":
+		print("date_after and date_before selected")
+		os.system('git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --after=' + date_after + ' --before=' + date_before + ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log')
 	print("Done.")
 	print("-" * 60)
 	print("Creating csv files from generated log...")
@@ -95,6 +105,8 @@ def parse_csv(uploaded_file):
 			for j, key in enumerate(key_array):
 				row_array[key] = row[j]
 			data_dict.append(row_array)
+
+	print(data_dict);
 			
 	return (data_dict, key_array)
 
