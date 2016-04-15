@@ -26,10 +26,15 @@ def index():
 		generator.date_before = request.form['date_before']
 		print (generator.date_after)
 		print (generator.date_before)
-		root_dir = owd + '/csv_files_' + generator.repo_name
+		root_dir = (owd + '/csv_files_' + generator.repo_name + "_" 
+			+ generator.date_after + "_" + generator.date_before)
 		# if directory already exists, skip function and go to the next page
-		if(os.path.exists(generator.repo_list + "v3/csv_files_" + generator.repo_name + "_" + generator.date_after + "_" + generator.date_before)): 
-			print("folder exists:" + generator.repo_list + "v3/csv_files_" + generator.repo_name + "_" + generator.date_after + "_" + generator.date_before)
+		if(os.path.exists(generator.repo_list + "v3/csv_files_" 
+			+ generator.repo_name + "_" + generator.date_after + "_" 
+			+ generator.date_before)): 
+			print("folder exists:" + generator.repo_list + "v3/csv_files_" 
+				+ generator.repo_name + "_" + generator.date_after + "_" 
+				+ generator.date_before)
 			return redirect(url_for('dashboard'))
 		else:
 			generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
@@ -52,14 +57,17 @@ def dashboard():
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
 		csv_name = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
-		with open("csv_files_" + generator.repo_name + "/{}".format(csv_name), 'rt') as csv_file:
+		with open("csv_files_" + generator.repo_name + "_" 
+			+ generator.date_after + "_" + generator.date_before 
+			+ "/{}".format(csv_name), 'rt') as csv_file:
 			data, keys = generator.parse_csv(csv_file)
 		return redirect(url_for('result'))
 
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	return render_template('result.html', repo_name=generator.repo_name, data=json.dumps(data), keys=json.dumps(keys))
+	return render_template('result.html', repo_name=generator.repo_name,
+	 data=json.dumps(data), keys=json.dumps(keys))
 
 
 # this filter allows using '|fromjson', which calls this json.loads function
