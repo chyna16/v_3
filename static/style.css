@@ -42,6 +42,9 @@ tbody td, thead th {
   font-size: 11px;
 }
 
+h2 {
+  text-align: center;
+}
 
 label.btn span {
   font-size: 1.5em ;
