@@ -15,6 +15,8 @@ repo_name = ""
 # once a date is selected on the home page, this variable is used
 date_after = ""
 date_before = ""
+password = ""
+clone_url = ""
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
@@ -73,25 +75,33 @@ def generate_data(address):
 	os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
 		+ date_before + ".log -c git -a summary > summary_" + repo_name 
 		+ ".csv")
-	# Reports an overview of mined data from git's log file
-	print("Creating organizational metrics summary...")
-	os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-		+ date_before + ".log -c git > metrics_" + repo_name + ".csv")
-	# Reports the number of authors/revisions made per module
-	print("Creating coupling summary...")
-	os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-		+ date_before + ".log -c git -a coupling > coupling_" + repo_name 
-		+ ".csv")
-	# Reports correlation of files that often commit together
-	# degree = % of commits where the two files were changed in the same commit
-	print("Creating code age summary...")
-	os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-		+ date_before + ".log -c git -a entity-churn > age_" + repo_name 
-		+ ".csv")
+	# # Reports an overview of mined data from git's log file
+	# print("Creating organizational metrics summary...")
+	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
+	# 	+ date_before + ".log -c git > metrics_" + repo_name + ".csv")
+	# # Reports the number of authors/revisions made per module
+	# print("Creating coupling summary...")
+	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
+	# 	+ date_before + ".log -c git -a coupling > coupling_" + repo_name 
+	# 	+ ".csv")
+	# # Reports correlation of files that often commit together
+	# # degree = % of commits where the two files were changed in the same commit
+	# print("Creating code age summary...")
+	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
+	# 	+ date_before + ".log -c git -a entity-churn > age_" + repo_name 
+	# 	+ ".csv")
 	# Reports how long ago the last change was made in measurement of months
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 	os.chdir("..")
+
+
+def submit_url():
+	char = clone_url.index('@')
+	os.chdir('..')
+	command = clone_url[:char] + ':' + password + clone_url[char:]
+	os.system('git clone ' + command)
+	os.chdir('v3')
 
 
 # this function takes csv file and two empty arrays
