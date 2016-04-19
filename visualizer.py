@@ -67,7 +67,8 @@ def dashboard():
 @app.route('/result', methods=['GET', 'POST'])
 def result():
 	return render_template('result.html', repo_name=generator.repo_name,
-	 data=json.dumps(data), keys=json.dumps(keys))
+	 data=json.dumps(data), keys=json.dumps(keys),
+	 date_after=generator.date_after, date_before=generator.date_before)
 
 
 # this filter allows using '|fromjson', which calls this json.loads function
