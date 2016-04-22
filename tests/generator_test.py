@@ -1,10 +1,10 @@
 import sys
+import os
 import settings
 sys.path.append(settings.t_test_dir)
 
 from flask import Flask
 import unittest
-import os
 import tempfile
 import generator
 from generator import generate_data
@@ -39,6 +39,8 @@ class generatorTest(unittest.TestCase):
 		self.assertNotEqual((generate_data(generator.date_after)), ("04-21-2016"))
 		self.assertNotEqual(("01-30-2014"), ("04-21-2016"))
 
+	def test_csv_folder_exists(self):
+		assert os.path.exists("csv_files___")
 
 
 
