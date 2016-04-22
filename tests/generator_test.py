@@ -1,10 +1,13 @@
 import sys
-sys.path.append('/home/farhat/Desktop/repos/v3.2')
+import settings
+sys.path.append(settings.t_test_dir)
 
 from flask import Flask
 import unittest
 import os
 import tempfile
+import generator
+from generator import generate_data
 from generator import parse_csv
 
 class generatorTest(unittest.TestCase):
@@ -29,6 +32,14 @@ class generatorTest(unittest.TestCase):
 
 		self.assertEqual(dict_test, [{'stat': 'commits', 'value': '26'}, {'stat': 'entities', 'value': '24'}])
 		self.assertEqual(array_test, ['stat', 'value'])
+	
+	def test_generate_data(self):
+		self.assertEqual(generate_data(generator.date_after), generate_data(generator.date_before))
+		self.assertNotEqual(("12-02-1993"), generate_data(generator.date_before))
+		self.assertNotEqual((generate_data(generator.date_after)), ("04-21-2016"))
+		self.assertNotEqual(("01-30-2014"), ("04-21-2016"))
+
+
 
 
 if __name__ == '__main__':

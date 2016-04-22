@@ -37,21 +37,40 @@
 
 <h1>Welcome to the Viacom Value Visualizer</h1>
 
-<!-- these are the intended buttons, currently broken -->
+<!--  <form method="POST" enctype="multipart/form-data">
+
+ </form> -->
 
 <form method="POST" enctype="multipart/form-data">
+ 
+  <div class="form-group">
+  <p><h2> Enter a repository clone link:</h2></p>
+  <h4> (Cloned repository will be added to the list below)</h4>
+    <label class="sr-only" for="inputURL">URL Link</label>
+    <input type="text" class="form-control" id="inputURL" name="clone_url" placeholder="Enter URL">
+  </div>
+  <div class="form-group">
+    <label class="sr-only" for="inputPassword">Password</label>
+    <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Password" required>
+  </div>
+  <button type="submit" class="btn  btn-lg btn-primary">Submit</button>
+
   <div class="row">
     <div class="col-lg-6">
-      <h2>Select a Repository</h2>
-      <p>
-        <div class="list-group" data-toggle="buttons">
-          {% for folder in folder_select %}
-            <button type="button" class="list-group-item" name="folder_name" value="{{folder}}">
-              {{folder}}
-            </button>
-          {% endfor %}
-        </div>
-      </p>
+      <h2>Select a Repository:</h2>
+    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+    {% for folder in folder_select %}
+      <label class="btn active">
+        <input type="radio" name="folder_name" value={{folder}} autocomplete="off">{{folder}}
+      </label>
+    {% endfor %}
+    <!-- <input name="folder_name">hdhd</input> -->
+      <label class="btn active">
+        <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
+      </label>
+    </div>
+    <br>
+    <br>
       <p>
         <a class="btn btn-info" href="#" role="button">
           View details &raquo;
@@ -59,37 +78,18 @@
       </p>
     </div>      
     <div class="col-lg-6">
-      <h2>Repository Details</h2>
+      <h2>Repository Details:</h2>
+      <br>
           <p>
             Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
           </p>
     </div>
   </div>
-  <p>
-    <button class="btn btn-outline btn-success btn-lg" role="button" type="submit">
-      Next
-    </button>
-  </p>
-  </form>
-
-  <!-- buttons below work -->
-  
-  <form method="POST" enctype="multipart/form-data">
-    <div class="list-group" data-toggle="buttons">
-    {% for folder in folder_select %}
-      <label class="btn btn-primary">
-        <input type="radio" name="folder_name" value={{folder}} autocomplete="off">{{folder}}
-      </label>
-    {% endfor %}
-      <label class="btn btn-primary">
-        <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
-      </label>
-    </div>
-    <p>
+      <p>
       <div class="col-lg-6">        
       <div class="form-group">
         <label for="formInput">Enter Start Date:</label>
-        <p>(From selected date to today unless End Date is filled)</p>
+        <p>(From selected date to today if selected alone)</p>
         <input type="date" class="form-control" id="formInput" name="date_after">
       </div>
       </div>
@@ -98,22 +98,29 @@
       <div class="col-lg-6">
       <div class="form-group">
         <label for="formInput">Enter End Date:</label>
+        <p>(From repository creation to selected date if selected alone)</p>
         <input type="date" class="form-control" id="formInput" name="date_before">
       </div>
       </div>
     </p>
     <p>
-      <button type="submit" id="nextbutton" class="btn btn-lg btn-success" role="button">
-        Show Files
+  <p>
+      <button type="submit" id="nextbutton" class="btn btn-lg btn-primary" role="button">
+        Next
       </button>
-    </p>
+  </p>
   </form>
+
 <script>
-    $.('#nextbutton').click(function () {
+  //   $.('#nextbutton').click(function () {
+  //   var $btn = $(this);
+  //   $btn.button('loading');
+  //   // $btn.button('reset')
+  // });
+    $("#nextbutton").click(function() {
     var $btn = $(this);
     $btn.button('loading');
-    // $btn.button('reset')
-  })
+});
 </script>
 </body>
 </html>
