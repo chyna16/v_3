@@ -28,6 +28,12 @@
 <h1>Results for {{repo_name}} repository</h1>
 <h2> From {{date_after}} to {{date_before }}<h2>
 
+<center>
+    <div id="wrapperBar" style="display: none; width: 1000px; overflow-x: scroll;"></div>
+    <!-- <div id="wrapperPie" style="display: none;"></div>
+    <div id="wrapperScatter" style="display: none;"></div> -->
+</center>
+
 <h3> Table </h3>
 <div class="col-md-8">
     <table class="table" align="center">
@@ -61,12 +67,6 @@
     To: <input type="text" name="end"><br>
     <input type="button" value="Filter" onclick="setFilter()">
 </form> 
-
-<center>
-    <div id="wrapperBar" style="display: none; width: 1000px; overflow-x: scroll;"></div>
-    <!-- <div id="wrapperPie" style="display: none;"></div>
-    <div id="wrapperScatter" style="display: none;"></div> -->
-</center>
 
 <script>
     var keys = {{keys|safe}}; // an array of the data type in original order
