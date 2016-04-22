@@ -181,11 +181,11 @@
             console.log(i);
             console.log(+d[filter_key]);
             // if (applyFilter(+d[filter_key]) != true) {
-                d.values = labels.map(function(label) {
-                    // if (applyFilter(d[filter_key]) == false) {
-                        return {type: label, value: +d[label]};
-                    // }
-                });
+            d.values = labels.map(function(label) {
+                // if (applyFilter(d[filter_key]) == false) {
+                    return {type: label, value: +d[label]};
+                // }
+            });
             // }
             console.log(d.values);
         });
