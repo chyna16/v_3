@@ -11,14 +11,22 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
+	generator.clone_url = ""
+	generator.password = ""
+	generator.repo_name = ""
 	if request.method == 'GET':
 		folder_select = []
 		for folder_name in generator.folder_list:
 			folder_select.append(folder_name)  # fills array with names of csv files in current directory
 		return render_template('index.html', folder_select=folder_select)  # returns array of csv filenames to webpage
-	elif request.method == 'POST':
-		select_folder()
-		return redirect(url_for('dashboard'))
+	elif request.method == 'POST' and not request.form['clone_url'] == "":
+			generator.clone_url = request.form['clone_url']
+			generator.password = request.form['password']
+			generator.submit_url()
+			return redirect(url_for('index'))
+	elif request.method == 'POST' and not request.form['folder_name'] == "": 
+			select_folder()
+			return redirect(url_for('dashboard'))
 	
 
 @app.route('/dashboard', methods=['GET', 'POST'])
@@ -68,7 +76,7 @@ def bad_request(e):
 
 def select_folder():
 	global root_dir
-	# print (request.form['folder_name'])
+	print (request.form['folder_name'])
 	generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
 	# print (generator.repo_name)
 	generator.set_path(generator.repo_name)

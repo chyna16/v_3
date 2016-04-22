@@ -100,6 +100,7 @@ def submit_url():
 	char = clone_url.index('@')
 	os.chdir('..')
 	command = clone_url[:char] + ':' + password + clone_url[char:]
+	print(command)
 	os.system('git clone ' + command)
 	os.chdir('v3')
 
