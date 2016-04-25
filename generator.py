@@ -20,6 +20,7 @@ clone_url = ""
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
+
 def set_path(repo_name):
 	print("Setting a path for codemaat...")
 	# path is set temporarily, per script run
@@ -31,37 +32,33 @@ def set_path(repo_name):
 	# owd = os.getcwd()
 
 
+def create_log(address):
+	sys_command = "" # resets to blank
+
+	# first part of command same for any date specification
+	sys_command = 'git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat'
+	#the following commands change depending on date specification
+	if not date_after == "" and date_before == "":
+		print("date after selected")
+		sys_command += ' --after=' + date_after 	
+	elif date_after == "" and not date_before == "":
+		print("date before selected")
+		sys_command += ' --before=' + date_before 	
+	elif not date_after == "" and not date_before == "":
+		print("date_after and date_before selected")
+		sys_command += ' --after=' + date_after + ' --before=' + date_before 	
+	# last part of command same for any date specification			
+	sys_command += ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log'
+
+	os.system(sys_command) # command line call using the updated string
+
+
 def generate_data(address):
 	# creates folder for the root_dir variable if none exists
 	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
 	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
 	print("Obtaining repository logs...")
-	if date_after == "" and date_before == "":
-		print("no date after or before")
-		os.system('git --git-dir ' 
-			+ address 
-			+ ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat > logfile_' 
-			+ repo_name + '__' + '.log')
-	elif not date_after == "" and date_before == "":
-		print("date after selected")
-		os.system('git --git-dir ' 
-			+ address 
-			+ ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --after=' 
-			+ date_after + ' > logfile_' + repo_name + '_' + date_after + '_' +'.log')
-	elif not date_before == "" and date_after == "":
-		print("date before selected")
-		os.system('git --git-dir ' 
-			+ address 
-			+ ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --before=' 
-			+ date_before + ' > logfile_' + repo_name + '__' + date_before + '.log')
-	elif not date_after == "" and not date_before == "":
-		print("date_after and date_before selected")
-		os.system('git --git-dir ' + address 
-			+ ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat --after=' 
-			+ date_after 
-			+ ' --before=' 
-			+ date_before + ' > logfile_' + repo_name + '_' + date_after + '_' 
-			+ date_before + '.log')
+	create_log(address)
 	print("Done.")
 	print("-" * 60)
 	print("Creating csv files from generated log...")
