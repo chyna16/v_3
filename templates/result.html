@@ -156,10 +156,9 @@
     }
 
     // graph dimensions
-    var w = 1000; if (data_len > 50) { w = data_len * 20; }
+    var w = 1000;
     var margin = {top: 20, left: 50, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
-    var width = w - margin.left - margin.right;
     var padding = 1;
 
     var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
@@ -171,6 +170,9 @@
             // this prevents copies from being made each time function is called
             // NOTE: this apparently does not work in Safari; fix later
 
+        if (data.length > 50) { w = data.length * 20; }
+        else if (data.length < 10) { w = data.length * 100; }
+        var width = w - margin.left - margin.right;
 
     ///////////////////////////// B A R  G R A P H ///////////////////////////////
         // var type = json_data[keys[0]];
@@ -237,15 +239,15 @@
             .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         
-        if (labels.length == 1) { var cat_shift = 0; } // used for shifting of single bars
-        else { var cat_shift = x1Scale.rangeBand() / 2; } // used for shifting of grouped bars
+        // if (labels.length == 1) { var cat_shift = 0; } // used for shifting of single bars
+        // else { var cat_shift = x1Scale.rangeBand() / 2; } // used for shifting of grouped bars
 
         var category = canvas.selectAll(".category")
                 .data(data)
                 .enter()
             .append("g")
                 .attr("class", "category")
-                .attr("transform", function(d) { return "translate("+ (x0Scale(d[keys[0]]) + cat_shift) + ",0)"; });
+                .attr("transform", function(d) { return "translate("+ x0Scale(d[keys[0]]) + ",0)"; });
 
         var bar = category.selectAll("rect")
                 .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
