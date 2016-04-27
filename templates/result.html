@@ -79,6 +79,7 @@
     var filter_key = "blank"; // if left "blank" then filter will not apply
     var filter_start;
     var filter_end;
+    var filtered_json;
 
     // called when user selects a column to filter by, and selects range
     // reads user entries and sets variables accordingly
@@ -110,22 +111,30 @@
     // parses data from dictionary using keys and fills each row.col with values
     var table = document.getElementById("tbody");
     function createTable() {
+        filtered_json = [];
+
+        json_data.forEach(function (d) {
+            if (applyFilter(+d[filter_key]) != true) {
+                filtered_json.push(d);
+            }
+        });
+
         d3.select("#tbody").html(""); // table is emptied before being filled
 
-        for (i=0; i<data_len; i++) {
-            if (applyFilter(json_data[i][filter_key])) { continue; }
+        for (i=0; i<filtered_json.length; i++) {
+            // if (applyFilter(json_data[i][filter_key])) { continue; }
                 // if the current value of the filter column chosen by theuser
                 // falls within the filter range, then the loop skips the following 
             var row = document.createElement("tr");
             for (j=0; j<keys_len; j++) {
                 var col = document.createElement("td");
-                col.appendChild(document.createTextNode(json_data[i][keys[j]]));
+                col.appendChild(document.createTextNode(filtered_json[i][keys[j]]));
                 // if (j==0) { col.addEventListener('click', chooseModule); }
                 row.appendChild(col);
             }
         table.appendChild(row);
         }
-        createGraph();
+        createGraph(filtered_json);
     }  
 
  
@@ -134,7 +143,7 @@
     // calls function to create graph using the selected data
     function chooseColumn(elem) {
         chosen_key = elem.getAttribute('value');
-        createGraph(); 
+        createGraph(filtered_json); 
     }
 
     // changes the display of corresponding graph to show or hide
@@ -156,11 +165,12 @@
     var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
 
     // this is called by chooseColumn() when the user selects data for y-axis
-    function createGraph() {
+    function createGraph(data) {
         d3.select('#wrapperBar').html("");
             // .html("") causes the wrapper to be emptied out
             // this prevents copies from being made each time function is called
             // NOTE: this apparently does not work in Safari; fix later
+
 
     ///////////////////////////// B A R  G R A P H ///////////////////////////////
         // var type = json_data[keys[0]];
@@ -168,7 +178,7 @@
         if (chosen_key == 'default') {
             // if no column was specified, the data from all value columns is used 
             var labels = d3.keys(json_data[0]).filter(function(key) 
-                { return key !== keys[0]; }); 
+                { return key !== keys[0] && key !== 'values'; }); 
         }
         else {
             // if a column was specified, only the data from that column is used
@@ -177,18 +187,20 @@
         }
 
 
-        json_data.forEach(function(d, i) {
+        data.forEach(function(d, i) {
             // console.log(i);
             // console.log(+d[filter_key]);
+            delete d.values;
             // if (applyFilter(+d[filter_key]) != true) {
                 d.values = labels.map(function(label) {
-                    console.log(label);
-                    console.log(d[label]);
+                    // console.log(label);
+                    // console.log(d[label]);
                     return {type: label, value: +d[label]};
                 });
             // }
             // else { d.values = {type: "", value: ""}; }
             console.log(d.values);
+            console.log(d);
         });
 
         // var xScale = d3.scale.ordinal()
@@ -199,7 +211,9 @@
         var x0Scale = d3.scale.ordinal().rangeBands([0, width], .05);
         var x1Scale = d3.scale.ordinal();
         var yScale = d3.scale.linear().range([height, 0]);
-        yScale.domain([0, d3.max(json_data, function(d) { return d3.max(d.values, function(d) { return d.value; }); })]);
+        yScale.domain([0, d3.max(data, function(d) { 
+            return d3.max(d.values, function(d) { return d.value; }); 
+        })]);
 
         var xAxis = d3.svg.axis()
                 .scale(x0Scale)
@@ -209,7 +223,7 @@
         //         .orient("left")
         //         .ticks(values.length);
 
-        x0Scale.domain(json_data.map(function(d) { 
+        x0Scale.domain(data.map(function(d) { 
             // if (applyFilter(+d[filter_key]) != true) {
                 return d[keys[0]];
             // }
@@ -227,17 +241,17 @@
         else { var cat_shift = x1Scale.rangeBand() / 2; } // used for shifting of grouped bars
 
         var category = canvas.selectAll(".category")
-                .data(json_data)
+                .data(data)
                 .enter()
             .append("g")
                 .attr("class", "category")
                 .attr("transform", function(d) { return "translate("+ (x0Scale(d[keys[0]]) + cat_shift) + ",0)"; });
 
         var bar = category.selectAll("rect")
-                .data(function(d) { console.log(d); return d.values; })
+                .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
                 .enter()
             .append("rect")
-                .attr("height", function(d) { console.log(d); console.log(d.value); return height - yScale(d.value); })
+                .attr("height", function(d) { /*console.log(d); console.log(d.value);*/ return height - yScale(d.value); })
                 .attr("width", x1Scale.rangeBand())
                 .attr("x", function(d) { return x1Scale(d.type); })
                 .attr("y", function(d) { return yScale(d.value); })
@@ -294,7 +308,7 @@
     }
 
     window.onload = createTable();
-    window.onload = createGraph();
+    // window.onload = createGraph();
 
 </script>
 
