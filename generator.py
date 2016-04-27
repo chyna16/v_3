@@ -3,6 +3,7 @@ import os
 import time
 import fnmatch
 import settings
+import stash_api
 
 maat_dir = settings.t_maat_dir
 repo_list = settings.t_repo_list
@@ -17,6 +18,7 @@ date_after = ""
 date_before = ""
 password = ""
 clone_url = ""
+project_list = stash_api.project_list
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
@@ -140,3 +142,8 @@ def parse_csv(uploaded_file):
 	print(data_dict);
 			
 	return (data_dict, key_array)
+
+
+if __name__ == '__main__':
+	print (folder_list)
+	print (project_list)
