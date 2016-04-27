@@ -2,11 +2,14 @@ import os
 import fnmatch
 import json
 import generator
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, flash
 
 # owd = obtain working directory
 owd = os.getcwd()
 app = Flask(__name__)
+secret = os.urandom(24)
+app.secret_key = secret
+
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
@@ -23,6 +26,7 @@ def index():
 			generator.clone_url = request.form['clone_url']
 			generator.password = request.form['password']
 			generator.submit_url()
+			flash('Cloning Complete.')
 			return redirect(url_for('index'))
 	elif request.method == 'POST' and not request.form['folder_name'] == "": 
 			select_folder()
@@ -42,6 +46,7 @@ def index_project():
 			generator.clone_url = request.form['clone_url']
 			generator.password = request.form['password']
 			generator.submit_url()
+			flash('Cloning complete.')
 			return redirect(url_for('index_project'))
 	elif request.method == 'POST' and not request.form['folder_name'] == "": 
 			select_folder()
@@ -112,10 +117,11 @@ def select_folder():
 		print("folder exists:" + generator.repo_list + "v3/csv_files_" 
 			+ generator.repo_name + "_" + generator.date_after + "_" 
 			+ generator.date_before)
+		flash('Directory exists, redirected to current page.')
 		return redirect(url_for('dashboard'))
 	else:
 		generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
-
+		flash('Analysis complete.')
 
 if __name__ == '__main__':
 	app.run(debug=True)
