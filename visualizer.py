@@ -27,7 +27,26 @@ def index():
 	elif request.method == 'POST' and not request.form['folder_name'] == "": 
 			select_folder()
 			return redirect(url_for('dashboard'))
+
 	
+@app.route('/index_project', methods=['GET', 'POST'])
+def index_project():
+	generator.clone_url = ""
+	generator.password = ""
+	generator.repo_name = ""
+	if request.method == 'GET':
+		project_select = generator.project_list
+		print(project_select)
+		return render_template('index_project.html', project_select=project_select)  # returns array of csv filenames to webpage
+	elif request.method == 'POST' and not request.form['clone_url'] == "":
+			generator.clone_url = request.form['clone_url']
+			generator.password = request.form['password']
+			generator.submit_url()
+			return redirect(url_for('index_project'))
+	elif request.method == 'POST' and not request.form['folder_name'] == "": 
+			select_folder()
+			return redirect(url_for('dashboard'))
+
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
