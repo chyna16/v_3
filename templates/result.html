@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel=stylesheet type=text/css href="../static/style.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
     <script src = "../static/jquery-1.12.3.js"></script>
     <script src="../static/d3.min.js"></script>
     <script src="../static/bootstrap.js"></script>
     <link rel=stylesheet type=text/css href="../static/bootstrap.css">
-    <link rel=stylesheet type=text/css href="../static/style.css">
     <title>Results</title>
 </head>
 
@@ -57,13 +57,7 @@
 <center>
 <div class="col-md-10" style="float:none">
     <table class="table">
-        <thead>
-        <tr>
-            {% for key in keys|fromjson %}
-                <th id="type" value={{ key }} onclick="chooseColumn(this)"> {{ key }} </th>
-            {% endfor %}
-        </tr>
-        </thead>
+        <thead id="thead"></thead>
         <tbody id="tbody"></tbody>
     </table>
 </div>
@@ -109,8 +103,38 @@
         return false;
     }
 
+    function setTableRows(row, elem_id, data) {
+        for (i=0; i<keys_len; i++) {
+            var col = document.createElement(elem_id);
+
+            if (i == 0) {
+                col.style.width = "40%";
+            }
+            else {
+                col.style.width = (60 / (keys_len-1)) + "%";
+            }
+
+            col.style.overflow = "hidden";
+            col.style.fontSize = "15px";
+            col.onmouseover = function() { this.style.overflow = "visible"; }
+            col.onmouseout = function() { this.style.overflow = "hidden"; }
+            // col.style.backgroundColor = "white";
+
+            if (data == keys) { 
+                col.setAttribute('value', data[i]);
+                if (i != 0) { col.setAttribute('onClick', 'chooseColumn(this)'); }
+                col.appendChild(document.createTextNode(data[i])); 
+            }
+            else { col.appendChild(document.createTextNode(data[keys[i]])); }
+
+            row.appendChild(col);
+        }
+        return row;
+    }
+
     // parses data from dictionary using keys and fills each row.col with values
-    var table = document.getElementById("tbody");
+    var table_head = document.getElementById("thead");
+    var table_body = document.getElementById("tbody");
     function createTable() {
         filtered_json = [];
 
@@ -120,21 +144,19 @@
             }
         });
 
+        var h_row = document.createElement("tr");
+        table_head.appendChild(setTableRows(h_row, "th", keys));
+
         d3.select("#tbody").html(""); // table is emptied before being filled
 
-        for (i=0; i<filtered_json.length; i++) {
+        filtered_json.forEach(function(d) {
             // if (applyFilter(json_data[i][filter_key])) { continue; }
                 // if the current value of the filter column chosen by theuser
                 // falls within the filter range, then the loop skips the following 
-            var row = document.createElement("tr");
-            for (j=0; j<keys_len; j++) {
-                var col = document.createElement("td");
-                col.appendChild(document.createTextNode(filtered_json[i][keys[j]]));
-                // if (j==0) { col.addEventListener('click', chooseModule); }
-                row.appendChild(col);
-            }
-        table.appendChild(row);
-        }
+            var b_row = document.createElement("tr");
+            table_body.appendChild(setTableRows(b_row, "td", d));
+        })
+
         createGraph(filtered_json);
     }  
 
