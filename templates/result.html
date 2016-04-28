@@ -50,7 +50,7 @@
 <br>
 <center>
 <div class="col-md-10" style="float:none">
-    <table class="table" align="center">
+    <table class="table">
         <thead>
         <tr>
             {% for key in keys|fromjson %}
@@ -151,7 +151,8 @@
     }
 
     // graph dimensions
-    var w = 1000;
+    var w;
+    var width;
     var margin = {top: 20, left: 50, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
     var padding = 1;
@@ -167,7 +168,8 @@
 
         if (data.length > 50) { w = data.length * 20; }
         else if (data.length < 10) { w = data.length * 100; }
-        var width = w - margin.left - margin.right;
+        else { w = 1000; }
+        width = w - margin.left - margin.right;
 
     ///////////////////////////// B A R  G R A P H ///////////////////////////////
         // var type = json_data[keys[0]];
