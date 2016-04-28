@@ -40,9 +40,15 @@
 </button> -->
 <center>
 <form id="filter" style="font-size:15px">
-    Column: <input type="text" name="key">
-    From: <input type="text" name="start">
-    To: <input type="text" name="end">
+    Column: {% for key in keys|fromjson %}
+                {% if key != (keys|fromjson)[0] %}
+                <input type="radio" name="key" value={{ key }}> {{ key }} 
+                {% endif %}
+            {% endfor %} 
+    &nbsp;&nbsp;&nbsp;
+    From: <input type="text" name="start" style="width:40px">
+    To: <input type="text" name="end" style="width:40px">
+    &nbsp;&nbsp;&nbsp;
     <input type="button" value="Filter" onclick="setFilter()">
 </form>
 </center>
