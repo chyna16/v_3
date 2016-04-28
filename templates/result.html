@@ -34,10 +34,7 @@
 </center>
 <br>
 <br>
-<!-- <button style="float:left" class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button> -->
-<!-- <button style="float:left" type="button" class="btn btn-info" name="wrapperBar"
-        onclick="toggleGraph(this)">Bar Graph
-</button> -->
+
 <center>
 <form id="filter" style="font-size:15px">
     Column: {% for key in keys|fromjson %}
@@ -74,7 +71,7 @@
     var filter_key = "blank"; // if left "blank" then filter will not apply
     var filter_start;
     var filter_end;
-    var filtered_json;
+    var filtered_json; // to be used as a filtered copy of json_data
 
     // called when user selects a column to filter by, and selects range
     // reads user entries and sets variables accordingly
@@ -90,7 +87,7 @@
         for (i=0; i<keys_len; i++) { if (filter_key == keys[i]) { createTable(); } }
     }
 
-    // called by both createTable and createGraph
+    // called by createTable
     // checks to see if the passed in value falls within the range of the filter
     // returns true if filter should be applied on said value, false if not
     function applyFilter(filter_value) {
@@ -107,25 +104,20 @@
         for (i=0; i<keys_len; i++) {
             var col = document.createElement(elem_id);
 
-            if (i == 0) {
-                col.style.width = "40%";
-            }
-            else {
-                col.style.width = (60 / (keys_len-1)) + "%";
-            }
+            if (i == 0) { col.style.width = "40%"; }
+            else { col.style.width = (60 / (keys_len-1)) + "%"; }
 
             col.style.overflow = "hidden";
             col.style.fontSize = "15px";
             col.onmouseover = function() { this.style.overflow = "visible"; }
             col.onmouseout = function() { this.style.overflow = "hidden"; }
-            // col.style.backgroundColor = "white";
+            // col.style.backgroundColor = "white"; INTERFERES W/ OVERFLOW
 
-            if (data == keys) { 
-                col.setAttribute('value', data[i]);
+            if (data == keys) {
                 if (i != 0) { col.setAttribute('onClick', 'chooseColumn(this)'); }
+                col.setAttribute('value', data[i]);
                 col.appendChild(document.createTextNode(data[i])); 
-            }
-            else { col.appendChild(document.createTextNode(data[keys[i]])); }
+            } else { col.appendChild(document.createTextNode(data[keys[i]])); }
 
             row.appendChild(col);
         }
@@ -139,6 +131,8 @@
         filtered_json = [];
 
         json_data.forEach(function (d) {
+            // if the current value of the filter column chosen by theuser
+            // falls within the filter range, then the loop skips the following
             if (applyFilter(+d[filter_key]) != true) {
                 filtered_json.push(d);
             }
@@ -149,10 +143,7 @@
 
         d3.select("#tbody").html(""); // table is emptied before being filled
 
-        filtered_json.forEach(function(d) {
-            // if (applyFilter(json_data[i][filter_key])) { continue; }
-                // if the current value of the filter column chosen by theuser
-                // falls within the filter range, then the loop skips the following 
+        filtered_json.forEach(function(d) { 
             var b_row = document.createElement("tr");
             table_body.appendChild(setTableRows(b_row, "td", d));
         })
@@ -200,8 +191,6 @@
         width = w - margin.left - margin.right;
 
     ///////////////////////////// B A R  G R A P H ///////////////////////////////
-        // var type = json_data[keys[0]];
-        // var vlength = values.length;
         if (chosen_key == 'default') {
             // if no column was specified, the data from all value columns is used 
             var labels = d3.keys(json_data[0]).filter(function(key) 
@@ -213,21 +202,11 @@
                 { return key == chosen_key; });
         }
 
-
         data.forEach(function(d, i) {
-            // console.log(i);
-            // console.log(+d[filter_key]);
             delete d.values;
-            // if (applyFilter(+d[filter_key]) != true) {
-                d.values = labels.map(function(label) {
-                    // console.log(label);
-                    // console.log(d[label]);
-                    return {type: label, value: +d[label]};
-                });
-            // }
-            // else { d.values = {type: "", value: ""}; }
-            console.log(d.values);
-            console.log(d);
+            d.values = labels.map(function(label) {
+                return {type: label, value: +d[label]};
+            });
         });
 
         // var xScale = d3.scale.ordinal()
@@ -250,11 +229,7 @@
         //         .orient("left")
         //         .ticks(values.length);
 
-        x0Scale.domain(data.map(function(d) { 
-            // if (applyFilter(+d[filter_key]) != true) {
-                return d[keys[0]];
-            // }
-        }));
+        x0Scale.domain(data.map(function(d) { return d[keys[0]]; }));
         x1Scale.domain(labels).rangeBands([0, x0Scale.rangeBand()]);
 
         var canvas = d3.select("#wrapperBar")
@@ -263,9 +238,6 @@
                 .attr("height", height + margin.top + margin.bottom)
             .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        
-        // if (labels.length == 1) { var cat_shift = 0; } // used for shifting of single bars
-        // else { var cat_shift = x1Scale.rangeBand() / 2; } // used for shifting of grouped bars
 
         var category = canvas.selectAll(".category")
                 .data(data)
@@ -278,43 +250,45 @@
                 .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
                 .enter()
             .append("rect")
-                .attr("height", function(d) { /*console.log(d); console.log(d.value);*/ return height - yScale(d.value); })
+                .attr("height", function(d) { return height - yScale(d.value); })
                 .attr("width", x1Scale.rangeBand())
                 .attr("x", function(d) { return x1Scale(d.type); })
                 .attr("y", function(d) { return yScale(d.value); })
                 .style("fill", function(d) { return color(d.type); });
 
-        // var bar = canvas.selectAll("rect")
-        //         .data(values)
-        //         .enter()
-        //     .append("rect")
-        //         .attr("height", function (d) {
-        //             return height - yScale(d);
-        //         })
-        //         .attr("width", width / vlength - padding)
-        //         .attr("x", function (d, i) {
-        //             return i * (width / vlength)
-        //         })
-        //         .attr("y", function (d) {
-        //             return height - (height - yScale(d))
-        //         });
+        /* var bar = canvas.selectAll("rect")
+                .data(values)
+                .enter()
+                .append("rect")
+                .attr("height", function (d) {
+                    return height - yScale(d);
+                })
+                .attr("width", width / vlength - padding)
+                .attr("x", function (d, i) {
+                    return i * (width / vlength)
+                })
+                .attr("y", function (d) {
+                    return height - (height - yScale(d))
+                });
+        */
 
-        // canvas.selectAll("text")
-        //         .data(values)
-        //         .enter()
-        //         .append("text")
-        //         .attr("fill", "steelblue")
-        //         .style("font-size", ".7em")
-        //         .attr("x", function (d, i) {
-        //             return i * (width / vlength) + (width / vlength) / 2
-        //         })
-        //         .attr("y", function (d) {
-        //             return height - (height - yScale(d)) - 5
-        //         })
-        //         .text(function (d) {
-        //             return d;
-        //         })
-        //         .style("text-anchor", "middle");
+        /* canvas.selectAll("text")
+                .data(values)
+                .enter()
+                .append("text")
+                .attr("fill", "steelblue")
+                .style("font-size", ".7em")
+                .attr("x", function (d, i) {
+                    return i * (width / vlength) + (width / vlength) / 2
+                })
+                .attr("y", function (d) {
+                    return height - (height - yScale(d)) - 5
+                })
+                .text(function (d) {
+                    return d;
+                })
+                .style("text-anchor", "middle");
+        */
 
         canvas.append("g")
                 .attr('class', 'x axis')
