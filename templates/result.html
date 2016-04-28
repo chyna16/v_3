@@ -17,6 +17,7 @@
         <nav>
             <ul class="nav nav-pills pull-right">
                 <li role="presentation"><a href="#">Home</a></li>
+                <li role="presentation"><a onclick="goBack()">Previous</a></li>
                 <li role="presentation"><a href="about.html">About</a></li>
                 <li role="presentation"><a href="#">Contact</a></li>
             </ul>
@@ -25,17 +26,30 @@
     </div>
 </nav>
 
-<h1>Results for {{repo_name}} repository</h1>
-<h2> From {{date_after}} to {{date_before }}<h2>
+<h1>Results for "{{repo_name}}" Repository</h1>
+<h2> From {{date_after}} to {{date_before }}</h2>
 
 <center>
     <div id="wrapperBar" style="display: block; width: 1000px; overflow-x: scroll;"></div>
-    <!-- <div id="wrapperPie" style="display: none;"></div>
-    <div id="wrapperScatter" style="display: none;"></div> -->
 </center>
-
-<h3> Table </h3>
-<div class="col-md-8">
+<br>
+<br>
+<!-- <button style="float:left" class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button> -->
+<!-- <button style="float:left" type="button" class="btn btn-info" name="wrapperBar"
+        onclick="toggleGraph(this)">Bar Graph
+</button> -->
+<center>
+<form id="filter" style="font-size:15px">
+    Column: <input type="text" name="key">
+    From: <input type="text" name="start">
+    To: <input type="text" name="end">
+    <input type="button" value="Filter" onclick="setFilter()">
+</form>
+</center>
+<br>
+<br>
+<center>
+<div class="col-md-10" style="float:none">
     <table class="table" align="center">
         <thead>
         <tr>
@@ -47,26 +61,7 @@
         <tbody id="tbody"></tbody>
     </table>
 </div>
-<p>
-    <button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button>
-</p>
-
-<button type="button" class="btn btn-info" data-target="#wrapperBar" name="wrapperBar"
-        onclick="toggleGraph(this)">Bar Graph
-</button>
-<button type="button" class="btn btn-info" data-target="#wrapperPie" name="wrapperPie"
-        onclick="toggleGraph(this)">Pie Chart
-</button>
-<button type="button" class="btn btn-info" data-target="#wrapperScatter" name="wrapperScatter"
-        onclick="toggleGraph(this)">Scatter Plot
-</button>
-
-<form id="filter" action="form_action.asp">
-    Column: <input type="text" name="key"><br>
-    From: <input type="text" name="start"><br>
-    To: <input type="text" name="end"><br>
-    <input type="button" value="Filter" onclick="setFilter()">
-</form> 
+</center>
 
 <script>
     var keys = {{keys|safe}}; // an array of the data type in original order
