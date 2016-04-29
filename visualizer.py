@@ -16,38 +16,44 @@ app.secret_key = secret
 @app.route('/index', methods=['GET', 'POST'])
 def index():
 	generator.clone_url = ""
-	generator.password = ""
+	# generator.password = ""
 	generator.repo_name = ""
 	if request.method == 'GET':
 		folder_select = []
 		for folder_name in generator.folder_list:
 			folder_select.append(folder_name)  # fills array with names of csv files in current directory
 		return render_template('index.html', folder_select=folder_select)  # returns array of csv filenames to webpage
-	elif request.method == 'POST' and not request.form['clone_url'] == "":
+	elif request.method == 'POST': 
+		if not request.form['clone_url'] == "" and request.form['folder_name'] == "":
 			generator.clone_url = request.form['clone_url']
 			generator.password = request.form['password']
 			generator.submit_url()
 			flash('Cloning Complete.')
 			return redirect(url_for('index'))
-	elif request.method == 'POST' and not request.form['folder_name'] == "": 
-			select_folder()
-			return redirect(url_for('dashboard'))
+		elif not request.form['folder_name'] == "" and request.form['clone_url'] == "":
+			selected_repo = request.form['folder_name']
+			if selected_repo == "projects":
+				print("Going to index_project")
+				return redirect(url_for('index_project'))
+			else:
+				select_folder(selected_repo)
+				return redirect(url_for('dashboard'))
 
 	
 @app.route('/index_project', methods=['GET', 'POST'])
 def index_project():
 	generator.clone_url = ""
-	generator.password = ""
+	# generator.password = ""
 	generator.repo_name = ""
 	project_select = generator.project_key
 	if request.method == 'GET':
 		return render_template('index_project.html', project_select=project_select)  # returns array of csv filenames to webpage
-	elif request.method == 'POST' and not request.form['clone_url'] == "":
-			generator.clone_url = request.form['clone_url']
-			generator.password = request.form['password']
-			generator.submit_url()
-			flash('Cloning complete.')
-			return redirect(url_for('index_project'))
+	# elif request.method == 'POST' and not request.form['clone_url'] == "":
+	# 		generator.clone_url = request.form['clone_url']
+	# 		generator.password = request.form['password']
+	# 		generator.submit_url()
+	# 		flash('Cloning complete.')
+	# 		return redirect(url_for('index_project'))
 	elif request.method == 'POST' and not request.form['project_name'] == "":
 		generator.selected_key = (request.form['project_name'])
 		print(request.form['project_name'])
@@ -63,18 +69,21 @@ def index_project():
 @app.route('/index_repo', methods=['GET', 'POST'])
 def index_repo():
 	generator.clone_url = ""
-	generator.password = ""
+	# generator.password = ""
 	generator.repo_name = ""
 	if request.method == 'GET':
 		return render_template('index_repo.html', repo_select=generator.project_repo_name, repo_url=generator.project_repo_list)  # returns array of csv filenames to webpage
-	elif request.method == 'POST' and not request.form['clone_url'] == "":
-			generator.clone_url = request.form['clone_url']
-			generator.password = request.form['password']
-			generator.submit_url()
-			flash('Cloning Complete.')
-			return redirect(url_for('index'))
+	# elif request.method == 'POST' and not request.form['clone_url'] == "":
+	# 		generator.clone_url = request.form['clone_url']
+	# 		generator.password = request.form['password']
+	# 		generator.submit_url()
+	# 		flash('Cloning Complete.')
+	# 		return redirect(url_for('index'))
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 			# temporary redirect
+			selected_repo = request.form['repo_name']
+			generator.clone_url = selected_repo
+			generator.submit_url()
 			return redirect(url_for('index'))
 
 
@@ -123,10 +132,10 @@ def bad_request(e):
 	return render_template ('400.html')
 
 
-def select_folder():
+def select_folder(repo):
 	global root_dir
 	print (request.form['folder_name'])
-	generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
+	generator.repo_name = repo  # gets name of repository that was selected by the user on webpage
 	# print (generator.repo_name)
 	generator.set_path(generator.repo_name)
 	generator.date_after = request.form['date_after']

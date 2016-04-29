@@ -16,12 +16,12 @@ repo_name = ""
 # once a date is selected on the home page, this variable is used
 date_after = ""
 date_before = ""
-password = ""
+password = "password"
 clone_url = ""
 # project_list = stash_api.project_list
 project_key = stash_api.project_key
 selected_key = ""
-repo_list = ""
+# repo_list = ""
 
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
@@ -120,7 +120,7 @@ def submit_url():
 # reads each column from file into an array and returns the arrays
 def parse_csv(uploaded_file):
 	reader = csv.reader(uploaded_file)
-	
+
 	# data_dict = {}
 	# key_array = []
 	# row_array = []
@@ -151,8 +151,6 @@ def parse_csv(uploaded_file):
 				row_array[key] = row[j]
 			data_dict.append(row_array)
 
-	print(data_dict);
-			
 	return (data_dict, key_array)
 
 
