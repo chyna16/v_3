@@ -117,11 +117,36 @@
                 if (i != 0) { col.setAttribute('onClick', 'chooseColumn(this)'); }
                 col.setAttribute('value', data[i]);
                 col.appendChild(document.createTextNode(data[i])); 
-            } else { col.appendChild(document.createTextNode(data[keys[i]])); }
+            } 
+            else { 
+                if (i == 0) { col.setAttribute('onClick', 'chooseModule(this)'); }
+                col.setAttribute('value', data[keys[i]]);
+                col.appendChild(document.createTextNode(data[keys[i]])); 
+            }
 
             row.appendChild(col);
         }
         return row;
+    }
+
+    function chooseModule(elem) {
+        var chosen_module = elem.getAttribute('value');
+
+        coupled_data = [];
+
+        filtered_json.forEach(function(d) {
+            if (d[keys[0]] == chosen_module) {
+                var temp_obj = {};
+                keys.forEach(function(k, i) {
+                    if (i != 0) { temp_obj[k] = d[k]; }
+                })
+                console.log(temp_obj);
+                coupled_data.push(temp_obj);
+            }
+        });
+
+        console.log(coupled_data);
+        createGraph(coupled_data);
     }
 
     function filterData() {
@@ -144,16 +169,6 @@
     table_head.appendChild(setTableRows(h_row, "th", keys));
     var table_body = document.getElementById("tbody");
     function createTable() {
-        // filtered_json = [];
-
-        // json_data.forEach(function (d) {
-        //     // if the current value of the filter column chosen by theuser
-        //     // falls within the filter range, then the loop skips the following
-        //     if (applyFilter(+d[filter_key]) != true) {
-        //         filtered_json.push(d);
-        //     }
-        // });
-
         d3.select("#tbody").html(""); // table is emptied before being filled
 
         filtered_json.forEach(function(d) { 
@@ -206,12 +221,12 @@
     ///////////////////////////// B A R  G R A P H ///////////////////////////////
         if (chosen_key == 'default') {
             // if no column was specified, the data from all value columns is used 
-            var labels = d3.keys(json_data[0]).filter(function(key) 
-                { return key !== keys[0] && key !== 'values'; }); 
+            var labels = d3.keys(data[0]).filter(function(key) 
+                { return key !== keys[0] && key !== 'values' && key !== 'coupled'; }); 
         }
         else {
             // if a column was specified, only the data from that column is used
-            var labels = d3.keys(json_data[0]).filter(function(key) 
+            var labels = d3.keys(data[0]).filter(function(key) 
                 { return key == chosen_key; });
         }
 
@@ -242,7 +257,10 @@
         //         .orient("left")
         //         .ticks(values.length);
 
-        x0Scale.domain(data.map(function(d) { return d[keys[0]]; }));
+        if (keys[1] == 'coupled') { var domain_key = keys[1]; }
+        else { var domain_key = keys[0]; }
+
+        x0Scale.domain(data.map(function(d) { return d[domain_key]; }));
         x1Scale.domain(labels).rangeBands([0, x0Scale.rangeBand()]);
 
         var canvas = d3.select("#wrapperBar")
@@ -257,7 +275,7 @@
                 .enter()
             .append("g")
                 .attr("class", "category")
-                .attr("transform", function(d) { return "translate("+ x0Scale(d[keys[0]]) + ",0)"; });
+                .attr("transform", function(d) { return "translate("+ x0Scale(d[domain_key]) + ",0)"; });
 
         var bar = category.selectAll("rect")
                 .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
