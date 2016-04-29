@@ -200,7 +200,7 @@
     // graph dimensions
     var w;
     var width;
-    var margin = {top: 20, left: 50, right: 20, bottom: 130};
+    var margin = {top: 20, left: 70, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
     var padding = 1;
 
@@ -252,10 +252,9 @@
         var xAxis = d3.svg.axis()
                 .scale(x0Scale)
                 .orient("bottom");
-        // var yAxis = d3.svg.axis()
-        //         .scale(yScale)
-        //         .orient("left")
-        //         .ticks(values.length);
+        var yAxis = d3.svg.axis()
+                .scale(yScale)
+                .orient("left");
 
         if (keys[1] == 'coupled') { var domain_key = keys[1]; }
         else { var domain_key = keys[0]; }
@@ -322,15 +321,26 @@
         */
 
         canvas.append("g")
-                .attr('class', 'x axis')
+                .attr('class', 'axis')
                 .attr('transform', 'translate(0,' + (height) + ')')
                 .call(xAxis)
                 .selectAll("text")  
                 .style("text-anchor", "end")
                 .attr("dx", "-1em")
+                .attr("dy", ".05em")
+                .attr("transform", function(d) { return "rotate(-55)" })
+                .style("font-size", ".7em")
+                .attr("fill", "steelblue");
+
+        canvas.append("g")
+                .attr('class', 'axis')
+                .attr('transform', 'translate(0, 0)')
+                .call(yAxis)
+                .selectAll("text")  
+                .style("text-anchor", "end")
+                .attr("dx", "-1em")
                 .attr("dy", ".15em")
-                .attr("transform", function(d) { return "rotate(-65)" })
-                .style("font-size", ".6em")
+                .style("font-size", ".8em")
                 .attr("fill", "steelblue");
     }
 
