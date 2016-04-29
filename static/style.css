@@ -4,11 +4,11 @@ body{
   font-size: 20px;
 }
 
-/* Scroll feature acquired from:
+/* scroll feature acquired from:
  * http://stackoverflow.com/questions/21168521/scrollable-table-with-fixed-header-in-bootstrap
  */
 table {
-  width: 100%;
+  width: 1000px;
 }
 thead, tbody, tr, td, th { display: block; }
 tr:after {
@@ -25,22 +25,24 @@ tbody {
     overflow-y: auto;
 }
 tbody td, thead th {
-    width: 33%;
     float: left;
 } 
 /* end scroll feature */
 
+/* axes styling retrieved from:
+ * http://alignedleft.com/tutorials/d3/axes
+ */
 .axis path,
 .axis line {
   fill: none;
   stroke: black;
   shape-rendering: crispEdges;
 }
-
 .axis text {
   font-family: sans-serif;
   font-size: 11px;
 }
+/* end axes styling */
 
 h2 {
   text-align: center;
