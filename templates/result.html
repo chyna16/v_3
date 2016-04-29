@@ -17,7 +17,7 @@
         <nav>
             <ul class="nav nav-pills pull-right">
                 <li role="presentation"><a href="#">Home</a></li>
-                <li role="presentation"><a onclick="goBack()">Previous</a></li>
+                <li role="presentation"><a href="#" onclick="goBack()">Previous</a></li>
                 <li role="presentation"><a href="about.html">About</a></li>
                 <li role="presentation"><a href="#">Contact</a></li>
             </ul>
@@ -27,7 +27,12 @@
 </nav>
 
 <h1>Results for "{{repo_name}}" Repository</h1>
-<h2> From {{date_after}} to {{date_before }}</h2>
+<h2> 
+    From {% if date_after == "" %} Beginning {% endif %}
+         {% else %} {{date_after}} {% endelse %}
+    to   {% if date_before == "" %} Present {% endif %}
+         {% else %} {{date_before}} {% endelse %}
+</h2>
 
 <center>
     <div id="wrapperBar" style="display: block; width: 1000px; overflow-x: scroll;"></div>
