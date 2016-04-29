@@ -18,7 +18,11 @@ date_after = ""
 date_before = ""
 password = ""
 clone_url = ""
-project_list = stash_api.project_list
+# project_list = stash_api.project_list
+project_key = stash_api.project_key
+selected_key = ""
+repo_list = ""
+
 # this returns only files of this type to the dashboard function to display.
 file_type = '*.csv'
 
@@ -29,7 +33,6 @@ def set_path(repo_name):
 	os.environ['PATH'] += os.pathsep + maat_dir
 	print("Done.")
 	print("-" * 60)
-	# need to create an exception if csv_files folder already exists
 	# global owd
 	# owd = os.getcwd()
 
@@ -66,8 +69,6 @@ def generate_data(address):
 	print("Creating csv files from generated log...")
 	time.sleep(1)
 	print("Creating repository summary...")
-	# currently running codemaat via 'maat.bat' on windows creates extra lines of code in the csv files,
-	# causing them to break when requested from the site
 	print("maat -l logfile_" + repo_name + "_" + date_after + "_" 
 		+ date_before + ".log -c git -a summary > summary_" + repo_name 
 		+ ".csv")
@@ -85,15 +86,26 @@ def generate_data(address):
 	# 	+ ".csv")
 	# # Reports correlation of files that often commit together
 	# # degree = % of commits where the two files were changed in the same commit
-	# print("Creating code age summary...")
-	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-	# 	+ date_before + ".log -c git -a entity-churn > age_" + repo_name 
-	# 	+ ".csv")
+	print("Creating code age summary...")
+	os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
+		+ date_before + ".log -c git -a entity-churn > age_" + repo_name 
+		+ ".csv")
 	# Reports how long ago the last change was made in measurement of months
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 	os.chdir("..")
 
+def get_project_key(selected_key):
+	global project_repo_list
+	global project_repo_name
+	# this applies the project selected to the relevant function in stash.api 
+	stash_api.get_project_repo_url(selected_key)
+	stash_api.get_project_repo_name(selected_key)
+	# the names of repositories in the selected project is set to this variable
+	# in a list format
+	project_repo_name = stash_api.project_repo_name
+	project_repo_list = stash_api.repo_list
+	print (project_repo_name)
 
 def submit_url():
 	char = clone_url.index('@')
@@ -145,5 +157,6 @@ def parse_csv(uploaded_file):
 
 
 if __name__ == '__main__':
-	print (folder_list)
-	print (project_list)
+	# print (folder_list)
+	# print (project_list)
+	print(project_key)
