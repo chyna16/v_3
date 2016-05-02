@@ -3,10 +3,11 @@ from requests.auth import HTTPBasicAuth
 from json import load 
 import json
 import codecs
+import settings
 
 
 url_projects = 'https://stash.mtvi.com/rest/api/1.0/projects' 
-projects = requests.get(url=url_projects, auth=('username', 'password'))
+projects = requests.get(url=url_projects, auth=(settings.username, settings.password))
 
 # reader = codecs.getreader("utf-8")	
 json_projects = json.loads(projects.text)
@@ -37,7 +38,7 @@ def get_details():
 def get_project_repos(selected_key):
 	url_repos = 'https://stash.mtvi.com/rest/api/1.0/projects/' + selected_key + '/repos'
 
-	repos = requests.get(url=url_repos, auth=('username', 'password'))
+	repos = requests.get(url=url_repos, auth=(settings.username, settings.password))
 
 	repos_dict = []
 

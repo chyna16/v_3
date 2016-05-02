@@ -12,8 +12,8 @@ app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
 
-maat_dir = settings.t_maat_directory
-repo_dir = settings.t_repo_directory
+maat_dir = settings.maat_directory
+repo_dir = settings.repo_directory
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -23,31 +23,32 @@ def index():
 		repo_list = [ item for item in os.listdir(repo_dir) if os.path.isdir(os.path.join(repo_dir, item)) ]
 		return render_template('index.html', repo_list=repo_list)  # returns array of csv filenames to webpage
 	elif request.method == 'POST':
-		clone_url = request.form['clone_url']
-		password = request.form['password']
-		selected_repo = request.form['repo_name']
-		from_date = request.form['from_date']
-		to_date = request.form['to_date']
+		session['clone_url'] = request.form['clone_url']
+		session['password'] = request.form['password']
+		session['repo_name'] = request.form['repo_name']
+		session['from_date'] = request.form['from_date']
+		session['to_date'] = request.form['to_date']
 
-		print("1")
-		if not clone_url == "" and selected_repo == "":
-			print("2.1")
+		clone_url = session['clone_url']
+		password = session['password']
+		repo_name = session['repo_name']
+		from_date = session['from_date']
+		to_date = session['to_date']
+
+		print(from_date)
+		print(to_date)
+
+		if not session['clone_url'] == "" and session['repo_name'] == "":
 			generator.submit_url(clone_url, password)
 			flash('Cloning Complete.')
 			return redirect(url_for('index'))
-		elif not selected_repo == "":
-			print("2.2")
-			if selected_repo == "projects":
-				print("3.1")
+		elif not session['repo_name'] == "":
+			if session['repo_name'] == "projects":
 				print("Going to index_project")
 				return redirect(url_for('index_project'))
 			else:
-				print("3.2")
-				root_dir = select_folder(selected_repo, from_date, to_date)
-				return redirect(url_for('dashboard', 
-					root_dir=root_dir, 
-					selected_repo=selected_repo, 
-					from_date=from_date, to_date=to_date))
+				session['root_dir'] = select_folder(repo_name, from_date, to_date)
+				return redirect(url_for('dashboard'))
 
 	
 @app.route('/index_project', methods=['GET', 'POST'])
@@ -57,29 +58,28 @@ def index_project():
 	if request.method == 'GET':
 		return render_template('index_project.html', list_of_projects=list_of_projects)  
 	elif request.method == 'POST' and not request.form['project_name'] == "":
-		selected_project = request.form['project_name']
-		return redirect(url_for('index_repo', selected_project=selected_project))
+		session['project_name'] = request.form['project_name']
+		return redirect(url_for('index_repo'))
 
 
 @app.route('/index_repo', methods=['GET', 'POST'])
 def index_repo():
-	project = request.args.get('selected_project')
-	project_repos = stash_api.get_project_repos(project)
+	project_repos = stash_api.get_project_repos(session['project_name'])
 
 	if request.method == 'GET':
 		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
-			selected_repo = request.form['repo_name']
-			generator.submit_url(selected_repo, 'password')
-			return redirect(url_for('index'))
+		selected_repo = request.form['repo_name']
+		generator.submit_url(selected_repo, settings.password)
+		return redirect(url_for('index'))
 
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-	root_dir = request.args.get('root_dir')
-	repo_name = request.args.get('selected_repo')
-	from_date = request.args.get('from_date')
-	to_date = request.args.get('to_date')
+	root_dir = session['root_dir']
+	repo_name = session['repo_name']
+	from_date = session['from_date']
+	to_date = session['to_date']
 
 	if request.method == 'GET':
 		csv_list = []
@@ -91,19 +91,16 @@ def dashboard():
 	# when user selects a repo, the following runs codemaat and generates a csv file
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
-		csv_name = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
-		return redirect(url_for('result', 
-			csv_name=csv_name, 
-			repo_name=repo_name, 
-			from_date=from_date, to_date=to_date))
+		session['csv_name'] = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
+		return redirect(url_for('result'))
 
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	csv_name = request.args.get('csv_name')
-	repo_name = request.args.get('repo_name')
-	from_date = request.args.get('from_date')
-	to_date = request.args.get('to_date')
+	csv_name = session['csv_name']
+	repo_name = session['repo_name']
+	from_date = session['from_date']
+	to_date = session['to_date']
 
 	with open("csv_files_" 
 			+ repo_name + "_" 
