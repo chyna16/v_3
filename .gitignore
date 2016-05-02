@@ -83,6 +83,8 @@ celerybeat-schedule
 
 # v3 project files
 settings.py
+tests/settings.py
+
 
 # virtualenv
 venv/
