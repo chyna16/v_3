@@ -12,15 +12,12 @@ folder_list = [ item for item in os.listdir(repo_list) if os.path.isdir(os.path.
 
 
 # repo_name is used for later functions once a repository is selected from the home page
-repo_name = ""
+# repo_name = ""
 # once a date is selected on the home page, this variable is used
-date_after = ""
-date_before = ""
-password = "password"
-clone_url = ""
+# date_after = ""
+# date_before = ""
 # project_list = stash_api.project_list
-project_key = stash_api.project_key
-selected_key = ""
+project_keys = stash_api.get_project_keys()
 # repo_list = ""
 
 # this returns only files of this type to the dashboard function to display.
@@ -37,7 +34,7 @@ def set_path(repo_name):
 	# owd = os.getcwd()
 
 
-def create_log(address):
+def create_log(repo_name, date_after, date_before, address):
 	sys_command = "" # resets to blank
 
 	# first part of command same for any date specification
@@ -58,12 +55,12 @@ def create_log(address):
 	os.system(sys_command) # command line call using the updated string
 
 
-def generate_data(address):
+def generate_data(repo_name, date_after, date_before, address):
 	# creates folder for the root_dir variable if none exists
 	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
 	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
 	print("Obtaining repository logs...")
-	create_log(address)
+	create_log(repo_name, date_after, date_before, address)
 	print("Done.")
 	print("-" * 60)
 	print("Creating csv files from generated log...")
@@ -95,19 +92,18 @@ def generate_data(address):
 	print("-" * 60)
 	os.chdir("..")
 
-def get_project_key(selected_key):
-	global project_repo_list
-	global project_repo_name
+def get_project_key(selected_project):
 	# this applies the project selected to the relevant function in stash.api 
-	stash_api.get_project_repo_url(selected_key)
-	stash_api.get_project_repo_name(selected_key)
+	
+	
 	# the names of repositories in the selected project is set to this variable
 	# in a list format
-	project_repo_name = stash_api.project_repo_name
-	project_repo_list = stash_api.repo_list
+	project_repo_name = stash_api.get_project_repo_name(selected_project)
+	project_repo_list = stash_api.get_project_repo_url(selected_project)
 	print (project_repo_name)
+	return (project_repo_name, project_repo_list)
 
-def submit_url():
+def submit_url(clone_url, password):
 	char = clone_url.index('@')
 	os.chdir('..')
 	command = clone_url[:char] + ':' + password + clone_url[char:]
