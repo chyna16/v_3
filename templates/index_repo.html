@@ -75,11 +75,8 @@
     <div class="btn-group btn-group-vertical" data-toggle="buttons">
     {% for repo_name in repo_list %}
       <label class="btn active">
-      {% for clone_url in repo_urls %}
-      <!-- address value is getting every value per button, need to fix -->
-        <input type="radio" name="repo_name" value={{clone_url}} autocomplete="off">
-      {% endfor %}
-      {{repo_name}}
+        <input type="radio" name="repo_name" value={{repo_name['url']}} autocomplete="off">
+      {{repo_name['name']}}
       </label>
     {% endfor %}
     <!-- <input name="folder_name">hdhd</input> -->
