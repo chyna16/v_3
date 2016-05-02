@@ -2,18 +2,9 @@ import csv
 import os
 import time
 import fnmatch
-import settings
-import stash_api
-
-maat_dir = settings.f_maat_directory
-repo_dir = settings.f_repo_directory
-
-folder_list = [ item for item in os.listdir(repo_dir) if os.path.isdir(os.path.join(repo_dir, item)) ]
-
-project_keys = stash_api.get_project_keys()
 
 
-def set_path():
+def set_path(maat_dir):
 	print("Setting a path for codemaat...")
 	# path is set temporarily, per script run
 	os.environ['PATH'] += os.pathsep + maat_dir
@@ -78,13 +69,6 @@ def generate_data(address, repo_name, date_after, date_before):
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 	os.chdir("..")
-
-
-def get_project_repos(selected_project):
-	project_repo_name = stash_api.get_project_repo_name(selected_project)
-	project_repo_list = stash_api.get_project_repo_url(selected_project)
-	print (project_repo_name)
-	return (project_repo_name, project_repo_list)
 
 
 def submit_url(clone_url, password):
