@@ -12,15 +12,11 @@ projects = requests.get(url=url_projects, auth=('username', 'password'))
 json_projects = json.loads(projects.text)
 
 
-def get_project_names():
-	project_list = []
-	for projects in json_projects['values']:
-		project_list.append(projects['name'])
-
-
-def get_project_keys():
+def get_projects():
+	# project_names_list = []
 	project_keys_list = []
 	for project in json_projects['values']:
+		# project_names_list.append(project['name'])
 		project_keys_list.append(project['key'])
 
 	return project_keys_list
@@ -38,32 +34,24 @@ def get_details():
 		print ("-" * 60)
 
 
-def get_project_repo_name(selected_key):
+def get_project_repos(selected_key):
 	url_repos = 'https://stash.mtvi.com/rest/api/1.0/projects/' + selected_key + '/repos'
 
 	repos = requests.get(url=url_repos, auth=('username', 'password'))
 
-	project_repo_names = []
+	repos_dict = []
+
 	json_repos = json.loads(repos.text)	
-	for repo_names in json_repos['values']:
-		project_repo_names.append(repo_names['name'])
-
-	return project_repo_names
-
-
-def get_project_repo_url(selected_key):
-	url_repos = 'https://stash.mtvi.com/rest/api/1.0/projects/' + selected_key + '/repos'
-
-	repos = requests.get(url=url_repos, auth=('username', 'password'))
-
-	project_repo_urls = []
-	json_repos = json.loads(repos.text)
-	for repo in json_repos['values']:
-		for link in repo['links']['clone']:
+	for repo_name in json_repos['values']:
+		# project_repo_names.append(repo_name['name'])
+		for link in repo_name['links']['clone']:
 			if link['name'] == "http":
-				project_repo_urls.append(link['href'])
+				# project_repo_urls.append(link['href'])
+				repos_dict.append({'name': repo_name['name'], 'url': link['href']})
 
-	return project_repo_urls
+	return (repos_dict)
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+	get_project_repos('ARC')
+
