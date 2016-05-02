@@ -73,11 +73,11 @@
     <div class="col-lg-6">
       <h2>Select a Repository:</h2>
     <div class="btn-group btn-group-vertical" data-toggle="buttons">
-    {% for repo_name in repo_select %}
+    {% for repo_name in repo_list %}
       <label class="btn active">
-      {% for address in repo_url %}
+      {% for clone_url in repo_urls %}
       <!-- address value is getting every value per button, need to fix -->
-        <input type="radio" name="repo_name" value={{address}} autocomplete="off">
+        <input type="radio" name="repo_name" value={{clone_url}} autocomplete="off">
       {% endfor %}
       {{repo_name}}
       </label>

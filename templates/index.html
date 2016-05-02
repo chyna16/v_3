@@ -73,9 +73,9 @@
     <div class="col-lg-6">
       <h2>Select a Repository:</h2>
     <div class="btn-group btn-group-vertical" data-toggle="buttons">
-    {% for folder in folder_select %}
+    {% for repo in repo_list %}
       <label class="btn active">
-        <input type="radio" name="folder_name" value={{folder}} autocomplete="off">{{folder}}
+        <input type="radio" name="repo_name" value={{repo}} autocomplete="off">{{repo}}
       </label>
     {% endfor %}
     <!-- <input name="folder_name">hdhd</input> -->
@@ -83,7 +83,7 @@
         <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
       </label>
       <label class="btn active">
-        <input type="radio" name="folder_name" value="projects" autocomplete="off">Select a Project
+        <input type="radio" name="repo_name" value="projects" autocomplete="off">Select a Project
       </label>
     </div>
     <br>
@@ -107,7 +107,7 @@
       <div class="form-group">
         <label for="formInput">Enter Start Date:</label>
         <p>(From selected date to today if selected alone)</p>
-        <input type="date" class="form-control" id="formInput" name="date_after">
+        <input type="date" class="form-control" id="formInput" name="from_date">
       </div>
       </div>
     </p>
@@ -116,7 +116,7 @@
       <div class="form-group">
         <label for="formInput">Enter End Date:</label>
         <p>(From repository creation to selected date if selected alone)</p>
-        <input type="date" class="form-control" id="formInput" name="date_before">
+        <input type="date" class="form-control" id="formInput" name="to_date">
       </div>
       </div>
     </p>

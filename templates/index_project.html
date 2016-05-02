@@ -59,9 +59,9 @@
     <div class="col-lg-6">
       <h2>Select a Project:</h2>
     <div class="btn-group btn-group-vertical" data-toggle="buttons">
-    {% for project_name in project_select %}
+    {% for project in list_of_projects %}
       <label class="btn active">
-        <input type="radio" name="project_name" value={{project_name}} autocomplete="off">{{project_name}}
+        <input type="radio" name="project_name" value={{project}} autocomplete="off">{{project}}
       </label>
     {% endfor %}
     <!-- <input name="folder_name">hdhd</input> -->

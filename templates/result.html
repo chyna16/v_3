@@ -29,11 +29,11 @@
 <h1>Results for "{{repo_name}}" Repository</h1>
 <h2> 
     From 
-        {% if date_after!='' %} {{ date_after }}
+        {% if from_date!='' %} {{ from_date }}
         {% else %} Beginning 
         {% endif %}
     to
-        {% if date_before!='' %} {{ date_before }}
+        {% if to_date!='' %} {{ to_date }}
         {% else %} Present 
         {% endif %}
 </h2>
