@@ -2,7 +2,8 @@ import os
 import fnmatch
 import json
 import generator
-# import stash_api
+import stash_api
+import settings
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 
 # owd = obtain working directory
@@ -11,12 +12,15 @@ app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
 
+maat_dir = settings.f_maat_directory
+repo_dir = settings.f_repo_directory
+
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
 	if request.method == 'GET':
-		repo_list = generator.folder_list
+		repo_list = [ item for item in os.listdir(repo_dir) if os.path.isdir(os.path.join(repo_dir, item)) ]
 		return render_template('index.html', repo_list=repo_list)  # returns array of csv filenames to webpage
 	elif request.method == 'POST':
 		clone_url = request.form['clone_url']
@@ -48,24 +52,22 @@ def index():
 	
 @app.route('/index_project', methods=['GET', 'POST'])
 def index_project():
-	list_of_projects = generator.project_keys
+	list_of_projects = stash_api.get_projects()
 
 	if request.method == 'GET':
 		return render_template('index_project.html', list_of_projects=list_of_projects)  
 	elif request.method == 'POST' and not request.form['project_name'] == "":
 		selected_project = request.form['project_name']
-		project_repo_names, project_repo_urls = generator.get_project_repos(selected_project)
-		return redirect(url_for('index_repo', names=project_repo_names, links=project_repo_urls))
+		return redirect(url_for('index_repo', selected_project=selected_project))
 
 
 @app.route('/index_repo', methods=['GET', 'POST'])
 def index_repo():
-	repo_list = request.args.get('names')
-	repo_urls = request.args.get('links')
+	project = request.args.get('selected_project')
+	project_repos = stash_api.get_project_repos(project)
 
 	if request.method == 'GET':
-		return render_template('index_repo.html', 
-			repo_list=repo_list, repo_urls=repo_urls)
+		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 			selected_repo = request.form['repo_name']
 			generator.submit_url(selected_repo, 'password')
@@ -132,25 +134,25 @@ def bad_request(e):
 
 
 def select_folder(repo, from_date, to_date):
-	generator.set_path()
+	generator.set_path(maat_dir)
 	root_dir = (owd + '/csv_files_' 
 		+ repo + "_" 
 		+ from_date + "_" + to_date)
 	# if directory already exists, skip function and go to the next page
-	if(os.path.exists(generator.repo_dir + root_dir)):
+	if(os.path.exists(repo_dir + root_dir)):
 		# + "v3/csv_files_" 
 		# + repo + "_" + date_after + "_" 
 		# + date_before)): 
-		print("folder exists:" + generator.repo_dir + root_dir)
+		print("folder exists:" + repo_dir + root_dir)
 		flash('Directory exists, redirected to current page.')
 	else:
-		generator.generate_data(generator.repo_dir + repo + '/.git', 
+		generator.generate_data(repo_dir + repo + '/.git', 
 			repo, from_date, to_date)
 		flash('Analysis complete.')
 
 	return (root_dir)
 
-	
+
 
 if __name__ == '__main__':
 	app.run(debug=True)
