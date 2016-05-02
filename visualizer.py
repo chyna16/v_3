@@ -3,7 +3,7 @@ import fnmatch
 import json
 import generator
 # import stash_api
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash, session
 
 # owd = obtain working directory
 owd = os.getcwd()
@@ -44,7 +44,7 @@ def index():
 @app.route('/index_project', methods=['GET', 'POST'])
 def index_project():
 	# generator.clone_url = ""
-	# # generator.password = ""
+	# generator.password = ""
 	# generator.repo_name = ""
 	list_of_projects = generator.project_keys
 	if request.method == 'GET':
@@ -87,7 +87,7 @@ def index_repo():
 			# temporary redirect
 			selected_repo = request.form['repo_name']
 			# generator.clone_url = selected_repo
-			generator.submit_url(selected_repo, 'password')
+			generator.submit_url(selected_repo, 'viacom4040')
 			return redirect(url_for('index'))
 
 
@@ -108,21 +108,20 @@ def dashboard():
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
 		csv_name = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
-		with open("csv_files_" + repo_name + "_" 
-			+ date_after + "_" + date_before 
-			+ "/{}".format(csv_name), 'rt') as csv_file:
-			data, keys = generator.parse_csv(csv_file)
-		return redirect(url_for('result', data=data, keys=keys, repo_name=repo_name, 
+		return redirect(url_for('result', csv_name=csv_name, repo_name=repo_name, 
 			date_after=date_after, date_before=date_before))
 
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	data = request.args.get('data')
-	keys = request.args.get('keys')
-	return render_template('result.html', repo_name=request.args.get('repo_name'),
-	 data=json.dumps(data), keys=json.dumps(keys), 
-	 date_after=request.args.get('date_after'), date_before=request.args.get('date_before'))
+	with open("csv_files_" 
+			+ request.args.get('repo_name') + "_" 
+			+ request.args.get('date_after') + "_" + request.args.get('date_before') + "/" 
+			+ request.args.get('csv_name'), 'rt') as csv_file:
+		data, keys = generator.parse_csv(csv_file)
+	return render_template('result.html', repo_name=request.args.get('repo_name'), 
+		data=json.dumps(data), keys=json.dumps(keys), 
+		date_after=request.args.get('date_after'), date_before=request.args.get('date_before'))
 
 
 # this filter allows using '|fromjson', which calls this json.loads function
@@ -161,37 +160,37 @@ def select_folder(repo):
 			+ repo + "_" + date_after + "_" 
 			+ date_before)
 		flash('Directory exists, redirected to current page.')
-		return redirect(url_for('dashboard'))
+		# return redirect(url_for('dashboard'))
 	else:
 		generator.generate_data(repo, date_after, date_before, generator.repo_list + repo + '/.git')
 		flash('Analysis complete.')
 
 	return (root_dir, date_after, date_before)
 
-def select_repo():
-	# global root_dir
-	print (request.form['folder_name'])
-	generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
-	# print (generator.repo_name)
-	generator.set_path(generator.repo_name)
-	generator.date_after = request.form['date_after']
-	generator.date_before = request.form['date_before']
-	# print (generator.date_after)
-	# print (generator.date_before)
-	root_dir = (owd + '/csv_files_' + generator.repo_name + "_" 
-		+ generator.date_after + "_" + generator.date_before)
-	# if directory already exists, skip function and go to the next page
-	if(os.path.exists(generator.repo_list + "v3/csv_files_" 
-		+ generator.repo_name + "_" + generator.date_after + "_" 
-		+ generator.date_before)): 
-		print("folder exists:" + generator.repo_list + "v3/csv_files_" 
-			+ generator.repo_name + "_" + generator.date_after + "_" 
-			+ generator.date_before)
-		flash('Directory exists, redirected to current page.')
-		return redirect(url_for('dashboard'))
-	else:
-		generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
-		flash('Analysis complete.')
+# def select_repo():
+# 	# global root_dir
+# 	print (request.form['folder_name'])
+# 	generator.repo_name = request.form['folder_name']  # gets name of repository that was selected by the user on webpage
+# 	# print (generator.repo_name)
+# 	generator.set_path(generator.repo_name)
+# 	generator.date_after = request.form['date_after']
+# 	generator.date_before = request.form['date_before']
+# 	# print (generator.date_after)
+# 	# print (generator.date_before)
+# 	root_dir = (owd + '/csv_files_' + generator.repo_name + "_" 
+# 		+ generator.date_after + "_" + generator.date_before)
+# 	# if directory already exists, skip function and go to the next page
+# 	if(os.path.exists(generator.repo_list + "v3/csv_files_" 
+# 		+ generator.repo_name + "_" + generator.date_after + "_" 
+# 		+ generator.date_before)): 
+# 		print("folder exists:" + generator.repo_list + "v3/csv_files_" 
+# 			+ generator.repo_name + "_" + generator.date_after + "_" 
+# 			+ generator.date_before)
+# 		flash('Directory exists, redirected to current page.')
+# 		return redirect(url_for('dashboard'))
+# 	else:
+# 		generator.generate_data(address = generator.repo_list + generator.repo_name + '/.git')
+# 		flash('Analysis complete.')
 
 if __name__ == '__main__':
 	app.run(debug=True)
