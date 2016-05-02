@@ -4,7 +4,6 @@ import json
 import generator
 import stash_api
 import settings
-import tempcreds
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 
 # owd = obtain working directory
@@ -13,8 +12,8 @@ app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
 
-maat_dir = settings.t_maat_directory
-repo_dir = settings.t_repo_directory
+maat_dir = settings.maat_directory
+repo_dir = settings.repo_directory
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -35,6 +34,9 @@ def index():
 		repo_name = session['repo_name']
 		from_date = session['from_date']
 		to_date = session['to_date']
+
+		print(from_date)
+		print(to_date)
 
 		if not session['clone_url'] == "" and session['repo_name'] == "":
 			generator.submit_url(clone_url, password)
@@ -68,7 +70,7 @@ def index_repo():
 		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name']
-		generator.submit_url(selected_repo, tempcreds.password)
+		generator.submit_url(selected_repo, settings.password)
 		return redirect(url_for('index'))
 
 
@@ -95,10 +97,6 @@ def dashboard():
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	# csv_n = request.args.get('csv_name')
-	# repo_name = request.args.get('repo_name')
-	# from_date = request.args.get('from_date')
-	# to_date = request.args.get('to_date')
 	csv_name = session['csv_name']
 	repo_name = session['repo_name']
 	from_date = session['from_date']
