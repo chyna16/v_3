@@ -12,8 +12,8 @@ app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
 
-maat_dir = settings.f_maat_directory
-repo_dir = settings.f_repo_directory
+maat_dir = settings.t_maat_directory
+repo_dir = settings.t_repo_directory
 
 
 @app.route('/', methods=['GET', 'POST'])
