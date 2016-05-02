@@ -28,10 +28,14 @@
 
 <h1>Results for "{{repo_name}}" Repository</h1>
 <h2> 
-    From {% if date_after == "" %} Beginning {% endif %}
-         {% else %} {{date_after}} {% endelse %}
-    to   {% if date_before == "" %} Present {% endif %}
-         {% else %} {{date_before}} {% endelse %}
+    From 
+        {% if date_after!='' %} {{ date_after }}
+        {% else %} Beginning 
+        {% endif %}
+    to
+        {% if date_before!='' %} {{ date_before }}
+        {% else %} Present 
+        {% endif %}
 </h2>
 
 <center>
