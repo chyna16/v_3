@@ -6,6 +6,9 @@
     <script src = "../static/jquery-1.12.3.js"></script>
     <script src="../static/d3.min.js"></script>
     <script src="../static/bootstrap.js"></script>
+    <script src="../static/table.js"></script>
+    <script src="../static/charts.js"></script>
+    <script src="../static/interactivity.js"></script>
     <link rel=stylesheet type=text/css href="../static/bootstrap.css">
     <title>Results</title>
 </head>
@@ -82,284 +85,21 @@
     var filter_end;
     var filtered_json = json_data; // to be used as a filtered copy of json_data
 
-    // called when user selects a column to filter by, and selects range
-    // reads user entries and sets variables accordingly
-    // if one of start/end is left empty, assigns default value
-    // calls createTable
-    function setFilter(filter_value) {
-        filter_key = document.forms["filter"]["key"].value;
-        filter_start = parseInt(document.forms["filter"]["start"].value);
-            if (filter_start == null || filter_start == "") { filter_start = 0; }
-        filter_end = parseInt(document.forms["filter"]["end"].value);
-            if (filter_end == null || filter_end == "") { filter_end = 100000; }
-
-        for (i=0; i<keys_len; i++) { if (filter_key == keys[i]) { filterData(); } }
-    }
-
-    // called by createTable
-    // checks to see if the passed in value falls within the range of the filter
-    // returns true if filter should be applied on said value, false if not
-    function applyFilter(filter_value) {
-        if (filter_value == undefined) { return false; }
-
-        // parseInt changes user-entered number from string to int
-        if (parseInt(filter_value) < filter_start || parseInt(filter_value) > filter_end) 
-            { return true; }
-
-        return false;
-    }
-
-    function setTableRows(row, elem_id, data) {
-        for (i=0; i<keys_len; i++) {
-            var col = document.createElement(elem_id);
-
-            if (i == 0) { col.style.width = "40%"; }
-            else { col.style.width = (60 / (keys_len-1)) + "%"; }
-
-            col.style.overflow = "hidden";
-            col.style.fontSize = "15px";
-            col.onmouseover = function() { this.style.overflow = "visible"; }
-            col.onmouseout = function() { this.style.overflow = "hidden"; }
-            // col.style.backgroundColor = "white"; INTERFERES W/ OVERFLOW
-
-            if (data == keys) {
-                if (i != 0) { col.setAttribute('onClick', 'chooseColumn(this)'); }
-                col.setAttribute('value', data[i]);
-                col.appendChild(document.createTextNode(data[i])); 
-            } 
-            else { 
-                if (i == 0) { col.setAttribute('onClick', 'chooseModule(this)'); }
-                col.setAttribute('value', data[keys[i]]);
-                col.appendChild(document.createTextNode(data[keys[i]])); 
-            }
-
-            row.appendChild(col);
-        }
-        return row;
-    }
-
-    function chooseModule(elem) {
-        var chosen_module = elem.getAttribute('value');
-
-        coupled_data = [];
-
-        filtered_json.forEach(function(d) {
-            if (d[keys[0]] == chosen_module) {
-                var temp_obj = {};
-                keys.forEach(function(k, i) {
-                    if (i != 0) { temp_obj[k] = d[k]; }
-                })
-                console.log(temp_obj);
-                coupled_data.push(temp_obj);
-            }
-        });
-
-        console.log(coupled_data);
-        createGraph(coupled_data);
-    }
-
-    function filterData() {
-        filtered_json = [];
-
-        json_data.forEach(function (d) {
-            // if the current value of the filter column chosen by theuser
-            // falls within the filter range, then the loop skips the following
-            if (applyFilter(+d[filter_key]) != true) {
-                filtered_json.push(d);
-            }
-        });
-
-        createTable();
-    }
-
-    // parses data from dictionary using keys and fills each row.col with values
-    var table_head = document.getElementById("thead");
-    var h_row = document.createElement("tr");
-    table_head.appendChild(setTableRows(h_row, "th", keys));
-    var table_body = document.getElementById("tbody");
-    function createTable() {
-        d3.select("#tbody").html(""); // table is emptied before being filled
-
-        filtered_json.forEach(function(d) { 
-            var b_row = document.createElement("tr");
-            table_body.appendChild(setTableRows(b_row, "td", d));
-        })
-
-        createGraph(filtered_json);
-    }  
-
  
     var chosen_key = "default"; // the default key represents all columns
-    // specifies the y-axis values for the graphs to whichever column the user selects
-    // calls function to create graph using the selected data
-    function chooseColumn(elem) {
-        chosen_key = elem.getAttribute('value');
-        createGraph(filtered_json); 
-    }
 
-    // changes the display of corresponding graph to show or hide
-    function toggleGraph(elem) {
-        var display_status = document.getElementById(elem.getAttribute('name')).style.display;
-
-        if (display_status == "none") 
-            { document.getElementById(elem.getAttribute('name')).style.display = "block"; }
-        else { document.getElementById(elem.getAttribute('name')).style.display = "none"; }
-    }
-
-    // graph dimensions
-    var w;
-    var width;
-    var margin = {top: 20, left: 70, right: 20, bottom: 130};
-    var height = 450 - margin.top - margin.bottom;
-    var padding = 1;
-
-    var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
-
-    // this is called by chooseColumn() when the user selects data for y-axis
-    function createGraph(data) {
-        d3.select('#wrapperBar').html("");
-            // .html("") causes the wrapper to be emptied out
-            // this prevents copies from being made each time function is called
-            // NOTE: this apparently does not work in Safari; fix later
-
-        if (data.length > 50) { w = data.length * 20; }
-        else if (data.length < 10) { w = data.length * 100; }
-        else { w = 1000; }
-        width = w - margin.left - margin.right;
-
-    ///////////////////////////// B A R  G R A P H ///////////////////////////////
-        if (chosen_key == 'default') {
-            // if no column was specified, the data from all value columns is used 
-            var labels = d3.keys(data[0]).filter(function(key) 
-                { return key !== keys[0] && key !== 'values' && key !== 'coupled'; }); 
-        }
-        else {
-            // if a column was specified, only the data from that column is used
-            var labels = d3.keys(data[0]).filter(function(key) 
-                { return key == chosen_key; });
-        }
-
-        data.forEach(function(d, i) {
-            delete d.values;
-            d.values = labels.map(function(label) {
-                return {type: label, value: +d[label]};
-            });
-        });
-
-        // var xScale = d3.scale.ordinal()
-        //         .domain(type).rangePoints([0, width - (width / values.length)]);
-        // var yScale = d3.scale.linear()
-        //         .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
-
-        var x0Scale = d3.scale.ordinal().rangeBands([0, width], .05);
-        var x1Scale = d3.scale.ordinal();
-        var yScale = d3.scale.linear().range([height, 0]);
-        yScale.domain([0, d3.max(data, function(d) { 
-            return d3.max(d.values, function(d) { return d.value; }); 
-        })]);
-
-        var xAxis = d3.svg.axis()
-                .scale(x0Scale)
-                .orient("bottom");
-        var yAxis = d3.svg.axis()
-                .scale(yScale)
-                .orient("left");
-
-        if (keys[1] == 'coupled') { var domain_key = keys[1]; }
-        else { var domain_key = keys[0]; }
-
-        x0Scale.domain(data.map(function(d) { return d[domain_key]; }));
-        x1Scale.domain(labels).rangeBands([0, x0Scale.rangeBand()]);
-
-        var canvas = d3.select("#wrapperBar")
-            .append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        var category = canvas.selectAll(".category")
-                .data(data)
-                .enter()
-            .append("g")
-                .attr("class", "category")
-                .attr("transform", function(d) { return "translate("+ x0Scale(d[domain_key]) + ",0)"; });
-
-        var bar = category.selectAll("rect")
-                .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
-                .enter()
-            .append("rect")
-                .attr("height", function(d) { return height - yScale(d.value); })
-                .attr("width", x1Scale.rangeBand())
-                .attr("x", function(d) { return x1Scale(d.type); })
-                .attr("y", function(d) { return yScale(d.value); })
-                .style("fill", function(d) { return color(d.type); });
-
-        /* var bar = canvas.selectAll("rect")
-                .data(values)
-                .enter()
-                .append("rect")
-                .attr("height", function (d) {
-                    return height - yScale(d);
-                })
-                .attr("width", width / vlength - padding)
-                .attr("x", function (d, i) {
-                    return i * (width / vlength)
-                })
-                .attr("y", function (d) {
-                    return height - (height - yScale(d))
-                });
-        */
-
-        /* canvas.selectAll("text")
-                .data(values)
-                .enter()
-                .append("text")
-                .attr("fill", "steelblue")
-                .style("font-size", ".7em")
-                .attr("x", function (d, i) {
-                    return i * (width / vlength) + (width / vlength) / 2
-                })
-                .attr("y", function (d) {
-                    return height - (height - yScale(d)) - 5
-                })
-                .text(function (d) {
-                    return d;
-                })
-                .style("text-anchor", "middle");
-        */
-
-        canvas.append("g")
-                .attr('class', 'axis')
-                .attr('transform', 'translate(0,' + (height) + ')')
-                .call(xAxis)
-                .selectAll("text")  
-                .style("text-anchor", "end")
-                .attr("dx", "-1em")
-                .attr("dy", ".05em")
-                .attr("transform", function(d) { return "rotate(-55)" })
-                .style("font-size", ".7em")
-                .attr("fill", "steelblue");
-
-        canvas.append("g")
-                .attr('class', 'axis')
-                .attr('transform', 'translate(0, 0)')
-                .call(yAxis)
-                .selectAll("text")  
-                .style("text-anchor", "end")
-                .attr("dx", "-1em")
-                .attr("dy", ".15em")
-                .style("font-size", ".8em")
-                .attr("fill", "steelblue");
-    }
 
     // called when user clicks "Back" button
     function goBack() {
         window.history.back();
     }
 
-    window.onload = createTable();
-    // window.onload = createGraph();
+    // the script waits until all the html content has been loaded
+    // before calling the function
+    // to create the default table/graph
+    document.addEventListener("DOMContentLoaded", function(event) {
+        createTable(json_data);
+    })
 
 </script>
 
