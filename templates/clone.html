@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% block head %}
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
+    <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    <!-- <script src = "../static/jquery-1.12.3.js"></script> -->
+    <!-- <link rel=stylesheet type=text/css href='../static/bootstrap.css'> -->
+    <!-- <script src = "../static/bootstrap.js"></script>  -->
+    <title>{% block title %}{% endblock %} - V3</title>
+  {% endblock %}
+</head>
+
+<body>
+
+<style> body{
+  font-family: 'Roboto Slab', serif;
+}
+</style>
+
+ <form method="POST" enctype="multipart/form-data">
+  <p>
+	  <div class="form-group">
+	  <p><h2> Enter a repository clone link:</h2></p>
+
+	    <label class="sr-only" for="inputURL">URL Link</label>
+	    <input type="text" class="form-control" id="inputURL" name="clone_url" placeholder="Enter URL">
+	  </div>
+	  <div class="form-group">
+	    <label class="sr-only" for="inputPassword">Password</label>
+	    <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Password" required>
+	  </div>
+	 <button type="submit" name="submit_button" value="1" class="btn btn-lg btn-primary center-block">Submit</button>
+ </form>
+	<h2><a href="index_available.html"> Or go to current list of repositories </h2>
+</p>
+</body>
+</html>

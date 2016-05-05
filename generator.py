@@ -43,13 +43,13 @@ def generate_data(address, repo_name, date_after, date_before):
 	print("-" * 60)
 	print("Creating csv files from generated log...")
 	time.sleep(1)
-	# print("Creating repository summary...")
+	print("Creating repository summary...")
 	# print("maat -l logfile_" + repo_name + "_" + date_after + "_" 
 	# 	+ date_before + ".log -c git -a summary > summary_" + repo_name 
 	# 	+ ".csv")
-	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-	# 	+ date_before + ".log -c git -a summary > summary_" + repo_name 
-	# 	+ ".csv")
+	os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
+		+ date_before + ".log -c git -a summary > summary_" + repo_name 
+		+ ".csv")
 	# # Reports an overview of mined data from git's log file
 	# print("Creating organizational metrics summary...")
 	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 

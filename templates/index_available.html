@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  {% block head %}
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
+    <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    <!-- <script src = "../static/jquery-1.12.3.js"></script> -->
+    <!-- <link rel=stylesheet type=text/css href='../static/bootstrap.css'> -->
+    <!-- <script src = "../static/bootstrap.js"></script>  -->
+    <title>{% block title %}{% endblock %} - V3</title>
+  {% endblock %}
+</head>
+
+<body>
+
+<style> body{
+  font-family: 'Roboto Slab', serif;
+}
+</style>
+<!-- 
+  <nav class="navbar navbar-inverse" role="navigation">
+      <div class="container">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            <li role="presentation"><a href="index">Home</a></li>
+            <li role="presentation"><a href="about.html">About</a></li>
+            <li role="presentation"><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <a class="navbar-brand" href="/">V3</a>
+      </div>    
+  </nav>
+ -->
+<!-- <h1>Welcome to the Viacom Value Visualizer</h1> -->
+
+<!--  <form method="POST" enctype="multipart/form-data">
+
+ </form> -->
+<!-- <ul id="tabs" class="nav nav-tabs"  data-tabs="tabs">
+    <li role="presentation" class="active"><a href="#tab1" data-toggle="tab">Clone a URL</a></li>
+    <li role="presentation" ><a href="#tab2" data-toggle="tab">Available Repositories</a></li>
+    <li role="presentation" ><a href="#tab3" data-toggle="tab">Stash Repositories</a></li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane" id="tab1">
+       
+    </div>
+    <div class="tab-pane active" id="tab2">
+        <p>a</p>
+    </div>
+    <div class="tab-pane" id="tab3">
+        
+    </div>
+</div> -->
+
+<form method="POST" enctype="multipart/form-data">
+
+  <div class="row">
+    <div class="col-lg-6">
+      <h2>Select a Repository:</h2>
+    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+    {% for repo in repo_list %}
+      <label class="btn active">
+        <input type="radio" name="repo_name" value={{repo}} autocomplete="off">{{repo}}
+      </label>
+    {% endfor %}
+      <label class="btn active">
+        <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
+      </label>
+<!--       <label class="btn active">
+        <input type="radio" name="repo_name" value="projects" autocomplete="off">Select a Project
+      </label> -->
+    </div>
+    <br>
+    <br>
+      <p>
+        <a class="btn btn-info" href="#" role="button">
+          View details &raquo;
+        </a>
+      </p>
+    </div>      
+    <div class="col-lg-6">
+      <h2>Repository Details:</h2>
+      <br>
+          <p>
+            Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+          </p>
+    </div>
+  </div>
+      <p>
+      <div class="col-lg-6">        
+      <div class="form-group">
+        <label for="formInput">Enter Start Date:</label>
+        <p>(From selected date to today if selected alone)</p>
+        <input type="date" class="form-control" id="formInput" name="from_date">
+      </div>
+      </div>
+    </p>
+    <p>
+      <div class="col-lg-6">
+      <div class="form-group">
+        <label for="formInput">Enter End Date:</label>
+        <p>(From repository creation to selected date if selected alone)</p>
+        <input type="date" class="form-control" id="formInput" name="to_date">
+      </div>
+      </div>
+    </p>
+    <p>
+  <p>
+      <button type="submit" name="submit_button" value="2" id="nextbutton" class="btn btn-lg btn-primary" role="button">
+        Next
+      </button>
+  </p>
+  </form>
+
+<script>
+  //   $.('#nextbutton').click(function () {
+  //   var $btn = $(this);
+  //   $btn.button('loading');
+  //   // $btn.button('reset')
+  // });
+    $("#nextbutton").click(function() {
+    var $btn = $(this);
+    $btn.button('loading');
+});
+</script>
+</body>
+</html>

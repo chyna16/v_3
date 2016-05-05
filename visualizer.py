@@ -20,9 +20,43 @@ repo_dir = settings.repo_directory
 @app.route('/index', methods=['GET', 'POST'])
 def index():
 	if request.method == 'GET':
+		list_of_projects = stash_api.get_projects()
 		repo_list = [ item for item in os.listdir(repo_dir) if os.path.isdir(os.path.join(repo_dir, item)) ]
-		return render_template('index.html', repo_list=repo_list)  # returns array of csv filenames to webpage
+		return render_template('index.html', repo_list=repo_list, 
+			list_of_projects=list_of_projects)
 	elif request.method == 'POST':
+		if request.form['submit_button'] == "2":
+			session['repo_name'] = request.form['repo_name']
+			session['from_date'] = request.form['from_date']
+			session['to_date'] = request.form['to_date']
+			repo_name = session['repo_name']
+			from_date = session['from_date']
+			to_date = session['to_date']
+			session['root_dir'] = select_folder(repo_name, from_date, to_date)
+			return redirect(url_for('dashboard'))
+		elif request.form['submit_button'] == "1":
+			session['clone_url'] = request.form['clone_url']
+			session['password'] = request.form['password']
+			clone_url = session['clone_url']
+			password = session['password']
+			generator.submit_url(clone_url, password)
+			flash('Cloning Complete. Check the "Available Repositories" tab.')
+			return redirect(url_for('index'))
+		elif request.form['submit_button'] == "3":
+			session['project_name'] = request.form['project_name']
+			return redirect(url_for('index_repo'))
+		# elif not session['repo_name'] == "":
+		# 	# print("blah")
+			# session['root_dir'] = select_folder(repo_name, from_date, to_date)
+			# return redirect(url_for('dashboard'))
+
+
+@app.route('/index_available', methods=['POST'])
+def index_available():
+	# if request.method == 'GET':
+	# 	repo_list = [ item for item in os.listdir(repo_dir) if os.path.isdir(os.path.join(repo_dir, item)) ]
+	# 	return render_template('index_available.html', repo_list=repo_list)  # returns array of csv filenames to webpage
+	if request.method == 'POST':
 		session['clone_url'] = request.form['clone_url']
 		session['password'] = request.form['password']
 		session['repo_name'] = request.form['repo_name']
@@ -38,17 +72,9 @@ def index():
 		print(from_date)
 		print(to_date)
 
-		if not session['clone_url'] == "" and session['repo_name'] == "":
-			generator.submit_url(clone_url, password)
-			flash('Cloning Complete.')
-			return redirect(url_for('index'))
-		elif not session['repo_name'] == "":
-			if session['repo_name'] == "projects":
-				print("Going to index_project")
-				return redirect(url_for('index_project'))
-			else:
-				session['root_dir'] = select_folder(repo_name, from_date, to_date)
-				return redirect(url_for('dashboard'))
+		if not session['repo_name'] == "":
+			session['root_dir'] = select_folder(repo_name, from_date, to_date)
+			return redirect(url_for('dashboard'))
 
 	
 @app.route('/index_project', methods=['GET', 'POST'])
@@ -71,7 +97,7 @@ def index_repo():
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name']
 		generator.submit_url(selected_repo, settings.password)
-		return redirect(url_for('index'))
+		return redirect(url_for('index_available'))
 
 
 @app.route('/dashboard', methods=['GET', 'POST'])

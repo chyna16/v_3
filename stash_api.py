@@ -54,5 +54,6 @@ def get_project_repos(selected_key):
 
 
 if __name__ == '__main__':
-	get_project_repos('ARC')
+	get_details()
+	# get_project_repos('ARC')
 
