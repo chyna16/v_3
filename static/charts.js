@@ -6,6 +6,7 @@ var height = 450 - margin.top - margin.bottom;
 var padding = 1;
 
 var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
+var hotspot_color = d3.scale.ordinal().range(["#ffb3b3", "#ff9999", "#ff8080", "#ff6666", "#ff4d4d", "#ff4d4d", "#ff1a1a", "#ff0000", "#e60000"]);
 
 // this is called by chooseColumn() when the user selects data for y-axis
 function createGraph(data) {
@@ -19,11 +20,18 @@ function createGraph(data) {
     else { w = 1000; }
     width = w - margin.left - margin.right;
 
+
 ///////////////////////////// B A R  G R A P H ///////////////////////////////
     if (chosen_key == 'default') {
-        // if no column was specified, the data from all value columns is used 
-        var labels = d3.keys(data[0]).filter(function(key) 
-            { return key !== keys[0] && key !== 'values' && key !== 'coupled'; }); 
+        // if no column was specified, the data from all value columns is used
+        if (analysis == ("hotspots_" + repo + ".csv")) {
+            var labels = d3.keys(data[0]).filter(function(key) 
+            { return key !== keys[0] && key !== 'values' && key !== 'n-revs'; });
+        }
+        else {
+            var labels = d3.keys(data[0]).filter(function(key) 
+            { return key !== keys[0] && key !== 'values' && key !== 'coupled'; });
+        }
     }
     else {
         // if a column was specified, only the data from that column is used
@@ -31,12 +39,22 @@ function createGraph(data) {
             { return key == chosen_key; });
     }
 
-    data.forEach(function(d, i) {
-        delete d.values;
-        d.values = labels.map(function(label) {
-            return {type: label, value: +d[label]};
+    if (analysis == ("hotspots_" + repo + ".csv")) {
+        data.forEach(function(d, i) {
+            delete d.values;
+            d.values = labels.map(function(label) {
+                return {type: label, value: +d[label], revs: +d['n-revs']};
+            });
         });
-    });
+    }
+    else {
+        data.forEach(function(d, i) {
+            delete d.values;
+            d.values = labels.map(function(label) {
+                return {type: label, value: +d[label]};
+            });
+        });
+    }
 
     // var xScale = d3.scale.ordinal()
     //         .domain(type).rangePoints([0, width - (width / values.length)]);
@@ -85,7 +103,10 @@ function createGraph(data) {
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
             .attr("y", function(d) { return yScale(d.value); })
-            .style("fill", function(d) { return color(d.type); });
+            .style("fill", function(d) {
+                if(analysis == ("hotspots_" + repo + ".csv")) return hotspot_color(d.revs); 
+                else return color(d.type);
+                }); 
 
     /* var bar = canvas.selectAll("rect")
             .data(values)

@@ -75,8 +75,9 @@
 <script>
     var keys = {{keys|safe}}; // an array of the data type in original order
     var json_data = {{data|safe}}; // a dictionary w/ each key (data type) holding an array
-    var analysis = {{csv_name}}
-    var repo = {{repo_name}}
+    var csv_name = {{csv_name|safe}}
+    var analysis = csv_name[0]
+    var repo = csv_name[1]
     var keys_len = keys.length; 
     var data_len = json_data.length;
 
