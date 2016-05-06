@@ -39,8 +39,9 @@ def index():
 			session['password'] = request.form['password']
 			clone_url = session['clone_url']
 			password = session['password']
+			message = generator.submit_url(clone_url, password)
 			generator.submit_url(clone_url, password)
-			flash('Cloning Complete. Check the "Available Repositories" tab.')
+			flash(message)
 			return redirect(url_for('index'))
 		elif request.form['submit_button'] == "3":
 			session['project_name'] = request.form['project_name']

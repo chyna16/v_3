@@ -2,6 +2,7 @@ import csv
 import os
 import time
 import fnmatch
+import subprocess
 
 
 def set_path(maat_dir):
@@ -75,10 +76,22 @@ def submit_url(clone_url, password):
 	char = clone_url.index('@')
 	os.chdir('..')
 	command = clone_url[:char] + ':' + password + clone_url[char:]
-	print(command)
-	os.system('git clone ' + command)
+	clone = os.system('git clone ' + command)
+	# temporary message handler for cloning repositories
+	clone_status = subprocess.getoutput('git clone ' + command)
+	print ("this is the status: " + clone_status)
+	if 'Authentication failed' 	in clone_status:
+		message = "Authentication failed."
+	elif 'already exists' in clone_status:
+		message = """Repository already exists. Check the 'Available
+		 Repositories' tab."""
+	elif 'not found' in clone_status:
+		message = """Repository not found. Either it does not exist, or you do 
+		not have permission to access it."""
+	else:
+		message = "Cloning complete. Check the 'Available Repositories tab."
+	return message
 	os.chdir('v3')
-
 
 # this function takes csv file and two empty arrays
 # reads each column from file into an array and returns the arrays
