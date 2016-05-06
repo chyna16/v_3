@@ -129,13 +129,18 @@ def result():
 	from_date = session['from_date']
 	to_date = session['to_date']
 
+	analysis = []
+	analysis.append(csv_name)
+	analysis.append(repo_name)
+	print(analysis)
+
 	with open("csv_files_" 
 			+ repo_name + "_" 
 			+ from_date + "_" + to_date + "/"
 			+ csv_name, 'rt') as csv_file:
 		data, keys = generator.parse_csv(csv_file)
 	return render_template('result.html', 
-		repo_name=repo_name, 
+		repo_name=repo_name, csv_name=json.dumps(analysis),
 		from_date=from_date, to_date=to_date, 
 		data=json.dumps(data), 
 		keys=json.dumps(keys))

@@ -34,6 +34,13 @@ def create_log(repo_name, date_after, date_before, address):
 	os.system(sys_command) # command line call using the updated string
 
 
+def run_codemaat(analysis_type, analysis_name, repo_name, date_after, date_before):
+	os.system("maat -l logfile_" 
+		+ repo_name + "_" + date_after + "_" + date_before 
+		+ ".log -c git -a " + analysis_type + " > " 
+		+ analysis_name + "_" + repo_name + ".csv")
+
+
 def generate_data(address, repo_name, date_after, date_before):
 	# creates folder for the root_dir variable if none exists
 	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
@@ -44,29 +51,26 @@ def generate_data(address, repo_name, date_after, date_before):
 	print("-" * 60)
 	print("Creating csv files from generated log...")
 	time.sleep(1)
-	print("Creating repository summary...")
-	# print("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-	# 	+ date_before + ".log -c git -a summary > summary_" + repo_name 
-	# 	+ ".csv")
-	os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-		+ date_before + ".log -c git -a summary > summary_" + repo_name 
-		+ ".csv")
-	# # Reports an overview of mined data from git's log file
-	# print("Creating organizational metrics summary...")
-	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-	# 	+ date_before + ".log -c git > metrics_" + repo_name + ".csv")
-	# # Reports the number of authors/revisions made per module
-	# print("Creating coupling summary...")
-	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-	# 	+ date_before + ".log -c git -a coupling > coupling_" + repo_name 
-	# 	+ ".csv")
-	# # Reports correlation of files that often commit together
-	# # degree = % of commits where the two files were changed in the same commit
+	# print("Creating repository summary...")
+	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	# 	# Reports an overview of mined data from git's log file
+	# print("Creating organizational metrics...")
+	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# 	# Reports the number of authors/revisions made per module
+	# print("Creating coupling history...")
+	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	# 	# Reports correlation of files that often commit together
+	# 	# degree = % of commits where the two files were changed in the same commit
 	# print("Creating code age summary...")
-	# os.system("maat -l logfile_" + repo_name + "_" + date_after + "_" 
-	# 	+ date_before + ".log -c git -a entity-churn > age_" + repo_name 
-	# 	+ ".csv")
-	# Reports how long ago the last change was made in measurement of months
+	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	# 	# Reports how long ago the last change was made in measurement of months
+	run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
+	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+		+ "lines_" + repo_name + ".csv")
+	merge_csv(repo_name)
+	# os.system("python ../../../maat_scripts/merge_comp_freqs.py " 
+	# 	+ "frequency_" + repo_name + ".csv" + " " 
+	# 	+ "lines_" + repo_name + ".csv")
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 	os.chdir("..")
@@ -110,6 +114,34 @@ def parse_csv(uploaded_file):
 			data_dict.append(row_array)
 
 	return (data_dict, key_array)
+
+
+def merge_csv(repo_name):
+	lines_array = []
+	merge_array = []
+
+	with open("lines_" + repo_name + ".csv") as lines_file:
+		lines_reader = csv.DictReader(lines_file)
+		for row in lines_reader:
+			lines_array.append({'entity': row['filename'], 'lines': row['code']})
+
+	with open("hotspots_" + repo_name + ".csv", "rt") as rev_file:
+		revs_reader = csv.DictReader(rev_file)
+		for row in revs_reader:
+			for module in lines_array:
+				if row['entity'] in module['entity']:
+					merge_array.append({
+						'entity': row['entity'], 
+						'n-revs': row['n-revs'], 
+						'lines': module['lines']})
+
+	with open("hotspots_" + repo_name + ".csv", "wt") as hotspot_file:
+		fieldnames = ['entity', 'n-revs', 'lines']
+		writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames) 
+		writer.writeheader()
+		for row in merge_array:
+			# writer.writerow({'entity': row['entity'], 'n-revs': row['n-revs'], 'lines': row['lines']})
+			writer.writerow(row)
 
 
 if __name__ == '__main__':

@@ -1,184 +1,167 @@
-var keys = {{keys|safe}}; // an array of the data type in original order
-var json_data = {{data|safe}}; // a dictionary w/ each key (data type) holding an array
-
-var keys_len = keys.length;
-var data_len = json_data[keys[0]].length;
-
-// parses data from dictionary using keys and fills each row.col with values
-var table = document.getElementById("tbody");
-for (i = 0; i < data_len; i++) {
-  var row = document.createElement("tr");
-  for (j = 0; j < keys_len; j++) {
-    var col = document.createElement("td");
-    col.appendChild(document.createTextNode(json_data[keys[j]][i]));
-    row.appendChild(col);
-  }
-  table.appendChild(row);
-}
-
-// sets the y-axis values for the graphs to whichever column the user selects
-// calls function to create graph using the selected data
-function chooseColumn(elem) {
-  var key = elem.getAttribute('value');
-  var y_values = json_data[key];
-
-  createGraph(y_values);
-  console.log(y_values);
-}
-
-// changes the display of corresponding graph to show or hide
-function toggleGraph(elem) {
-  var display_status = document.getElementById(elem.getAttribute('name')).style.display;
-
-  if (display_status == "none") {
-    document.getElementById(elem.getAttribute('name')).style.display = "block";
-  }
-  else {
-    document.getElementById(elem.getAttribute('name')).style.display = "none";
-  }
-}
-
-// graph dimensions that don't change
-var margin = {top: 20, left: 50, right: 20, bottom: 130};
+// graph dimensions
+var w;
+var width;
+var margin = {top: 20, left: 70, right: 20, bottom: 130};
 var height = 450 - margin.top - margin.bottom;
-var width = 800 - margin.left - margin.right;
 var padding = 1;
 
+var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
+var hotspot_color = d3.scale.ordinal().range(["#ffb3b3", "#ff9999", "#ff8080", "#ff6666", "#ff4d4d", "#ff4d4d", "#ff1a1a", "#ff0000", "#e60000"]);
+
 // this is called by chooseColumn() when the user selects data for y-axis
-// NOTE: currently, only bar graph functions displays; needs to be modified
-function createGraph(values) {
-  d3.select("#wrapperBar").html("");
-  d3.select("#wrapperPie").html("");
-  d3.select("#wrapperScatter").html("");
-    // .html("") causes the wrapper to be emptied out
-    // this prevents copies from being made each time function is called
-    // NOTE: this apparently does not work in Safari; fix later
+function createGraph(data) {
+    d3.select('#wrapperBar').html("");
+        // .html("") causes the wrapper to be emptied out
+        // this prevents copies from being made each time function is called
+        // NOTE: this apparently does not work in Safari; fix later
+
+    if (data.length > 50) { w = data.length * 20; }
+    else if (data.length < 10) { w = data.length * 100; }
+    else { w = 1000; }
+    width = w - margin.left - margin.right;
+
 
 ///////////////////////////// B A R  G R A P H ///////////////////////////////
-  var type = json_data[keys[0]];
-  var vlength = values.length;
+    if (chosen_key == 'default') {
+        // if no column was specified, the data from all value columns is used
+        if (analysis == ("hotspots_" + repo + ".csv")) {
+            var labels = d3.keys(data[0]).filter(function(key) 
+            { return key !== keys[0] && key !== 'values' && key !== 'n-revs'; });
+        }
+        else {
+            var labels = d3.keys(data[0]).filter(function(key) 
+            { return key !== keys[0] && key !== 'values' && key !== 'coupled'; });
+        }
+    }
+    else {
+        // if a column was specified, only the data from that column is used
+        var labels = d3.keys(data[0]).filter(function(key) 
+            { return key == chosen_key; });
+    }
 
-  var xScale = d3.scale.ordinal()
-        .domain(type).rangePoints([0, width - (width / values.length)]);
-  var yScale = d3.scale.linear()
-        .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
+    if (analysis == ("hotspots_" + repo + ".csv")) {
+        data.forEach(function(d, i) {
+            delete d.values;
+            d.values = labels.map(function(label) {
+                return {type: label, value: +d[label], revs: +d['n-revs']};
+            });
+        });
+    }
+    else {
+        data.forEach(function(d, i) {
+            delete d.values;
+            d.values = labels.map(function(label) {
+                return {type: label, value: +d[label]};
+            });
+        });
+    }
 
-  var xAxis = d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom")
-        .ticks(type.length);
-  var yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient("left")
-        .ticks(values.length);
+    // var xScale = d3.scale.ordinal()
+    //         .domain(type).rangePoints([0, width - (width / values.length)]);
+    // var yScale = d3.scale.linear()
+    //         .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
 
-  var canvas = d3.select("#wrapperBar")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var x0Scale = d3.scale.ordinal().rangeBands([0, width], .05);
+    var x1Scale = d3.scale.ordinal();
+    var yScale = d3.scale.linear().range([height, 0]);
+    yScale.domain([0, d3.max(data, function(d) { 
+        return d3.max(d.values, function(d) { return d.value; }); 
+    })]);
 
-  var bar = canvas.selectAll("rect")
-      .data(values)
-      .enter()
+    var xAxis = d3.svg.axis()
+            .scale(x0Scale)
+            .orient("bottom");
+    var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left");
+
+    if (keys[1] == 'coupled') { var domain_key = keys[1]; }
+    else { var domain_key = keys[0]; }
+
+    x0Scale.domain(data.map(function(d) { return d[domain_key]; }));
+    x1Scale.domain(labels).rangeBands([0, x0Scale.rangeBand()]);
+
+    var canvas = d3.select("#wrapperBar")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var category = canvas.selectAll(".category")
+            .data(data)
+            .enter()
+        .append("g")
+            .attr("class", "category")
+            .attr("transform", function(d) { return "translate("+ x0Scale(d[domain_key]) + ",0)"; });
+
+    var bar = category.selectAll("rect")
+            .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
+            .enter()
         .append("rect")
-        .attr("height", function(d) { return height - yScale(d); })
-        .attr("width", width / vlength - padding)
-        .attr("x", function(d, i) { return i * (width / vlength) })
-        .attr("y", function(d) { return height - (height-yScale(d)) });
+            .attr("height", function(d) { return height - yScale(d.value); })
+            .attr("width", x1Scale.rangeBand())
+            .attr("x", function(d) { return x1Scale(d.type); })
+            .attr("y", function(d) { return yScale(d.value); })
+            .style("fill", function(d) {
+                if(analysis == ("hotspots_" + repo + ".csv")) return hotspot_color(d.revs); 
+                else return color(d.type);
+                }); 
 
-  canvas.selectAll("text")
-      .data(values)
-      .enter()
-        .append("text")
-        .attr("fill", "steelblue")
-        .style("font-size", ".7em")
-        .attr("x", function(d, i) { return i * (width/vlength) + (width/vlength) / 2})
-        .attr("y", function(d) { return height - (height-yScale(d)) - 5 })
-        .text(function(d) { return d; })
-        .style("text-anchor", "middle");
+    /* var bar = canvas.selectAll("rect")
+            .data(values)
+            .enter()
+            .append("rect")
+            .attr("height", function (d) {
+                return height - yScale(d);
+            })
+            .attr("width", width / vlength - padding)
+            .attr("x", function (d, i) {
+                return i * (width / vlength)
+            })
+            .attr("y", function (d) {
+                return height - (height - yScale(d))
+            });
+    */
 
-  canvas.append("g")
-        .attr('class', 'x axis')
-        .attr('transform', 'translate(' + (width/vlength) / 2 + ',' + (height) + ')')
-        .call(xAxis)
-        .selectAll("text")  
-        .style("text-anchor", "end")
-        .attr("dx", "-1em")
-        .attr("dy", ".15em")
-        .attr("transform", function(d) { return "rotate(-65)"; })
-        .style("font-size", ".7em")
-        .attr("fill", "steelblue");
+    /* canvas.selectAll("text")
+            .data(values)
+            .enter()
+            .append("text")
+            .attr("fill", "steelblue")
+            .style("font-size", ".7em")
+            .attr("x", function (d, i) {
+                return i * (width / vlength) + (width / vlength) / 2
+            })
+            .attr("y", function (d) {
+                return height - (height - yScale(d)) - 5
+            })
+            .text(function (d) {
+                return d;
+            })
+            .style("text-anchor", "middle");
+    */
 
-///////////////////////////// P I E  C H A R T /////////////////////////////// {
-  // var arc = d3.svg.arc()
-  //   .innerRadius(radius - 40)
-  //   .outerRadius(radius);
-  // var pie = d3.layout.pie()
-  //     .padAngle(.02);
-  // var color = d3.scale.category10();
-  // var svg = d3.select("#wrapperPie").append("svg")
-  //     .attr("width", width)
-  //     .attr("height", height)
-  //   .append("g")
-  //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+    canvas.append("g")
+            .attr('class', 'axis')
+            .attr('transform', 'translate(0,' + (height) + ')')
+            .call(xAxis)
+            .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-1em")
+            .attr("dy", ".05em")
+            .attr("transform", function(d) { return "rotate(-55)" })
+            .style("font-size", ".7em")
+            .attr("fill", "steelblue");
 
-  // pieSVG.selectAll("path")
-  //     .data(pie(values))
-  //   .enter().append("path")
-  //     .style("fill", function(d, i) { return color(i); })
-  //     .attr("d", arc);
-// }
-
-////////////////////////// S C A T T E R  P L O T //////////////////////////// {
-  // FIX: summary.csv shows a skewed range
-  // FIX: automated spacing between plot points
-  // var plot = d3.select("#wrapperScatter").append('svg')
-  //     .attr('id', 'plot')
-  //     .attr('height', height + padding * 2)
-  //     .attr('width', width + padding * 2)
-  //     .style('padding', padding)
-  //     .append('g')
-  //     .attr('id', 'viz')
-  //     .attr('transform', 'translate(' + padding + ',' + padding + ')');
-
-  // var xScale = d3.scale.ordinal().domain(type).rangePoints([0, width]);
-  // var yScale = d3.scale.linear().range([height, 10]);
-  // var yDomain = [0, d3.max(value)]
-  // yScale.domain(yDomain);
-
-  // var xAxis = d3.svg.axis()
-  //       .scale(xScale)
-  //       .orient("bottom")
-  //       .ticks(6);
-  // var yAxis = d3.svg.axis()
-  //       .scale(yScale)
-  //       .orient("left")
-  //       .ticks(3);
-
-  // plot.append("g")
-  //       .attr('class', 'y axis')
-  //       .call(yAxis);
-  // plot.append("g")
-  //       .attr('class', 'x axis')
-  //       .attr('transform', 'translate(0,' + height + ')')
-  //       .call(xAxis);
-
-  // var dots = plot.selectAll('circle')
-  //       .data(value)
-  //       .enter()
-  //       .append('circle');
-
-  // dots.attr('r', 5)
-  //   .attr('cx', function(d, i) {
-  //     return i * 20 })
-  //   .attr('cy', function(d) {
-  //     return yScale(d) });
-// }
-}
-
-// called when user clicks "Back" button
-function goBack() {
-    window.history.back();
+    canvas.append("g")
+            .attr('class', 'axis')
+            .attr('transform', 'translate(0, 0)')
+            .call(yAxis)
+            .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-1em")
+            .attr("dy", ".15em")
+            .style("font-size", ".8em")
+            .attr("fill", "steelblue");
 }
