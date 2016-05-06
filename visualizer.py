@@ -108,7 +108,7 @@ def result():
 			+ csv_name, 'rt') as csv_file:
 		data, keys = generator.parse_csv(csv_file)
 	return render_template('result.html', 
-		repo_name=repo_name, 
+		repo_name=repo_name, csv_name=csv_name,
 		from_date=from_date, to_date=to_date, 
 		data=json.dumps(data), 
 		keys=json.dumps(keys))
