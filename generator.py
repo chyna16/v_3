@@ -64,9 +64,11 @@ def generate_data(address, repo_name, date_after, date_before):
 	# print("Creating code age summary...")
 	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# 	# Reports how long ago the last change was made in measurement of months
-	run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
+	run_codemaat('revisions', 'revisions', repo_name, date_after, date_before)
+	print(os.getcwd())
 	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "lines_" + repo_name + ".csv")
+		+ "hotspots_" + repo_name + ".csv")
+	print(os.getcwd())
 	merge_csv(repo_name)
 	# os.system("python ../../../maat_scripts/merge_comp_freqs.py " 
 	# 	+ "frequency_" + repo_name + ".csv" + " " 
@@ -120,12 +122,16 @@ def merge_csv(repo_name):
 	lines_array = []
 	merge_array = []
 
-	with open("lines_" + repo_name + ".csv") as lines_file:
-		lines_reader = csv.DictReader(lines_file)
-		for row in lines_reader:
-			lines_array.append({'entity': row['filename'], 'lines': row['code']})
+	try:
+		with open("hotspots_" + repo_name + ".csv") as lines_file:
+			lines_reader = csv.DictReader(lines_file)
+			for row in lines_reader:
+				lines_array.append({'entity': row['filename'], 'lines': row['code']})
+	except IOError:
+		print("file not found")
+		return
 
-	with open("hotspots_" + repo_name + ".csv", "rt") as rev_file:
+	with open("revisions_" + repo_name + ".csv", "rt") as rev_file:
 		revs_reader = csv.DictReader(rev_file)
 		for row in revs_reader:
 			for module in lines_array:
@@ -140,7 +146,6 @@ def merge_csv(repo_name):
 		writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames) 
 		writer.writeheader()
 		for row in merge_array:
-			# writer.writerow({'entity': row['entity'], 'n-revs': row['n-revs'], 'lines': row['lines']})
 			writer.writerow(row)
 
 
