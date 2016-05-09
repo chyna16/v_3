@@ -77,8 +77,8 @@ def generate_data(address, repo_name, date_after, date_before):
 
 
 def submit_url(clone_url, password):
-	char = clone_url.index('@')
 	os.chdir('..')
+	char = clone_url.index('@')
 	command = clone_url[:char] + ':' + password + clone_url[char:]
 	clone = os.system('git clone ' + command)
 	# temporary message handler for cloning repositories
@@ -94,8 +94,8 @@ def submit_url(clone_url, password):
 		not have permission to access it."""
 	else:
 		message = "Cloning complete. Check the 'Available Repositories tab."
-	return message
 	os.chdir('v3')
+	return message
 
 # this function takes csv file and two empty arrays
 # reads each column from file into an array and returns the arrays
