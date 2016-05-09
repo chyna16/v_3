@@ -22,30 +22,33 @@ def index():
 	if request.method == 'GET':
 		list_of_projects = stash_api.get_projects()
 		repo_list = [ item for item in os.listdir(repo_dir) if os.path.isdir(os.path.join(repo_dir, item)) ]
-		return render_template('index.html', repo_list=repo_list, 
-			list_of_projects=list_of_projects)
+		return render_template('index.html', 
+			repo_list=repo_list, list_of_projects=list_of_projects)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "2":
-			session['repo_name'] = request.form['repo_name']
-			session['from_date'] = request.form['from_date']
-			session['to_date'] = request.form['to_date']
-			repo_name = session['repo_name']
-			from_date = session['from_date']
-			to_date = session['to_date']
-			session['root_dir'] = select_folder(repo_name, from_date, to_date)
-			return redirect(url_for('dashboard'))
+			# session['repo_name'] = request.form['repo_name']
+			# session['from_date'] = request.form['from_date']
+			# session['to_date'] = request.form['to_date']
+			repo_name = request.form['repo_name']
+			from_date = request.form['from_date']
+			to_date = request.form['to_date']
+			# session['root_dir'] = select_folder(repo_name, from_date, to_date)
+			root_dir = select_folder(repo_name, from_date, to_date)
+			return redirect(url_for('dashboard',
+				root_dir=root_dir, repo_name=repo_name, 
+				from_date=from_date, to_date=to_date))
 		elif request.form['submit_button'] == "1":
-			session['clone_url'] = request.form['clone_url']
-			session['password'] = request.form['password']
-			clone_url = session['clone_url']
-			password = session['password']
+			# session['clone_url'] = request.form['clone_url']
+			# session['password'] = request.form['password']
+			clone_url = request.form['clone_url']
+			password = request.form['password']
 			message = generator.submit_url(clone_url, password)
-			generator.submit_url(clone_url, password)
 			flash(message)
 			return redirect(url_for('index'))
 		elif request.form['submit_button'] == "3":
-			session['project_name'] = request.form['project_name']
-			return redirect(url_for('index_repo'))
+			# session['project_name'] = request.form['project_name']
+			project_name = request.form['project_name']
+			return redirect(url_for('index_repo', project_name=project_name))
 		# elif not session['repo_name'] == "":
 		# 	# print("blah")
 			# session['root_dir'] = select_folder(repo_name, from_date, to_date)
@@ -91,22 +94,27 @@ def index_project():
 
 @app.route('/index_repo', methods=['GET', 'POST'])
 def index_repo():
-	project_repos = stash_api.get_project_repos(session['project_name'])
+	project_name = request.args.get('project_name')
+	project_repos = stash_api.get_project_repos(project_name)
 
 	if request.method == 'GET':
 		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name']
 		generator.submit_url(selected_repo, settings.password)
-		return redirect(url_for('index_available'))
+		return redirect(url_for('index'))
 
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-	root_dir = session['root_dir']
-	repo_name = session['repo_name']
-	from_date = session['from_date']
-	to_date = session['to_date']
+	# root_dir = session['root_dir']
+	# repo_name = session['repo_name']
+	# from_date = session['from_date']
+	# to_date = session['to_date']
+	root_dir = request.args.get('root_dir')
+	repo_name = request.args.get('repo_name')
+	from_date = request.args.get('from_date')
+	to_date = request.args.get('to_date')
 
 	if request.method == 'GET':
 		csv_list = []
@@ -118,21 +126,25 @@ def dashboard():
 	# when user selects a repo, the following runs codemaat and generates a csv file
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
-		session['csv_name'] = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
-		return redirect(url_for('result'))
+		# session['csv_name'] = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
+		csv_name = request.form['filename']
+		return redirect(url_for('result',
+			repo_name=repo_name, csv_name=csv_name, 
+			from_date=from_date, to_date=to_date))
 
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	csv_name = session['csv_name']
-	repo_name = session['repo_name']
-	from_date = session['from_date']
-	to_date = session['to_date']
+	# csv_name = session['csv_name']
+	# repo_name = session['repo_name']
+	# from_date = session['from_date']
+	# to_date = session['to_date']
+	repo_name = request.args.get('repo_name')
+	csv_name = request.args.get('csv_name')
+	from_date = request.args.get('from_date')
+	to_date = request.args.get('to_date')
 
-	analysis = []
-	analysis.append(csv_name)
-	analysis.append(repo_name)
-	print(analysis)
+	analysis = [csv_name, repo_name]
 
 	with open("csv_files_" 
 			+ repo_name + "_" 
@@ -142,8 +154,7 @@ def result():
 	return render_template('result.html', 
 		repo_name=repo_name, csv_name=json.dumps(analysis),
 		from_date=from_date, to_date=to_date, 
-		data=json.dumps(data), 
-		keys=json.dumps(keys))
+		data=json.dumps(data), keys=json.dumps(keys))
 
 
 # this filter allows using '|fromjson', which calls this json.loads function
