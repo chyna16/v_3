@@ -57,6 +57,9 @@ def generate_data(address, repo_name, date_after, date_before):
 	# print("Creating organizational metrics...")
 	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	# 	# Reports the number of authors/revisions made per module
+	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file="
+	# 	+ "hotspots_" + repo_name + ".csv")
+	# merge_csv(repo_name)
 	# print("Creating coupling history...")
 	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
 	# 	# Reports correlation of files that often commit together
@@ -64,15 +67,6 @@ def generate_data(address, repo_name, date_after, date_before):
 	# print("Creating code age summary...")
 	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# 	# Reports how long ago the last change was made in measurement of months
-	run_codemaat('revisions', 'revisions', repo_name, date_after, date_before)
-	print(os.getcwd())
-	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "hotspots_" + repo_name + ".csv")
-	print(os.getcwd())
-	merge_csv(repo_name)
-	# os.system("python ../../../maat_scripts/merge_comp_freqs.py " 
-	# 	+ "frequency_" + repo_name + ".csv" + " " 
-	# 	+ "lines_" + repo_name + ".csv")
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 	os.chdir("..")
@@ -131,7 +125,7 @@ def merge_csv(repo_name):
 		print("file not found")
 		return
 
-	with open("revisions_" + repo_name + ".csv", "rt") as rev_file:
+	with open("metrics_" + repo_name + ".csv", "rt") as rev_file:
 		revs_reader = csv.DictReader(rev_file)
 		for row in revs_reader:
 			for module in lines_array:
