@@ -1,40 +1,15 @@
-<!DOCTYPE html>
+{% extends "layout.html" %}
 
-<html>
-<head>
-  {% block head %}
-    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+{% block title %} Home {% endblock %}
+
+{% block head %}
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
-    <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
-    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
     <!-- <script src = "../static/jquery-1.12.3.js"></script> -->
     <!-- <link rel=stylesheet type=text/css href='../static/bootstrap.css'> -->
     <!-- <script src = "../static/bootstrap.js"></script>  -->
-    <title>{% block title %}{% endblock %} - V3</title>
-  {% endblock %}
-</head>
+{% endblock %}
 
-<body>
-
-<style> body{
-  font-family: 'Roboto Slab', serif;
-}
-</style>
-
-  <nav class="navbar navbar-inverse" role="navigation">
-      <div class="container">
-        <nav>
-          <ul class="nav nav-pills pull-right">
-            <li role="presentation"><a href="index">Home</a></li>
-            <li role="presentation"><a href="about.html">About</a></li>
-            <li role="presentation"><a href="#">Contact</a></li>
-          </ul>
-        </nav>
-        <a class="navbar-brand" href="/">V3</a>
-      </div> 
-  </nav>
-
+{% block content %}
 <h1>Viacom Version Visualizer</h1>
 <h3>Create an analysis by selecting a repository using one of the three options:</h3>
 	<div class="container" style="min-height:100% width:80%">
@@ -48,11 +23,9 @@
 		{% endfor %}
 	  {% endif %}
 	{% endwith %}
-	
-	{% block body %}{% endblock %}
 	</div>
-<form method="POST" enctype="multipart/form-data">
 
+<!-- <form method="POST" enctype="multipart/form-data"> -->
 <ul id="tabs" class="nav nav-tabs nav-justified"  data-tabs="tabs">
     <li role="presentation" class="active"><a href="#tab1" data-toggle="tab">Clone a Repository</a></li>
     <li role="presentation" ><a href="#tab2" data-toggle="tab">Available Repositories</a></li>
@@ -70,6 +43,4 @@
         {% include 'index_project.html' %}
     </div>
 </div>
-
-</body>
-</html>
+{% endblock %}

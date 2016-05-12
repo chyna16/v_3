@@ -1,80 +1,49 @@
-<!DOCTYPE html>
+{% extends "layout.html" %}
 
-<html>
-<head>
- <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
-    <script src = "../static/jquery-1.12.3.js"></script>
-    <script src="../static/d3.min.js"></script>
-    <script src="../static/bootstrap.js"></script>
-    <link rel=stylesheet type=text/css href="../static/bootstrap.css">
+{% block title %} Dashboard {% endblock %}
+
+{% block head %}
+    <!-- <script src="../static/d3.min.js"></script> -->
     <link rel=stylesheet type=text/css href="../static/style.css">
-	<title>V3 - Select an Analysis</title>
-</head>
+{% endblock %}
 
-<body>
+{% block content %}
+<div class="container" style="min-height:100% width:80%">
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+	  <div class="alert alert-warning alert-dismissible" role="alert">
+	  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+		{{message}}
+	  </div>
+	{% endfor %}
+  {% endif %}
+{% endwith %}
 
-	<style> body{
-	  font-family: 'Roboto Slab', serif;
-	}
-	</style>
-
-	<nav class="navbar navbar-inverse" role="navigation">
-	  <div class="container">
-	    <nav>
-	      <ul class="nav nav-pills pull-right">
-	        <li role="presentation"><a href="index">Home</a></li>
-	        <li role="presentation"><a href="#">About</a></li>
-	        <li role="presentation"><a href="#">Contact</a></li>
-	      </ul>
-	    </nav>
-	    <a class="navbar-brand" href="/">V3</a>
-	  </div>    
-	</nav>
-
-	<div class="container" style="min-height:100% width:80%">
-	{% with messages = get_flashed_messages() %}
-	  {% if messages %}
-	    {% for message in messages %}
-		  <div class="alert alert-warning alert-dismissible" role="alert">
-		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-			{{message}}
-		  </div>
-		{% endfor %}
-	  {% endif %}
-	{% endwith %}
-	
-	{% block body %}{% endblock %}
+{% block body %}{% endblock %}
+</div>
+<h1>Select an Analysis to Display</h1>
+<br>
+<form method="POST" enctype="multipart/form-data">
+<div class="col-lg-12 col-lg-offset-5">
+	<div class="btn-group btn-group-vertical" data-toggle="buttons">
+	{% for file in csv_list %}
+	  <label class="btn active">
+	    <input type="radio" name="filename" value={{file}} autocomplete="off">{{file}}
+	  </label>
+	{% endfor %}
+	  <label class="btn active">
+	    <input type="radio" name="options" id="option2" autocomplete="off"> Blank Radio
+	  </label>
 	</div>
-	<h1>Select an Analysis to Display</h1>
+	</div>
 	<br>
-	<form method="POST" enctype="multipart/form-data">
-	<div class="col-lg-12 col-lg-offset-5">
-		<div class="btn-group btn-group-vertical" data-toggle="buttons">
-		{% for file in csv_list %}
-		  <label class="btn active">
-		    <input type="radio" name="filename" value={{file}} autocomplete="off">{{file}}
-		  </label>
-		{% endfor %}
-		  <label class="btn active">
-		    <input type="radio" name="options" id="option2" autocomplete="off"> Blank Radio
-		  </label>
-		</div>
-		</div>
-		<br>
-		<br>
-		<div class="col-lg-6">
-		<p><button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button></p>
-		</div>
-		<div class="col-lg-6">
-		<p><button  type="submit" class="btn btn-lg btn-success" role="button">Show Results</button></p>
-		</div>
-	</form>
-
-	<script>
-	function goBack() {
-	    window.history.back();
-	}
-	</script>
-
-</body>
-</html>
+	<br>
+	<div class="col-lg-6">
+	<p><button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button></p>
+	</div>
+	<div class="col-lg-6">
+	<p><button  type="submit" class="btn btn-lg btn-success" role="button">Show Results</button></p>
+	</div>
+</form>
+{% endblock %}

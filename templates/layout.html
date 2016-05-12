@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>V3 - {% block title %} {% endblock %}</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+    <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    {% block head %} {% endblock %}
+</head>
+
+<body>
+
+<style> 
+body {
+  font-family: 'Roboto Slab', serif;
+}
+</style>
+
+<nav class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <nav>
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation"><a href="/">Home</a></li>
+                <li role="presentation"><a href="#" onclick="goBack()">Back</a></li>
+                <li role="presentation"><a href="about.html">About</a></li>
+                <li role="presentation"><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+        <a class="navbar-brand" href="/">V3</a>
+    </div>
+</nav>
+
+{% block content %} {% endblock %}
+
+<script>
+// called when user clicks "Back" button
+function goBack() {
+    window.history.back();
+}
+</script>
+
+</body>
+</html>
+
