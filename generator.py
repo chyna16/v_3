@@ -13,9 +13,18 @@ def set_path(maat_dir):
 	print("-" * 60)
 
 
-def create_log(repo_name, date_after, date_before, address):
-	sys_command = "" # resets to blank
+def change_folder(repo_name, date_after, date_before):
+	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
+	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
 
+
+def directory_return():
+	os.chdir("..")
+
+
+def create_log(repo_name, date_after, date_before, address):
+	print("Obtaining repository logs...")
+	sys_command = "" # resets to blank
 	# first part of command same for any date specification
 	sys_command = 'git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat'
 	#the following commands change depending on date specification
@@ -30,9 +39,9 @@ def create_log(repo_name, date_after, date_before, address):
 		sys_command += ' --after=' + date_after + ' --before=' + date_before 	
 	# last part of command same for any date specification			
 	sys_command += ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log'
-
 	os.system(sys_command) # command line call using the updated string
-
+	print("Done.")
+	print("-" * 60)
 
 def run_codemaat(analysis_type, analysis_name, repo_name, date_after, date_before):
 	os.system("maat -l logfile_" 
@@ -43,27 +52,28 @@ def run_codemaat(analysis_type, analysis_name, repo_name, date_after, date_befor
 
 def generate_data(address, repo_name, date_after, date_before):
 	# creates folder for the root_dir variable if none exists
-	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
-	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
-	print("Obtaining repository logs...")
-	create_log(repo_name, date_after, date_before, address)
-	print("Done.")
-	print("-" * 60)
+	# os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
+	# os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
+	# print("Obtaining repository logs...")
+	# create_log(repo_name, date_after, date_before, address)
+	# print("Done.")
+	# print("-" * 60)
 	print("Creating csv files from generated log...")
 	time.sleep(1)
-	# print("Creating repository summary...")
-	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
-	# 	# Reports an overview of mined data from git's log file
-	# print("Creating organizational metrics...")
-	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	# 	# Reports the number of authors/revisions made per module
-	# print("Creating coupling history...")
-	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
-	# 	# Reports correlation of files that often commit together
-	# 	# degree = % of commits where the two files were changed in the same commit
-	# print("Creating code age summary...")
-	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
-	# 	# Reports how long ago the last change was made in measurement of months
+	print("Creating repository summary...")
+	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	# Reports an overview of mined data from git's log file
+	print("Creating organizational metrics...")
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# Reports the number of authors/revisions made per module
+	print("Creating coupling history...")
+	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	# Reports correlation of files that often commit together
+	# degree = % of commits where the two files were changed in the same commit
+	print("Creating code age summary...")
+	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	# Reports how long ago the last change was made in measurement of months
+	print("Creating repository hotspots...")
 	run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
 	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
 		+ "lines_" + repo_name + ".csv")
@@ -73,8 +83,39 @@ def generate_data(address, repo_name, date_after, date_before):
 	# 	+ "lines_" + repo_name + ".csv")
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
-	os.chdir("..")
+	# os.chdir("..")
 
+
+def generate_data_summary(address, repo_name, date_after, date_before):
+	time.sleep(1)
+	print("Creating repository summary...")
+	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	print("-" * 60)
+
+
+def generate_data_hotspot(address, repo_name, date_after, date_before):
+	time.sleep(1)
+	print("Creating repository hotspots...")
+	run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
+	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+		+ "lines_" + repo_name + ".csv")
+	merge_csv(repo_name)
+	print("-" * 60)
+
+
+def generate_data_metrics(address, repo_name, date_after, date_before):
+	time.sleep(1)
+	print("Creating organizational metrics...")
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+		# Reports the number of authors/revisions made per module
+	print("-" * 60)
+
+
+def generate_data_coupling(address, repo_name, date_after, date_before):
+	time.sleep(1)
+	print("Creating coupling history...")
+	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	print("-" * 60)
 
 def submit_url(clone_url, password):
 	os.chdir('..')

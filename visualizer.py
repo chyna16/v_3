@@ -185,10 +185,49 @@ def select_folder(repo, from_date, to_date):
 		# + date_before)): 
 		print("folder exists:" + repo_dir + root_dir)
 		flash('Directory exists, redirected to current page.')
-	else:
+	elif request.form['checkbox'] == "summary":
+		print ("button: " + request.form['checkbox'])
+		generator.change_folder(repo, from_date, to_date)
+		generator.generate_data_summary(repo_dir + repo + '/.git', 
+			repo, from_date, to_date)
+		generator.directory_return()
+		flash('Analysis complete.')
+	elif request.form['checkbox'] == "hotspots":
+		print ("button: " + request.form['checkbox'])
+		generator.change_folder(repo, from_date, to_date)
+		generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
+		generator.generate_data_hotspot(repo_dir + repo + '/.git', 
+			repo, from_date, to_date)
+		generator.directory_return()
+		flash('Analysis complete.')
+	elif request.form['checkbox'] == "metrics":
+		print ("button: " + request.form['checkbox'])
+		generator.change_folder(repo, from_date, to_date)
+		generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
+		generator.generate_data_metrics(repo_dir + repo + '/.git', 
+			repo, from_date, to_date)
+		generator.directory_return()
+		flash('Analysis complete.')
+	elif request.form['checkbox'] == "coupling":
+		print ("button: " + request.form['checkbox'])
+		generator.change_folder(repo, from_date, to_date)
+		generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
+		generator.generate_data_coupling(repo_dir + repo + '/.git', 
+			repo, from_date, to_date)
+		generator.directory_return()
+		flash('Analysis complete.')
+	elif request.form['checkbox'] == "0":
+		print("none selected- button: " + request.form['checkbox'])
+		generator.change_folder(repo, from_date, to_date)
+		generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
 		generator.generate_data(repo_dir + repo + '/.git', 
 			repo, from_date, to_date)
+		generator.directory_return()
 		flash('Analysis complete.')
+	# else:
+	# 	generator.generate_data(repo_dir + repo + '/.git', 
+	# 		repo, from_date, to_date)
+	# 	flash('Analysis complete.')
 
 	return (root_dir)
 
