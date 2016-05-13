@@ -161,12 +161,16 @@ def merge_csv(repo_name):
 	lines_array = []
 	merge_array = []
 
-	with open("lines_" + repo_name + ".csv") as lines_file:
-		lines_reader = csv.DictReader(lines_file)
-		for row in lines_reader:
-			lines_array.append({'entity': row['filename'], 'lines': row['code']})
+	try:
+		with open("hotspots_" + repo_name + ".csv") as lines_file:
+			lines_reader = csv.DictReader(lines_file)
+			for row in lines_reader:
+				lines_array.append({'entity': row['filename'], 'lines': row['code']})
+	except IOError:
+		print("file not found")
+		return
 
-	with open("hotspots_" + repo_name + ".csv", "rt") as rev_file:
+	with open("metrics_" + repo_name + ".csv", "rt") as rev_file:
 		revs_reader = csv.DictReader(rev_file)
 		for row in revs_reader:
 			for module in lines_array:
@@ -181,7 +185,6 @@ def merge_csv(repo_name):
 		writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames) 
 		writer.writeheader()
 		for row in merge_array:
-			# writer.writerow({'entity': row['entity'], 'n-revs': row['n-revs'], 'lines': row['lines']})
 			writer.writerow(row)
 
 

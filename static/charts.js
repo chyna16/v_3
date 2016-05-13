@@ -6,7 +6,8 @@ var height = 450 - margin.top - margin.bottom;
 var padding = 1;
 
 var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
-var hotspot_color = d3.scale.ordinal().range(["#ffb3b3", "#ff9999", "#ff8080", "#ff6666", "#ff4d4d", "#ff4d4d", "#ff1a1a", "#ff0000", "#e60000"]);
+var hotspot_color = d3.scale.linear();
+
 
 // this is called by chooseColumn() when the user selects data for y-axis
 function createGraph(data) {
@@ -20,13 +21,15 @@ function createGraph(data) {
     else { w = 1000; }
     width = w - margin.left - margin.right;
 
+    hotspot_color.domain([0, d3.max(data, function(d) { return d['n-revs']; })]);
+    hotspot_color.range(["#ffb3b3", "#e60000"]);
 
 ///////////////////////////// B A R  G R A P H ///////////////////////////////
     if (chosen_key == 'default') {
         // if no column was specified, the data from all value columns is used
         if (analysis == ("hotspots_" + repo + ".csv")) {
             var labels = d3.keys(data[0]).filter(function(key) 
-            { return key !== keys[0] && key !== 'values' && key !== 'n-revs'; });
+            { return key == 'lines'; });
         }
         else {
             var labels = d3.keys(data[0]).filter(function(key) 

@@ -1,39 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% extends "layout.html" %}
+
+{% block title %} Result {% endblock %}
+
+{% block head %}
     <link rel=stylesheet type=text/css href="../static/style.css">
-    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
-    <script src = "../static/jquery-1.12.3.js"></script>
     <script src="../static/d3.min.js"></script>
-    <script src="../static/bootstrap.js"></script>
     <script src="../static/table.js"></script>
     <script src="../static/charts.js"></script>
     <script src="../static/interactivity.js"></script>
-    <link rel=stylesheet type=text/css href="../static/bootstrap.css">
-    <title>Results</title>
-</head>
+{% endblock %}
 
-<body>
-
-<style> body{
-  font-family: 'Roboto Slab', serif;
-}
-</style>
-
-<nav class="navbar navbar-inverse" role="navigation">
-    <div class="container">
-        <nav>
-            <ul class="nav nav-pills pull-right">
-                <li role="presentation"><a href="#">Home</a></li>
-                <li role="presentation"><a href="#" onclick="goBack()">Previous</a></li>
-                <li role="presentation"><a href="about.html">About</a></li>
-                <li role="presentation"><a href="#">Contact</a></li>
-            </ul>
-        </nav>
-        <a class="navbar-brand" href="/">V3</a>
-    </div>
-</nav>
-
+{% block content %}
 <h1>Results for "{{repo_name}}" Repository</h1>
 <h2> 
     From 
@@ -49,6 +26,7 @@
 <center>
     <div id="wrapperBar" style="display: block; width: 1000px; overflow-x: scroll;"></div>
 </center>
+
 <br>
 <br>
 
@@ -66,8 +44,10 @@
     <input type="button" value="Filter" onclick="setFilter()">
 </form>
 </center>
+
 <br>
 <br>
+
 <center>
 <div class="col-md-10" style="float:none">
     <table class="table">
@@ -96,12 +76,6 @@
  
     var chosen_key = "default"; // the default key represents all columns
 
-
-    // called when user clicks "Back" button
-    function goBack() {
-        window.history.back();
-    }
-
     // the script waits until all the html content has been loaded
     // before calling the function
     // to create the default table/graph
@@ -110,6 +84,4 @@
     })
 
 </script>
-
-</body>
-</html>
+{% endblock %}
