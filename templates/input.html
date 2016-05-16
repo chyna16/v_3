@@ -25,25 +25,17 @@
 <h1>Select an Analysis to Display</h1>
 <br>
 <form method="POST" enctype="multipart/form-data">
-<div class="col-lg-12 col-lg-offset-5">
-	<div class="btn-group btn-group-vertical" data-toggle="buttons">
+<div class="col-lg-12">
 	{% for file in csv_list %}
-	  <label class="btn active">
-	    <input type="radio" name="filename" value={{file}} autocomplete="off">{{file}}
-	  </label>
+	    <button class="btn btn-primary-outline" name="filename" value={{file}} autocomplete="off">{{file}}</button>
 	{% endfor %}
-	  <label class="btn active">
-	    <input type="radio" name="options" id="option2" autocomplete="off"> Blank Radio
-	  </label>
-	</div>
+	    <button class="btn btn-primary-outline" name="options" value="option2" autocomplete="off"> Blank Button </button>
 	</div>
 	<br>
 	<br>
-	<div class="col-lg-6">
+	<br>
+	<div class="col-lg-12">
 	<p><button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button></p>
-	</div>
-	<div class="col-lg-6">
-	<p><button  type="submit" class="btn btn-lg btn-success" role="button">Show Results</button></p>
 	</div>
 </form>
 {% endblock %}
