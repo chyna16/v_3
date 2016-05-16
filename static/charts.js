@@ -1,63 +1,52 @@
 // graph dimensions
-var w;
-var width;
-var margin = {top: 20, left: 70, right: 20, bottom: 130};
-var height = 450 - margin.top - margin.bottom;
-var padding = 1;
 
-var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
-var hotspot_color = d3.scale.linear();
 
+function createGraph(data) {
+    if (analysis == ("hotspots_" + repo + ".csv")) {
+        createBubbleChart(data);
+    }
+    else {
+        createBarGraph(data);
+    }
+}
 
 // this is called by chooseColumn() when the user selects data for y-axis
-function createGraph(data) {
+function createBarGraph(data) {
     d3.select('#wrapperBar').html("");
         // .html("") causes the wrapper to be emptied out
         // this prevents copies from being made each time function is called
         // NOTE: this apparently does not work in Safari; fix later
 
+    var w;
+    var width;
+    var margin = {top: 20, left: 70, right: 20, bottom: 130};
+    var height = 450 - margin.top - margin.bottom;
+    var padding = 1;
+    var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
+    
     if (data.length > 50) { w = data.length * 20; }
     else if (data.length < 10) { w = data.length * 100; }
     else { w = 1000; }
     width = w - margin.left - margin.right;
 
-    hotspot_color.domain([0, d3.max(data, function(d) { return d['n-revs']; })]);
-    hotspot_color.range(["#ffb3b3", "#e60000"]);
-
 ///////////////////////////// B A R  G R A P H ///////////////////////////////
     if (chosen_key == 'default') {
         // if no column was specified, the data from all value columns is used
-        if (analysis == ("hotspots_" + repo + ".csv")) {
-            var labels = d3.keys(data[0]).filter(function(key) 
-            { return key == 'lines'; });
-        }
-        else {
-            var labels = d3.keys(data[0]).filter(function(key) 
-            { return key !== keys[0] && key !== 'values' && key !== 'coupled'; });
-        }
+        var labels = d3.keys(data[0]).filter(function(key) 
+        { return key !== keys[0] && key !== 'values' && key !== 'coupled'; });
     }
     else {
         // if a column was specified, only the data from that column is used
         var labels = d3.keys(data[0]).filter(function(key) 
-            { return key == chosen_key; });
+        { return key == chosen_key; });
     }
 
-    if (analysis == ("hotspots_" + repo + ".csv")) {
-        data.forEach(function(d, i) {
-            delete d.values;
-            d.values = labels.map(function(label) {
-                return {type: label, value: +d[label], revs: +d['n-revs']};
-            });
+    data.forEach(function(d, i) {
+        delete d.values;
+        d.values = labels.map(function(label) {
+            return {type: label, value: +d[label]};
         });
-    }
-    else {
-        data.forEach(function(d, i) {
-            delete d.values;
-            d.values = labels.map(function(label) {
-                return {type: label, value: +d[label]};
-            });
-        });
-    }
+    });
 
     // var xScale = d3.scale.ordinal()
     //         .domain(type).rangePoints([0, width - (width / values.length)]);
@@ -106,10 +95,7 @@ function createGraph(data) {
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
             .attr("y", function(d) { return yScale(d.value); })
-            .style("fill", function(d) {
-                if(analysis == ("hotspots_" + repo + ".csv")) return hotspot_color(d.revs); 
-                else return color(d.type);
-                }); 
+            .style("fill", function(d) { return color(d.type); }); 
 
     /* var bar = canvas.selectAll("rect")
             .data(values)
@@ -167,4 +153,50 @@ function createGraph(data) {
             .attr("dy", ".15em")
             .style("font-size", ".8em")
             .attr("fill", "steelblue");
+}
+
+
+function createBubbleChart(data) {
+    d3.select('#wrapperBar').html("");
+
+    var diameter = 600;
+
+    var color = d3.scale.linear()
+        .domain([0, d3.max(data, function(d) { return +d['n-revs']; })])
+        .range(["#ffb3b3", "#e60000"]);
+
+    var chart = d3.layout.pack()
+        .sort(null)
+        .size([diameter, diameter])
+        .padding(1.5);
+
+    data.forEach(function(d) { d.value = +d['lines']; })
+
+    var nodes = chart.nodes({children: data}).filter(function(d) { return !d.children; });
+
+    var canvas = d3.select("#wrapperBar")
+        .append("svg")
+            .attr("width", diameter)
+            .attr("height", diameter)
+            .attr("class", "bubble");
+
+    var bubbles = canvas.append("g")
+            .attr("transform", "translate(200,0)")
+        .selectAll(".bubble")
+            .data(nodes)
+            .enter();
+
+    bubbles.append("circle")
+            .attr("r", function(d) { return d.r; })
+            .attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; })
+            .style("fill", function(d) { return color(+d['n-revs']); });
+
+    bubbles.append("text")
+            .attr("x", function(d) { return d.x; })
+            .attr("y", function(d) { return d.y + 5; })
+            .attr("text-anchor", "middle")
+        .text(function(d) { return d['entity']; })
+            .style("fill", "black") 
+            .style("font-size", "12px");
 }
