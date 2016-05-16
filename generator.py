@@ -61,23 +61,23 @@ def generate_data(address, repo_name, date_after, date_before):
 	print("Creating csv files from generated log...")
 	time.sleep(1)
 	print("Creating repository summary...")
-	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
 	# Reports an overview of mined data from git's log file
 	print("Creating organizational metrics...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	# Reports the number of authors/revisions made per module
 	print("Creating coupling history...")
-	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
 	# Reports correlation of files that often commit together
 	# degree = % of commits where the two files were changed in the same commit
 	print("Creating code age summary...")
-	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
-	run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
-	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "lines_" + repo_name + ".csv")
-	merge_csv(repo_name)
+	# run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
+	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+	# 	+ "lines_" + repo_name + ".csv")
+	# merge_csv(repo_name)
 	# os.system("python ../../../maat_scripts/merge_comp_freqs.py " 
 	# 	+ "frequency_" + repo_name + ".csv" + " " 
 	# 	+ "lines_" + repo_name + ".csv")
@@ -96,9 +96,9 @@ def generate_data_summary(address, repo_name, date_after, date_before):
 def generate_data_hotspot(address, repo_name, date_after, date_before):
 	time.sleep(1)
 	print("Creating repository hotspots...")
-	run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "lines_" + repo_name + ".csv")
+		+ "hotspots_" + repo_name + ".csv")
 	merge_csv(repo_name)
 	print("-" * 60)
 
@@ -116,6 +116,7 @@ def generate_data_coupling(address, repo_name, date_after, date_before):
 	print("Creating coupling history...")
 	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
 	print("-" * 60)
+
 
 def submit_url(clone_url, password):
 	os.chdir('..')
