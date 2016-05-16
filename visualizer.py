@@ -26,20 +26,14 @@ def index():
 			repo_list=repo_list, list_of_projects=list_of_projects)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "2":
-			# session['repo_name'] = request.form['repo_name']
-			# session['from_date'] = request.form['from_date']
-			# session['to_date'] = request.form['to_date']
 			repo_name = request.form['repo_name']
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
-			# session['root_dir'] = select_folder(repo_name, from_date, to_date)
 			root_dir = select_folder(repo_name, from_date, to_date)
 			return redirect(url_for('dashboard',
 				root_dir=root_dir, repo_name=repo_name, 
 				from_date=from_date, to_date=to_date))
 		elif request.form['submit_button'] == "1":
-			# session['clone_url'] = request.form['clone_url']
-			# session['password'] = request.form['password']
 			clone_url = request.form['clone_url']
 			password = request.form['password']
 			message = generator.submit_url(clone_url, password)
@@ -49,47 +43,6 @@ def index():
 			# session['project_name'] = request.form['project_name']
 			project_name = request.form['project_name']
 			return redirect(url_for('index_repo', project_name=project_name))
-		# elif not session['repo_name'] == "":
-		# 	# print("blah")
-			# session['root_dir'] = select_folder(repo_name, from_date, to_date)
-			# return redirect(url_for('dashboard'))
-
-
-@app.route('/index_available', methods=['POST'])
-def index_available():
-	# if request.method == 'GET':
-	# 	repo_list = [ item for item in os.listdir(repo_dir) if os.path.isdir(os.path.join(repo_dir, item)) ]
-	# 	return render_template('index_available.html', repo_list=repo_list)  # returns array of csv filenames to webpage
-	if request.method == 'POST':
-		session['clone_url'] = request.form['clone_url']
-		session['password'] = request.form['password']
-		session['repo_name'] = request.form['repo_name']
-		session['from_date'] = request.form['from_date']
-		session['to_date'] = request.form['to_date']
-
-		clone_url = session['clone_url']
-		password = session['password']
-		repo_name = session['repo_name']
-		from_date = session['from_date']
-		to_date = session['to_date']
-
-		print(from_date)
-		print(to_date)
-
-		if not session['repo_name'] == "":
-			session['root_dir'] = select_folder(repo_name, from_date, to_date)
-			return redirect(url_for('dashboard'))
-
-	
-@app.route('/index_project', methods=['GET', 'POST'])
-def index_project():
-	list_of_projects = stash_api.get_projects()
-
-	if request.method == 'GET':
-		return render_template('index_project.html', list_of_projects=list_of_projects)  
-	elif request.method == 'POST' and not request.form['project_name'] == "":
-		session['project_name'] = request.form['project_name']
-		return redirect(url_for('index_repo'))
 
 
 @app.route('/index_repo', methods=['GET', 'POST'])
@@ -107,10 +60,6 @@ def index_repo():
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-	# root_dir = session['root_dir']
-	# repo_name = session['repo_name']
-	# from_date = session['from_date']
-	# to_date = session['to_date']
 	root_dir = request.args.get('root_dir')
 	repo_name = request.args.get('repo_name')
 	from_date = request.args.get('from_date')
@@ -135,10 +84,6 @@ def dashboard():
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	# csv_name = session['csv_name']
-	# repo_name = session['repo_name']
-	# from_date = session['from_date']
-	# to_date = session['to_date']
 	repo_name = request.args.get('repo_name')
 	csv_name = request.args.get('csv_name')
 	from_date = request.args.get('from_date')
@@ -180,9 +125,6 @@ def select_folder(repo, from_date, to_date):
 		+ from_date + "_" + to_date)
 	# if directory already exists, skip function and go to the next page
 	if(os.path.exists(repo_dir + root_dir)):
-		# + "v3/csv_files_" 
-		# + repo + "_" + date_after + "_" 
-		# + date_before)): 
 		print("folder exists:" + repo_dir + root_dir)
 		flash('Directory exists, redirected to current page.')
 	elif request.form['checkbox'] == "summary":
