@@ -19,23 +19,49 @@
 	{% endfor %}
   {% endif %}
 {% endwith %}
-
-{% block body %}{% endblock %}
 </div>
+
 <h1>Select an Analysis to Display</h1>
 <br>
+<center>
 <form method="POST" enctype="multipart/form-data">
-<div class="col-lg-12">
-	{% for file in csv_list %}
-	    <button class="btn btn-primary-outline" name="filename" value={{file}} autocomplete="off">{{file}}</button>
-	{% endfor %}
-	    <button class="btn btn-primary-outline" name="options" value="option2" autocomplete="off"> Blank Button </button>
+<div class="col-md-12">
+	<div class="col-md-6">
+	<input class="center" type="image" src="../static/images/thumbnail_metrics.png" name="analysis" value="metrics">
+	<br>
+	<b>Metrics</b>
+	<p>View the amount of effort (revisions and coders) that went into each module.</p>
 	</div>
+	<div class="col-md-6">
+	<input class="center" type="image" src="../static/images/thumbnail_hotspots.png" name="analysis" value="hotspots">
 	<br>
-	<br>
-	<br>
-	<div class="col-lg-12">
-	<p><button class="btn btn-lg btn-default" role="button" onclick="goBack()">Go Back</button></p>
+	<b>Hotspots</b>
+	<p>Find potential problem childs within your code base. See which modules may need refactoring.</p>
 	</div>
+</div>
+<br><br><br><br><br><br><br><br><br><br><br>
+<div class="col-md-12">
+	<div class="col-md-6">
+	<input class="center" type="image" src="../static/images/thumbnail_coupling.png" name="analysis" value="coupling">
+	<br>
+	<b>Coupling</b>
+	<p>Look at the relational history of your modules, and which other modules each may be dependent on.</p>
+	</div>
+	<div class="col-md-6">
+	<input class="center" type="image" src="../static/images/thumbnail_age.png" name="analysis" value="age">
+	<br>
+	<b>Age</b>
+	<p>View the code history of your modules. Compare the amount of lines added vs those deleted.</p>
+	</div>
+</div>
+<br><br><br><br><br><br><br><br><br><br><br>
 </form>
+</center>
+
 {% endblock %}
+
+	<!-- {% for file in csv_list %}
+	    <button class="btn btn-primary-outline" name="analysis" value={{file}} autocomplete="off">{{file}}</button>
+	{% endfor %} -->
+<!-- 
+	<button class="btn btn-primary-outline" name="options" value="option2" autocomplete="off"> Blank Button </button> -->

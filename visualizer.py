@@ -76,7 +76,7 @@ def dashboard():
 	# the csv file is opened and parsed; visualization is displayed
 	elif request.method == 'POST':
 		# session['csv_name'] = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
-		csv_name = request.form['filename']
+		csv_name = request.form['analysis'] + "_" + repo_name + ".csv"
 		return redirect(url_for('result',
 			repo_name=repo_name, csv_name=csv_name, 
 			from_date=from_date, to_date=to_date))
