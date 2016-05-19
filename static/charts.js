@@ -95,7 +95,31 @@ function createBarGraph(data) {
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
             .attr("y", function(d) { return yScale(d.value); })
-            .style("fill", function(d) { return color(d.type); }); 
+            .style("fill", function(d) { return color(d.type); });
+        
+     var text = category.selectAll("text")
+            .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
+            .enter()
+        .append('text')
+            .attr("x", function(d) { return x1Scale(d.type); })
+            .attr("y", function(d) { return yScale(d.value); })
+            .text(function(d){ return d.value })
+            .style("display", "block");
+        
+        //feature to display numerical values on mouse enter broken
+        // text.on("mouseenter", function(d){
+        //     word = d3.select(this);
+        //     word.select("text")
+        //     .style("display", "block")
+            // // .style("fill", "black") 
+            // .style("font-size", "12px"); 
+        // });
+
+
+        // bar.append('text')
+        //     .text(function(d){
+        //         return d.value
+        //     });
 
     /* var bar = canvas.selectAll("rect")
             .data(values)

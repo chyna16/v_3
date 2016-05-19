@@ -26,6 +26,7 @@ def create_log(repo_name, date_after, date_before, address):
 	print("Obtaining repository logs...")
 	sys_command = "" # resets to blank
 	# first part of command same for any date specification
+
 	sys_command = 'git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat'
 	#the following commands change depending on date specification
 	if not date_after == "" and date_before == "":
@@ -40,8 +41,10 @@ def create_log(repo_name, date_after, date_before, address):
 	# last part of command same for any date specification			
 	sys_command += ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log'
 	os.system(sys_command) # command line call using the updated string
+	os.system('git --git-dir ' + address + ' log --pretty=format:"%s" > logfile_string.log')
 	print("Done.")
 	print("-" * 60)
+
 
 def run_codemaat(analysis_type, analysis_name, repo_name, date_after, date_before):
 	os.system("maat -l logfile_" 
@@ -187,6 +190,19 @@ def merge_csv(repo_name):
 		writer.writeheader()
 		for row in merge_array:
 			writer.writerow(row)
+
+def word_cloud_dict():
+	file = open("logfile","r")
+	wordcount = []
+	count = 0
+	for word in file.read().split():
+		check = word.find(word)
+		if check != -1 and check !=0:
+			count += 1
+		else:
+			count = 1
+		wordcount.append({'word':word, 'count':count})
+	print (wordcount)
 
 
 if __name__ == '__main__':
