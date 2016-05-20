@@ -191,18 +191,41 @@ def merge_csv(repo_name):
 		for row in merge_array:
 			writer.writerow(row)
 
-def word_cloud_dict():
-	file = open("logfile","r")
-	wordcount = []
-	count = 0
-	for word in file.read().split():
-		check = word.find(word)
-		if check != -1 and check !=0:
-			count += 1
+# checks for non-significant words
+def reduntant_word(word):
+	if word in ('merge', 'merged', 'feature', "'feature'"):
+		return True
+	elif word[:4] in ('http', '~ben'):
+		return True
+
+# iterates over word_list
+# checks for given word within each dict
+def word_exists(word, word_list):
+	for word_pair in word_list:
+		if word.lower() == word_pair['text']:
+			word_pair['value'] += 1
+			return True
+
+# aqcuires list of all words from commit messages
+# creates a list of dictionaries of words paired with frequency of occurrence
+def get_word_frequency(logfile):
+	file = open(logfile, 'r')
+	log_list = file.read().split()
+	file.close()
+
+	word_list = []
+
+	for word in log_list:
+		if reduntant_word(word.lower()): continue
 		else:
-			count = 1
-		wordcount.append({'word':word, 'count':count})
-	print (wordcount)
+			if not word_list:
+				word_list.append({'text': word.lower(), 'value': 1})
+			else:
+				if word_exists(word, word_list): continue
+				else:
+					word_list.append({'text': word.lower(), 'value': 1})
+
+	print(word_list)
 
 
 if __name__ == '__main__':
