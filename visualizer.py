@@ -6,8 +6,6 @@ import stash_api
 import settings
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 
-# owd = obtain working directory
-owd = os.getcwd()
 app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
@@ -29,7 +27,8 @@ def index():
 			repo_name = request.form['repo_name']
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
-			root_dir = select_folder(repo_name, from_date, to_date)
+			generator.set_path(maat_dir) # set path for codemaat
+			root_dir = generator.select_folder(repo_dir, repo_name, from_date, to_date)
 			return redirect(url_for('dashboard',
 				root_dir=root_dir, repo_name=repo_name, 
 				from_date=from_date, to_date=to_date))
@@ -116,63 +115,6 @@ def not_found(e):
 @app.errorhandler(400)
 def bad_request(e):
 	return render_template ('400.html')
-
-
-# CURRENTLY NOT IN USE
-# used for reading user selection of analyses
-# FIX: currently does not read multiple selections
-def select_analysis(repo, from_date, to_date):
-	if request.form['checkbox'] == "summary":
-		print ("button: " + request.form['checkbox'])
-		generator.generate_data_summary(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
-	if request.form['checkbox'] == "hotspots":
-		print ("button: " + request.form['checkbox'])
-		generator.generate_data_hotspot(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
-	if request.form['checkbox'] == "metrics":
-		print ("button: " + request.form['checkbox'])
-		generator.generate_data_metrics(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
-	if request.form['checkbox'] == "coupling":
-		print ("button: " + request.form['checkbox'])
-		generator.generate_data_coupling(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
-	if request.form['checkbox'] == "0":
-		print("none selected- button: " + request.form['checkbox'])
-		generator.generate_data(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
-
-
-def select_folder(repo, from_date, to_date):
-	generator.set_path(maat_dir) # set path for codemaat
-	print("1: " + os.getcwd())
-	root_dir = owd + '/csv_files_' + repo + "_" + from_date + "_" + to_date
-		# root_dir is the complete address of csv folder for chosen repo
-
-	if(os.path.exists(root_dir)):
-		# if the csv folder for the chosen repo exists in 'v3'
-		print("folder exists: " + root_dir)
-		os.chdir("csv_files_" + repo + "_" + from_date + "_" + to_date)
-			# switch to that folder
-	else:
-		# if that csv folder doesn't exist
-		print("creating folder: " + root_dir)
-		generator.change_folder(repo, from_date, to_date) 
-			# create that folder and switch to it
-
-	generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
-		# while in the csv folder of chosen repo, create log file
-	print("2: " + os.getcwd())
-
-	# select_analysis(repo, from_date, to_date) # this function is not being called currently
-	# currently relying on generate_data for running codemaat
-	generator.generate_data(repo_dir + repo + '/.git', 
-		repo, from_date, to_date)
-	generator.directory_return() # go back to parent directory ('v3')
-	print("3: " + os.getcwd())
-	flash('Analysis complete.')
-	return root_dir
 
 
 
