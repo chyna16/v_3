@@ -118,60 +118,61 @@ def bad_request(e):
 	return render_template ('400.html')
 
 
-def select_folder(repo, from_date, to_date):
-	generator.set_path(maat_dir)
-	root_dir = (owd + '/csv_files_' 
-		+ repo + "_" 
-		+ from_date + "_" + to_date)
-	# if directory already exists, skip function and go to the next page
-	if(os.path.exists(repo_dir + root_dir)):
-		print("folder exists:" + repo_dir + root_dir)
-		flash('Directory exists, redirected to current page.')
-	elif request.form['checkbox'] == "summary":
+# CURRENTLY NOT IN USE
+# used for reading user selection of analyses
+# FIX: currently does not read multiple selections
+def select_analysis(repo, from_date, to_date):
+	if request.form['checkbox'] == "summary":
 		print ("button: " + request.form['checkbox'])
-		generator.change_folder(repo, from_date, to_date)
 		generator.generate_data_summary(repo_dir + repo + '/.git', 
 			repo, from_date, to_date)
-		generator.directory_return()
-		flash('Analysis complete.')
-	elif request.form['checkbox'] == "hotspots":
+	if request.form['checkbox'] == "hotspots":
 		print ("button: " + request.form['checkbox'])
-		generator.change_folder(repo, from_date, to_date)
-		generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
 		generator.generate_data_hotspot(repo_dir + repo + '/.git', 
 			repo, from_date, to_date)
-		generator.directory_return()
-		flash('Analysis complete.')
-	elif request.form['checkbox'] == "metrics":
+	if request.form['checkbox'] == "metrics":
 		print ("button: " + request.form['checkbox'])
-		generator.change_folder(repo, from_date, to_date)
-		generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
 		generator.generate_data_metrics(repo_dir + repo + '/.git', 
 			repo, from_date, to_date)
-		generator.directory_return()
-		flash('Analysis complete.')
-	elif request.form['checkbox'] == "coupling":
+	if request.form['checkbox'] == "coupling":
 		print ("button: " + request.form['checkbox'])
-		generator.change_folder(repo, from_date, to_date)
-		generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
 		generator.generate_data_coupling(repo_dir + repo + '/.git', 
 			repo, from_date, to_date)
-		generator.directory_return()
-		flash('Analysis complete.')
-	elif request.form['checkbox'] == "0":
+	if request.form['checkbox'] == "0":
 		print("none selected- button: " + request.form['checkbox'])
-		generator.change_folder(repo, from_date, to_date)
-		generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
 		generator.generate_data(repo_dir + repo + '/.git', 
 			repo, from_date, to_date)
-		generator.directory_return()
-		flash('Analysis complete.')
-	# else:
-	# 	generator.generate_data(repo_dir + repo + '/.git', 
-	# 		repo, from_date, to_date)
-	# 	flash('Analysis complete.')
 
-	return (root_dir)
+
+def select_folder(repo, from_date, to_date):
+	generator.set_path(maat_dir) # set path for codemaat
+	print("1: " + os.getcwd())
+	root_dir = owd + '/csv_files_' + repo + "_" + from_date + "_" + to_date
+		# root_dir is the complete address of csv folder for chosen repo
+
+	if(os.path.exists(root_dir)):
+		# if the csv folder for the chosen repo exists in 'v3'
+		print("folder exists: " + root_dir)
+		os.chdir("csv_files_" + repo + "_" + from_date + "_" + to_date)
+			# switch to that folder
+	else:
+		# if that csv folder doesn't exist
+		print("creating folder: " + root_dir)
+		generator.change_folder(repo, from_date, to_date) 
+			# create that folder and switch to it
+
+	generator.create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
+		# while in the csv folder of chosen repo, create log file
+	print("2: " + os.getcwd())
+
+	# select_analysis(repo, from_date, to_date) # this function is not being called currently
+	# currently relying on generate_data for running codemaat
+	generator.generate_data(repo_dir + repo + '/.git', 
+		repo, from_date, to_date)
+	generator.directory_return() # go back to parent directory ('v3')
+	print("3: " + os.getcwd())
+	flash('Analysis complete.')
+	return root_dir
 
 
 
