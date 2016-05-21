@@ -23,40 +23,48 @@
 
 <h1>Select an Analysis to Display</h1>
 <br>
-<center>
 <form method="POST" enctype="multipart/form-data">
+<center>
 <div class="col-md-12">
 	<div class="col-md-6">
-	<input class="center" type="image" src="../static/images/thumbnail_metrics.png" name="analysis" value="metrics">
+	<button type="submit" name="analysis" value="metrics">
+		<img src="../static/images/thumbnail_metrics.png">
+	</button>
 	<br>
 	<b>Metrics</b>
 	<p>View the amount of effort (revisions and coders) that went into each module.</p>
 	</div>
 	<div class="col-md-6">
-	<input class="center" type="image" src="../static/images/thumbnail_hotspots.png" name="analysis" value="hotspots">
+	<button type="submit" name="analysis" value="hotspots">
+		<img src="../static/images/thumbnail_hotspots.png">
+	</button>
 	<br>
 	<b>Hotspots</b>
-	<p>Find potential problem childs within your code base. See which modules may need refactoring.</p>
+	<p>Find potential problem children within your code base. See which modules may need refactoring.</p>
 	</div>
 </div>
 <br><br><br><br><br><br><br><br><br><br><br>
 <div class="col-md-12">
 	<div class="col-md-6">
-	<input class="center" type="image" src="../static/images/thumbnail_coupling.png" name="analysis" value="coupling">
+	<button type="submit" name="analysis" value="coupling">
+		<img src="../static/images/thumbnail_coupling.png">
+	</button>
 	<br>
 	<b>Coupling</b>
 	<p>Look at the relational history of your modules, and which other modules each may be dependent on.</p>
 	</div>
 	<div class="col-md-6">
-	<input class="center" type="image" src="../static/images/thumbnail_age.png" name="analysis" value="age">
+	<button type="submit" name="analysis" value="age">
+		<img src="../static/images/thumbnail_age.png">
+	</button>
 	<br>
 	<b>Age</b>
 	<p>View the code history of your modules. Compare the amount of lines added vs those deleted.</p>
 	</div>
 </div>
 <br><br><br><br><br><br><br><br><br><br><br>
-</form>
 </center>
+</form>
 
 {% endblock %}
 
