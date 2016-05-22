@@ -1,8 +1,6 @@
-// graph dimensions
-
 
 function createGraph(data) {
-    if (analysis == ("hotspots_" + repo + ".csv")) {
+    if (analysis_type == "hotspots") {
         createBubbleChart(data);
     }
     else {

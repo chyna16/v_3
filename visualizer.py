@@ -95,9 +95,9 @@ def dashboard():
 			# NOTE: csv_list currently not being used in webpage
 			# TO DO: get rid of csv_list and have all csv's always available?
 	elif request.method == 'POST':
-		csv_name = request.form['analysis'] + "_" + repo_name + ".csv"
+		analysis = request.form['analysis']
 		return redirect(url_for('result',
-			repo_name=repo_name, csv_name=csv_name, 
+			repo_name=repo_name, analysis=analysis, 
 			from_date=from_date, to_date=to_date))
 
 
@@ -106,21 +106,17 @@ def dashboard():
 def result():
 	# retrieves passed in queries from dashboard view
 	repo_name = request.args.get('repo_name')
-	csv_name = request.args.get('csv_name')
+	analysis = request.args.get('analysis')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
 
-	analysis = [csv_name, repo_name]
-
-	with open("csv_files_" 
-			+ repo_name + "_" 
-			+ from_date + "_" + to_date + "/"
-			+ csv_name, 'rt') as csv_file:
+	with open("csv_files_" + repo_name + "_" + from_date + "_" + to_date + "/"
+		+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
 		# opens respective csv file for chosen analysis
 		data, keys = generator.parse_csv(csv_file) 
 			# calls parse_csv to retrieve data from csv file
 	return render_template('result.html', 
-		repo_name=repo_name, csv_name=json.dumps(analysis),
+		repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
 		from_date=from_date, to_date=to_date, 
 		data=json.dumps(data), keys=json.dumps(keys))
 			# json.dumps() converts data into a string format for javascript
