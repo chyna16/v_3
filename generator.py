@@ -6,122 +6,17 @@ import subprocess
 from flask import request, flash
 
 
+# called by index view
+# sets the path to the location of codemaat in order to call maat command
 def set_path(maat_dir):
 	print("Setting a path for codemaat...")
-	# path is set temporarily, per script run
 	os.environ['PATH'] += os.pathsep + maat_dir
 	print("Done.")
 	print("-" * 60)
 
 
-def change_folder(repo_name, date_after, date_before):
-	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
-	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
-
-
-def directory_return():
-	os.chdir("..")
-
-
-def create_log(repo_name, date_after, date_before, address):
-	print("Obtaining repository logs...")
-	sys_command = "" # resets to blank
-	# first part of command same for any date specification
-
-	sys_command = 'git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat'
-	#the following commands change depending on date specification
-	if not date_after == "" and date_before == "":
-		print("date after selected")
-		sys_command += ' --after=' + date_after 	
-	elif date_after == "" and not date_before == "":
-		print("date before selected")
-		sys_command += ' --before=' + date_before 	
-	elif not date_after == "" and not date_before == "":
-		print("date_after and date_before selected")
-		sys_command += ' --after=' + date_after + ' --before=' + date_before 	
-	# last part of command same for any date specification			
-	sys_command += ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log'
-	os.system(sys_command) # command line call using the updated string
-	os.system('git --git-dir ' + address + ' log --pretty=format:"%s" > logfile_string.log')
-	print("Done.")
-	print("-" * 60)
-
-
-def run_codemaat(analysis_type, analysis_name, repo_name, date_after, date_before):
-	os.system("maat -l logfile_" 
-		+ repo_name + "_" + date_after + "_" + date_before 
-		+ ".log -c git -a " + analysis_type + " > " 
-		+ analysis_name + "_" + repo_name + ".csv")
-
-
-def generate_data(address, repo_name, date_after, date_before):
-	# creates folder for the root_dir variable if none exists
-	# os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
-	# os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
-	# print("Obtaining repository logs...")
-	# create_log(repo_name, date_after, date_before, address)
-	# print("Done.")
-	# print("-" * 60)
-	print("Creating csv files from generated log...")
-	time.sleep(1)
-	print("Creating repository summary...")
-	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
-	# Reports an overview of mined data from git's log file
-	print("Creating organizational metrics...")
-	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	# Reports the number of authors/revisions made per module
-	print("Creating coupling history...")
-	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
-	# Reports correlation of files that often commit together
-	# degree = % of commits where the two files were changed in the same commit
-	print("Creating code age summary...")
-	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
-	# Reports how long ago the last change was made in measurement of months
-	print("Creating repository hotspots...")
-	# run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
-	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-	# 	+ "lines_" + repo_name + ".csv")
-	# merge_csv(repo_name)
-	# os.system("python ../../../maat_scripts/merge_comp_freqs.py " 
-	# 	+ "frequency_" + repo_name + ".csv" + " " 
-	# 	+ "lines_" + repo_name + ".csv")
-	print("Done. Check your current folder for your files.")
-	print("-" * 60)
-	# os.chdir("..")
-
-
-def generate_data_summary(address, repo_name, date_after, date_before):
-	time.sleep(1)
-	print("Creating repository summary...")
-	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
-	print("-" * 60)
-
-
-def generate_data_hotspot(address, repo_name, date_after, date_before):
-	time.sleep(1)
-	print("Creating repository hotspots...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "hotspots_" + repo_name + ".csv")
-	merge_csv(repo_name)
-	print("-" * 60)
-
-
-def generate_data_metrics(address, repo_name, date_after, date_before):
-	time.sleep(1)
-	print("Creating organizational metrics...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-		# Reports the number of authors/revisions made per module
-	print("-" * 60)
-
-
-def generate_data_coupling(address, repo_name, date_after, date_before):
-	time.sleep(1)
-	print("Creating coupling history...")
-	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
-	print("-" * 60)
-
-
+# called by index view & index_repo view
+# handles command line inputs for cloning a repository
 def submit_url(clone_url, password):
 	os.chdir('..')
 	char = clone_url.index('@')
@@ -144,7 +39,108 @@ def submit_url(clone_url, password):
 	return message
 
 
-# used for reading user selection of analyses
+def change_folder(repo_name, date_after, date_before):
+	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
+	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
+
+
+def directory_return():
+	os.chdir("..")
+
+
+# called by select_folder
+# handles command line inputs for creating a logfile
+def create_log(repo_name, date_after, date_before, address):
+	print("Obtaining repository logs...")
+	sys_command = "" # resets to blank
+	# first part of command same for any date specification
+	sys_command = 'git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat'
+	#the following commands change depending on date specification
+	if not date_after == "" and date_before == "":
+		print("date after selected")
+		sys_command += ' --after=' + date_after 	
+	elif date_after == "" and not date_before == "":
+		print("date before selected")
+		sys_command += ' --before=' + date_before 	
+	elif not date_after == "" and not date_before == "":
+		print("date_after and date_before selected")
+		sys_command += ' --after=' + date_after + ' --before=' + date_before 	
+	# last part of command same for any date specification			
+	sys_command += ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log'
+	os.system(sys_command) # command line call using the updated string
+	os.system('git --git-dir ' + address + ' log --pretty=format:"%s" > logfile_string.log')
+	print("Done.")
+	print("-" * 60)
+
+
+# called by generate_data functions
+# helper function to handle command line input for running codemaat
+def run_codemaat(analysis_type, analysis_name, repo_name, date_after, date_before):
+	os.system("maat -l logfile_" 
+		+ repo_name + "_" + date_after + "_" + date_before 
+		+ ".log -c git -a " + analysis_type + " > " 
+		+ analysis_name + "_" + repo_name + ".csv")
+
+
+# called by select_folder/select_analysis
+# currently only calls run_codemaat on all analyses
+def generate_data(address, repo_name, date_after, date_before):
+	print("Creating csv files from generated log...")
+	time.sleep(1)
+	print("Creating repository summary...")
+	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	# Reports an overview of mined data from git's log file
+	print("Creating organizational metrics...")
+	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# Reports the number of authors/revisions made per module
+	print("Creating coupling history...")
+	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	# Reports correlation of files that often commit together
+	# degree = % of commits where the two files were changed in the same commit
+	print("Creating code age summary...")
+	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	# Reports how long ago the last change was made in measurement of months
+	print("Creating repository hotspots...")
+	# run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
+	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+	# 	+ "lines_" + repo_name + ".csv")
+	# merge_csv(repo_name)
+	print("Done. Check your current folder for your files.")
+	print("-" * 60)
+
+
+def generate_data_summary(address, repo_name, date_after, date_before):
+	time.sleep(1)
+	print("Creating repository summary...")
+	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	print("-" * 60)
+
+def generate_data_hotspot(address, repo_name, date_after, date_before):
+	time.sleep(1)
+	print("Creating repository hotspots...")
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+		+ "hotspots_" + repo_name + ".csv")
+	merge_csv(repo_name)
+	print("-" * 60)
+
+def generate_data_metrics(address, repo_name, date_after, date_before):
+	time.sleep(1)
+	print("Creating organizational metrics...")
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+		# Reports the number of authors/revisions made per module
+	print("-" * 60)
+
+def generate_data_coupling(address, repo_name, date_after, date_before):
+	time.sleep(1)
+	print("Creating coupling history...")
+	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	print("-" * 60)
+
+
+# called by select_folder
+# reads user selection of analyses 
+# calls helper functions that run codemaat 
 # FIX: currently does not read multiple selections
 def select_analysis(repo_dir, repo, from_date, to_date):
 	if request.form['checkbox'] == "summary":
@@ -169,6 +165,10 @@ def select_analysis(repo_dir, repo, from_date, to_date):
 			repo, from_date, to_date)
 
 
+# called by index view
+# sets the address where csv files are/will be located
+# handles switching between directories
+# calls helper functions that handle folder, logfile, & codemaat
 def select_folder(repo_dir, repo, from_date, to_date):
 	print("1: " + os.getcwd())
 	root_dir = os.getcwd() + '/csv_files_' + repo + "_" + from_date + "_" + to_date
@@ -198,8 +198,10 @@ def select_folder(repo_dir, repo, from_date, to_date):
 	return root_dir
 
 
-# this function takes csv file and two empty arrays
-# reads each column from file into an array and returns the arrays
+# called by result view
+# reads opened csv file
+# creates a list of the headers, and a dictionary of each row
+# returns the list of headers, and a list of the dictionaries
 def parse_csv(uploaded_file):
 	reader = csv.reader(uploaded_file)
 	data_dict = []
@@ -217,6 +219,10 @@ def parse_csv(uploaded_file):
 	return (data_dict, key_array)
 
 
+# called by generate_data/generate_data_hotspot
+# collects num of revs from metrics.csv & lines from hotspots.csv
+# merges them together with respective modules
+# re-writes hotspots.csv w/ merged data
 def merge_csv(repo_name):
 	lines_array = []
 	merge_array = []
@@ -247,21 +253,24 @@ def merge_csv(repo_name):
 		for row in merge_array:
 			writer.writerow(row)
 
-# checks for non-significant words
+
+# called by get_word_frequency
+# filters out non-significant words
 def reduntant_word(word):
 	if word in ('merge', 'merged', 'feature', "'feature'"):
 		return True
 	elif word[:4] in ('http', '~ben'):
 		return True
 
-# iterates over word_list
-# checks for given word within each dict
+# called by get_word_frequency
+# iterates over word_list & checks for given word within each dict
 def word_exists(word, word_list):
 	for word_pair in word_list:
 		if word.lower() == word_pair['text']:
 			word_pair['value'] += 1
 			return True
 
+# CURRENTLY NOT IN USE
 # aqcuires list of all words from commit messages
 # creates a list of dictionaries of words paired with frequency of occurrence
 def get_word_frequency(logfile):

@@ -1,64 +1,84 @@
 import os
 import fnmatch
 import json
-import generator
-import stash_api
-import settings
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import Flask, request, render_template, redirect, url_for, flash
+import generator # our script
+import stash_api # our script
+import settings # our script
 
 app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
 
-maat_dir = settings.maat_directory
-repo_dir = settings.repo_directory
+maat_dir = settings.maat_directory # address of codemaat
+repo_dir = settings.repo_directory # address of cloned repositories
+list_of_projects = stash_api.get_projects() # list of projects on Stash
 
 
+# homepage where user can select/add a repository to begin analysis process
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
 	if request.method == 'GET':
-		list_of_projects = stash_api.get_projects()
-		repo_list = [ item for item in os.listdir(repo_dir) if os.path.isdir(os.path.join(repo_dir, item)) ]
+		repo_list = [ item for item in os.listdir(repo_dir) 
+			if os.path.isdir(os.path.join(repo_dir, item)) ]
+			# a list of all currently cloned repositories
+			# refreshes everytime user chooses a new repository
 		return render_template('index.html', 
 			repo_list=repo_list, list_of_projects=list_of_projects)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "2":
+			# if a selection was made from 'Available Repositories'
 			repo_name = request.form['repo_name']
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
 			generator.set_path(maat_dir) # set path for codemaat
-			root_dir = generator.select_folder(repo_dir, repo_name, from_date, to_date)
-			return redirect(url_for('dashboard',
+			root_dir = generator.select_folder(
+				repo_dir, repo_name, from_date, to_date
+			)	# select_folder called to handle folders and files
+				# returns address of folder that contains csv files
+			return redirect(url_for(
+				'dashboard',
 				root_dir=root_dir, repo_name=repo_name, 
-				from_date=from_date, to_date=to_date))
+				from_date=from_date, to_date=to_date
+			)) 	# redirects to dashboard view which opens input.html
 		elif request.form['submit_button'] == "1":
+			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
 			message = generator.submit_url(clone_url, password)
-			flash(message)
+				# submit_url called to handle cloning of repo
+			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
 		elif request.form['submit_button'] == "3":
-			# session['project_name'] = request.form['project_name']
+			# if a selection was made from 'Stash Repositories'
 			project_name = request.form['project_name']
 			return redirect(url_for('index_repo', project_name=project_name))
 
 
+# page where user can select a repository after selecting a Stash project
 @app.route('/index_repo', methods=['GET', 'POST'])
 def index_repo():
-	project_name = request.args.get('project_name')
-	project_repos = stash_api.get_project_repos(project_name)
+	# retrieves passed in query from index view
+	project_name = request.args.get('project_name') 
+	project_repos = stash_api.get_project_repos(project_name) 
+		# list of repos in Stash belong to selected project
 
 	if request.method == 'GET':
 		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
-		selected_repo = request.form['repo_name']
-		generator.submit_url(selected_repo, settings.password)
-		return redirect(url_for('index'))
+		selected_repo = request.form['repo_name'] # string: clone url
+		generator.submit_url(selected_repo, settings.password) # uses our pass
+		return redirect(url_for('index')) 
+			# after selecting a repo, the user is returned to the homepage 
+			# where selected repo is now added to list of available repos
+			# TO DO: skip the step of returning to homepage?
 
 
+# page where user can select the specific analysis to view
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
+	# retrieves passed in queries from index view
 	root_dir = request.args.get('root_dir')
 	repo_name = request.args.get('repo_name')
 	from_date = request.args.get('from_date')
@@ -66,23 +86,25 @@ def dashboard():
 
 	if request.method == 'GET':
 		csv_list = []
-		# this is the directory of where the html page obtains the list of files to select from
-		for root, dirs, files in os.walk(root_dir):  # traverses filesystem of root_dir
-			for filename in fnmatch.filter(files, '*.csv'):  # picks out files of type in pattern
-				csv_list.append(filename)  # fills array with names of csv files in current directory
-		return render_template('input.html', csv_list=csv_list)  # returns array of csv filenames to webpage
-	# when user selects a repo, the following runs codemaat and generates a csv file
-	# the csv file is opened and parsed; visualization is displayed
+		for root, dirs, files in os.walk(root_dir):
+			# traverses filesystem of root_dir
+			for filename in fnmatch.filter(files, '*.csv'):  
+				# traverses files and picks out csv files
+				csv_list.append(filename) # list of csv files
+		return render_template('input.html', csv_list=csv_list) 
+			# NOTE: csv_list currently not being used in webpage
+			# TO DO: get rid of csv_list and have all csv's always available?
 	elif request.method == 'POST':
-		# session['csv_name'] = request.form['filename']  # gets name of csv filename that was selected by the user on webpage
 		csv_name = request.form['analysis'] + "_" + repo_name + ".csv"
 		return redirect(url_for('result',
 			repo_name=repo_name, csv_name=csv_name, 
 			from_date=from_date, to_date=to_date))
 
 
+# page where user can view the visualized data
 @app.route('/result', methods=['GET', 'POST'])
 def result():
+	# retrieves passed in queries from dashboard view
 	repo_name = request.args.get('repo_name')
 	csv_name = request.args.get('csv_name')
 	from_date = request.args.get('from_date')
@@ -94,28 +116,31 @@ def result():
 			+ repo_name + "_" 
 			+ from_date + "_" + to_date + "/"
 			+ csv_name, 'rt') as csv_file:
-		data, keys = generator.parse_csv(csv_file)
+		# opens respective csv file for chosen analysis
+		data, keys = generator.parse_csv(csv_file) 
+			# calls parse_csv to retrieve data from csv file
 	return render_template('result.html', 
 		repo_name=repo_name, csv_name=json.dumps(analysis),
 		from_date=from_date, to_date=to_date, 
 		data=json.dumps(data), keys=json.dumps(keys))
+			# json.dumps() converts data into a string format for javascript
 
 
-# this filter allows using '|fromjson', which calls this json.loads function
+# this filter allows using '|fromjson' in a jinja template
+# to call json.loads() method
 @app.template_filter('fromjson')
 def convert_json(s):
 	return json.loads(s)
 
-# customized error pages that follow the style of the website
+# customized error page
 @app.errorhandler(404)
 def not_found(e):
 	return render_template ('404.html')
 
-
+# customized error page
 @app.errorhandler(400)
 def bad_request(e):
 	return render_template ('400.html')
-
 
 
 if __name__ == '__main__':
