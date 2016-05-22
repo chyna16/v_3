@@ -43,10 +43,10 @@ def get_details():
 # called by index_repo view
 # makes new api call using selected project to get list of repos
 def get_project_repos(selected_key):
-	url_repos = 'https://stash.mtvi.com/rest/api/1.0/projects/' 
+	url_repos = ('https://stash.mtvi.com/rest/api/1.0/projects/'
 		+ selected_key 
-		+ '/repos'
-	json_repos = requests.get(
+		+ '/repos')
+	repos = requests.get(
 		url=url_repos, auth=(settings.username, settings.password)
 	)
 	json_repos = json.loads(repos.text)
@@ -61,10 +61,3 @@ def get_project_repos(selected_key):
 				)	# creates a list of dictionaries for every repo
 
 	return repo_list
-
-
-# for running script by itself to test functions
-if __name__ == '__main__':
-	# get_details()
-	# get_project_repos()
-	# print(json_projects)
