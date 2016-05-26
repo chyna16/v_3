@@ -42,15 +42,17 @@
     <h2>Select a Repository:</h2>
     <br>
     <div class="col-lg-6">
+    <div class="list">
     <div class="btn-group btn-group-vertical" data-toggle="buttons">
     {% for repo in repo_list %}
       <label class="btn active">
-        <input type="radio" id="r1" name="repo_name" value={{repo}} autocomplete="off">{{repo}}
+        <input type="radio" name="repo_name" value={{repo}} autocomplete="off">{{repo}}
       </label>
     {% endfor %}
       <label class="btn active">
         <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
       </label>
+    </div>
 <!--       <label class="btn active">
         <input type="radio" name="repo_name" value="projects" autocomplete="off">Select a Project
       </label> -->
@@ -83,9 +85,7 @@
         <p>(From repository creation to selected date if selected alone)</p>
         <input type="date" class="form-control" id="formInput" name="to_date">
       </div>
-      </div>
-    </p>
-    <p>
+      <p>
       <label>Select a repository type:</label>
       <br>
     <!-- <div class="btn-group btn-group" data-toggle="buttons"> -->
@@ -101,9 +101,12 @@
         Next
       </button>
   </p>
+      </div>
+    </p>
   </form>
-        <button onclick="test()">function</button>
-
+  <button onclick="test_name()">Check name</button>
+  
+<!-- modal for viewing repository details
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -114,26 +117,27 @@
         <h4 class="modal-title" id="myModalLabel">Repository Details</h4>
       </div>
       <div class="modal-body">
-        {{repo_list}}
+        {# not used yet
+        {% for repo in repo_list %}
+          {% if repo == project_name %}
+              {{project_description}}
+          {% endif %}
+        {% endfor %}
+          #}
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
 <script>
-rate_value = document.getElementById("r1").value;
-// function alert(){
-//   if (document.getElementById("r1").checked) {
-//     alert(rate_value);
-//   }
-// }
-
-function test(){
-  alert(rate_value);
+function test_name(){
+var value = $('input[name=repo_name]:checked').val();
+alert(value);
 }
+
  // $btn.button('reset')
     $("#nextbutton").click(function() {
     var $btn = $(this);

@@ -73,7 +73,10 @@ label.btn span {
 div[data-toggle="buttons"] label.active{
     color: #7AA3CC;
 }
-
+div.list {
+  overflow-y: scroll;
+  height: 500px;
+}
 div[data-toggle="buttons"] label {
 display: inline-block;
 padding: 6px 12px;
