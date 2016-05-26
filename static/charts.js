@@ -93,16 +93,18 @@ function createBarGraph(data) {
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
             .attr("y", function(d) { return yScale(d.value); })
-            .style("fill", function(d) { return color(d.type); });
+            .style("fill", function(d) { return color(d.type); })
+        .append("svg:title")
+            .text(function(d) { return d.value; });
         
-     var text = category.selectAll("text")
-            .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
-            .enter()
-        .append('text')
-            .attr("x", function(d) { return x1Scale(d.type); })
-            .attr("y", function(d) { return yScale(d.value); })
-            .text(function(d){ return d.value })
-            .style("display", "block");
+     // var text = category.selectAll("text")
+     //        .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
+     //        .enter()
+     //    .append('text')
+     //        .attr("x", function(d) { return x1Scale(d.type); })
+     //        .attr("y", function(d) { return yScale(d.value); })
+     //        .text(function(d){ return d.value })
+     //        .style("display", "block");
         
         //feature to display numerical values on mouse enter broken
         // text.on("mouseenter", function(d){
@@ -113,27 +115,6 @@ function createBarGraph(data) {
             // .style("font-size", "12px"); 
         // });
 
-
-        // bar.append('text')
-        //     .text(function(d){
-        //         return d.value
-        //     });
-
-    /* var bar = canvas.selectAll("rect")
-            .data(values)
-            .enter()
-            .append("rect")
-            .attr("height", function (d) {
-                return height - yScale(d);
-            })
-            .attr("width", width / vlength - padding)
-            .attr("x", function (d, i) {
-                return i * (width / vlength)
-            })
-            .attr("y", function (d) {
-                return height - (height - yScale(d))
-            });
-    */
 
     /* canvas.selectAll("text")
             .data(values)
@@ -181,7 +162,7 @@ function createBarGraph(data) {
 function createBubbleChart(data) {
     d3.select('#wrapperBar').html("");
 
-    var diameter = 600;
+    var diameter = 700;
 
     var color = d3.scale.linear()
         .domain([0, d3.max(data, function(d) { return +d['n-revs']; })])
@@ -203,7 +184,7 @@ function createBubbleChart(data) {
             .attr("class", "bubble");
 
     var bubbles = canvas.append("g")
-            .attr("transform", "translate(200,0)")
+            .attr("transform", "translate(0,0)")
         .selectAll(".bubble")
             .data(nodes)
             .enter();
@@ -212,13 +193,15 @@ function createBubbleChart(data) {
             .attr("r", function(d) { return d.r; })
             .attr("cx", function(d) { return d.x; })
             .attr("cy", function(d) { return d.y; })
-            .style("fill", function(d) { return color(+d['n-revs']); });
+            .style("fill", function(d) { return color(+d['n-revs']); })
+        .append("svg:title")
+            .text(function(d) { return d['entity']; });
 
     bubbles.append("text")
             .attr("x", function(d) { return d.x; })
             .attr("y", function(d) { return d.y + 5; })
             .attr("text-anchor", "middle")
-        .text(function(d) { return d['entity']; })
+        .text(function(d) { if(d['entity'].length*6 <= d.r*2) return d['entity']; })
             .style("fill", "black") 
             .style("font-size", "12px");
 }
