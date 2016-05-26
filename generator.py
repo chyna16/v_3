@@ -55,20 +55,26 @@ def create_log(repo_name, date_after, date_before, address):
 	sys_command = "" # resets to blank
 	# first part of command same for any date specification
 	sys_command = 'git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat'
+	sys_command_cloud = 'git --git-dir ' + address + ' log --pretty=format:"%s"'
 	#the following commands change depending on date specification
 	if not date_after == "" and date_before == "":
 		print("date after selected")
-		sys_command += ' --after=' + date_after 	
+		sys_command += ' --after=' + date_after
+		sys_command_cloud += ' --after=' + date_after 	
 	elif date_after == "" and not date_before == "":
 		print("date before selected")
-		sys_command += ' --before=' + date_before 	
+		sys_command += ' --before=' + date_before
+		sys_command_cloud += ' --before=' + date_before 	
 	elif not date_after == "" and not date_before == "":
 		print("date_after and date_before selected")
-		sys_command += ' --after=' + date_after + ' --before=' + date_before 	
+		sys_command += ' --after=' + date_after + ' --before=' + date_before
+		sys_command_cloud += ' --after=' + date_after + ' --before=' + date_before 	
 	# last part of command same for any date specification			
 	sys_command += ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log'
+	sys_command_cloud += ' > cloud_' + repo_name + '_' + date_after + '_' + date_before + '.log'
 	os.system(sys_command) # command line call using the updated string
-	os.system('git --git-dir ' + address + ' log --pretty=format:"%s" > logfile_string.log')
+	os.system(sys_command_cloud) 
+	# os.system('git --git-dir ' + address + ' log --pretty=format:"%s" > logfile_string.log')
 	print("Done.")
 	print("-" * 60)
 
@@ -256,7 +262,7 @@ def merge_csv(repo_name):
 
 # called by get_word_frequency
 # filters out non-significant words
-def reduntant_word(word):
+def redundant_word(word):
 	if word in ('merge', 'merged', 'feature', "'feature'"):
 		return True
 	elif word[:4] in ('http', '~ben'):
@@ -267,33 +273,33 @@ def reduntant_word(word):
 def word_exists(word, word_list):
 	for word_pair in word_list:
 		if word.lower() == word_pair['text']:
-			word_pair['value'] += 1
+			word_pair['size'] += 1
 			return True
 
 # CURRENTLY NOT IN USE
 # aqcuires list of all words from commit messages
 # creates a list of dictionaries of words paired with frequency of occurrence
 def get_word_frequency(logfile):
-	file = open(logfile, 'r')
-	log_list = file.read().split()
-	file.close()
+	log_list = logfile.read().split()
+	logfile.close()
 
 	word_list = []
 
 	for word in log_list:
-		if reduntant_word(word.lower()): continue
+		if redundant_word(word.lower()): continue
 		else:
 			if not word_list:
-				word_list.append({'text': word.lower(), 'value': 1})
+				word_list.append({'text': word.lower(), 'size': 1})
 			else:
 				if word_exists(word, word_list): continue
 				else:
-					word_list.append({'text': word.lower(), 'value': 1})
+					word_list.append({'text': word.lower(), 'size': 1})
 
-	print(word_list)
+	return(word_list)
 
 
 if __name__ == '__main__':
 	# print (folder_list)
 	# print (project_list)
-	print(project_key)
+	# print(project_key)
+	get_word_frequency()
