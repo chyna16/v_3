@@ -3,6 +3,9 @@ function createGraph(data) {
     if (analysis_type == "hotspots") {
         createBubbleChart(data);
     }
+    else if (analysis_type == "coupling") {
+        d3.select('#wrapperBar').html("Choose an enitity to view degree of coupling.");
+    }
     else {
         createBarGraph(data);
     }
@@ -204,4 +207,58 @@ function createBubbleChart(data) {
         .text(function(d) { if(d['entity'].length*6 <= d.r*2) return d['entity']; })
             .style("fill", "black") 
             .style("font-size", "12px");
+}
+
+function createMeter(data, module) {
+    d3.select('#wrapperBar').html("");
+
+    var r = 75,
+        w = data.length * 200;
+
+    var xScale = d3.scale.linear()
+        .domain([0, data.length-1])
+        .range([r, w-r]);
+
+    var arc = d3.svg.arc()
+        .startAngle(Math.PI)
+        .innerRadius(r-30)
+        .outerRadius(r);
+
+    d3.select("#wrapperBar").append("text")
+            .attr('text-anchor', 'middle')
+            .text('Coupled with: ' + module);
+
+    var svg = d3.select("#wrapperBar")
+        .append("svg")
+            .attr('width', w)
+            .attr('height', 250)
+            .attr('class', 'percentage')
+        .append("g");
+
+    var meter = svg.selectAll("meters")
+        .data(data).enter()
+        .append("g")
+            .attr('transform', function(d, i) { 
+                return 'translate(' + xScale(i) + ',130)'; 
+            });
+
+    meter.append("path")
+        .attr('d', arc.endAngle(3 * Math.PI))
+        .style('fill', '#c5c2bd');
+
+    meter.append("path")
+        .attr('d', arc.endAngle(function(d) { 
+            return (d.degree / 100) * (2 * Math.PI) + Math.PI; 
+        }))
+        .attr('fill', '#a57103');
+
+    meter.append("text")
+        .attr('text-anchor', 'middle')
+        .text(function(d) { return d.degree + "%"; });
+
+    meter.append("text")
+        .attr('text-anchor', 'middle')
+        .attr('y', '95')
+        .style('font-size', '13px')
+        .text(function(d) { return d.coupled.split('/').pop(); });
 }

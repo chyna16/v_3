@@ -43,7 +43,7 @@ function chooseModule(elem) {
         }
     });
 
-    createGraph(coupled_data);
+    createMeter(coupled_data, chosen_module);
 }
 
 
