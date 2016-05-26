@@ -35,8 +35,6 @@
       </div>    
   </nav>
 
-<h1>Welcome to the Viacom Value Visualizer</h1>
-
 	<div class="container" style="min-height:100% width:80%">
 	{% with messages = get_flashed_messages() %}
 	  {% if messages %}
@@ -51,27 +49,12 @@
 	
 	{% block body %}{% endblock %}
 	</div>
-<!--  <form method="POST" enctype="multipart/form-data">
-
- </form> -->
 
 <form method="POST" enctype="multipart/form-data">
- 
-  <!-- <div class="form-group">
-  <p><h2> Enter a repository clone link:</h2></p>
-  <h4> (Cloned repository will be added to the list below)</h4>
-    <label class="sr-only" for="inputURL">URL Link</label>
-    <input type="text" class="form-control" id="inputURL" name="clone_url" placeholder="Enter URL">
-  </div>
-  <div class="form-group">
-    <label class="sr-only" for="inputPassword">Password</label>
-    <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Password">
-  </div>
-  <button type="submit" class="btn  btn-lg btn-primary">Submit</button> -->
 
-  <div class="row">
+    <h2>Select a Repository:</h2>
+    <br>
     <div class="col-lg-6">
-      <h2>Select a Repository:</h2>
     <div class="btn-group btn-group-vertical" data-toggle="buttons">
     {% for repo_name in repo_list %}
       <label class="btn active">
@@ -79,7 +62,6 @@
       {{repo_name['name']}}
       </label>
     {% endfor %}
-    <!-- <input name="folder_name">hdhd</input> -->
       <label class="btn active">
         <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
       </label>
@@ -87,44 +69,69 @@
     <br>
     <br>
       <p>
-        <a class="btn btn-info" href="#" role="button">
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" href="#">
           View details &raquo;
-        </a>
+        </button>
       </p>
     </div>      
-    <div class="col-lg-6">
-      <h2>Repository Details:</h2>
-      <br>
-          <p>
-            Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-          </p>
-    </div>
-  </div>
+
       <p>
-      <div class="col-lg-6">        
+      <div class="col-lg-6">
       <div class="form-group">
         <label for="formInput">Enter Start Date:</label>
         <p>(From selected date to today if selected alone)</p>
-        <input type="date" class="form-control" id="formInput" name="date_after">
+        <input type="date" class="form-control" id="formInput" name="from_date">
       </div>
-      </div>
-    </p>
-    <p>
-      <div class="col-lg-6">
       <div class="form-group">
         <label for="formInput">Enter End Date:</label>
         <p>(From repository creation to selected date if selected alone)</p>
-        <input type="date" class="form-control" id="formInput" name="date_before">
+        <input type="date" class="form-control" id="formInput" name="to_date">
       </div>
       </div>
     </p>
     <p>
+      <label>Select a repository type:</label>
+      <br>
+    <!-- <div class="btn-group btn-group" data-toggle="buttons"> -->
+      <input type="checkbox" name='checkbox' value="summary"> Summary
+      <input type="checkbox" name='checkbox' value="metrics"> Metrics
+      <input type="checkbox" name='checkbox' value="coupling"> Coupling
+      <input type="checkbox" name='checkbox' value="hotspots"> Hotspots
+      <input type="hidden" name='checkbox' value="0">
+  <!-- </div> -->
+    </p>
   <p>
       <button type="submit" id="nextbutton" class="btn btn-lg btn-primary" role="button">
         Next
       </button>
   </p>
   </form>
+
+<!-- modal for viewing repository details
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="myModalLabel">Repository Details</h4>
+      </div>
+      <div class="modal-body">
+        {# not used yet
+        {% for repo in repo_list %}
+          {% if repo == project_name %}
+              {{project_description}}
+          {% endif %}
+        {% endfor %}
+          #}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div> -->
 
 <script>
   //   $.('#nextbutton').click(function () {
