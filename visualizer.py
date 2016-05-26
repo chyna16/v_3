@@ -53,7 +53,7 @@ def index():
 		elif request.form['submit_button'] == "3":
 			# if a selection was made from 'Stash Repositories'
 			project_name = request.form['project_name']
-			return redirect(url_for('index_repo', project_name=project_name))
+			return redirect(url_for('index_repo', project_name=project_name, project_description=generator.project_description))
 
 
 # page where user can select a repository after selecting a Stash project
@@ -109,17 +109,24 @@ def result():
 	analysis = request.args.get('analysis')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
-
-	with open("csv_files_" + repo_name + "_" + from_date + "_" + to_date + "/"
-		+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
-		# opens respective csv file for chosen analysis
-		data, keys = generator.parse_csv(csv_file) 
-			# calls parse_csv to retrieve data from csv file
-	return render_template('result.html', 
-		repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
-		from_date=from_date, to_date=to_date, 
-		data=json.dumps(data), keys=json.dumps(keys))
-			# json.dumps() converts data into a string format for javascript
+	if analysis == "cloud":
+		with open("csv_files_" + repo_name + "_" + from_date + "_" + to_date + "/"
+		+ analysis + "_" + repo_name + "__.log", 'rt') as log_file:
+			word_list = generator.get_word_frequency(log_file)
+		return render_template('wordcloud.html', 
+		word_list=word_list, repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
+		from_date=from_date, to_date=to_date)
+	else:
+		with open("csv_files_" + repo_name + "_" + from_date + "_" + to_date + "/"
+			+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
+			# opens respective csv file for chosen analysis
+			data, keys = generator.parse_csv(csv_file) 
+				# calls parse_csv to retrieve data from csv file
+			return render_template('result.html', 
+				repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
+				from_date=from_date, to_date=to_date, 
+				data=json.dumps(data), keys=json.dumps(keys))
+					# json.dumps() converts data into a string format for javascript
 
 
 # this filter allows using '|fromjson' in a jinja template

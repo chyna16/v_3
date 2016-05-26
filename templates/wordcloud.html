@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %} Result {% endblock %}
+
+{% block head %}
+    <link rel=stylesheet type=text/css href="../static/style.css">
+    <script src="../static/d3.min.js"></script>
+    <script src="../static/table.js"></script>
+    <script src="../static/charts.js"></script>
+    <script src="../static/interactivity.js"></script>
+    <script src="../static/d3.layout.cloud.js"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Results for "{{repo_name}}" Repository</h1>
+<h2> 
+    From 
+        {% if from_date!='' %} {{ from_date }}
+        {% else %} Beginning 
+        {% endif %}
+    to
+        {% if to_date!='' %} {{ to_date }}
+        {% else %} Present 
+        {% endif %}
+</h2>
+
+<style> body {
+  font-family: 'Roboto Slab', serif;
+}
+</style>
+<center>
+<div id="viz-wrapper"></div>
+<br><br>
+<!-- table support and color key coming soon -->
+<div class="col-md-10" style="float:none">
+    <table class="table">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+    </table>
+</div>
+
+</center>
+<script type="text/javascript">
+    var commit_words = {{ word_list | safe }};
+    var height = 1000,
+        width = 1000;
+
+    var color = d3.scale.linear()
+            .domain([0, d3.max(commit_words, function(d) { return +d['size']; })])
+            .range(["#c63939", "#130505"]);
+
+    var cloud_layout = d3.layout.cloud()
+                    .size([height, width])
+                    .words(commit_words)
+                    .padding(10)
+                    .font('monospace')
+                    // rotates random words 90 degrees
+                    // .rotate(function(d) { return Math.floor(Math.random() * 2) * 90; })
+                    .rotate(function (d) {return 0})
+                    //not all words are being displayed if font size is too large
+                    .fontSize(function(d) {return d.size * 20})
+                    .text(function(d) {return d.text;})
+                    .spiral("rectangular")
+                    .on("end", draw)
+                    .start();
+
+
+    function draw(words) {
+        d3.select("#viz-wrapper").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .style("display", "block")
+                .attr("class", "wordcloud")
+                .append("g")
+                .attr("transform", "translate(450,450)")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return d.size + "px"; })
+                .style("fill", function(d, i) { return color(i); })
+                .on("mouseover", function(d, i){
+                    word = d3.select(this)
+                             .enter().append("size")
+                             .style("font-size", function(d) { return d.size + "px"; })
+                             .style("fill", function(d, i) { return color(i); })
+                             .style('display','block');
+                })
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+    }
+
+</script>
+{% endblock %}
