@@ -13,7 +13,9 @@
   {% if messages %}
     {% for message in messages %}
 	  <div class="alert alert-warning alert-dismissible" role="alert">
-	  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+	  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+	  <span aria-hidden="true">×</span>
+	  </button>
 		{{message}}
 	  </div>
 	{% endfor %}
@@ -61,16 +63,20 @@
 	<b>Age</b>
 	<p>View the code history of your modules. Compare the amount of lines added vs those deleted.</p>
 	</div>
-	<div class="col-md-6">
-	<button type="submit" name="analysis" value="cloud">
-		<img src="../static/images/thumbnail_cloud.png">
-	</button>
-	<br>
-	<b>Word Cloud</b>
-	<p>View a visual representation of your repository's commit messages.</p>
-	</div>
 </div>
 <br><br><br><br><br><br><br><br><br><br><br>
+<div class="col-md-12">
+	<center>
+	<div class="col-md-6">
+		<button type="submit" name="analysis" value="cloud">
+			<img src="../static/images/thumbnail_cloud.png">
+		</button>
+		<br>
+		<b>Word Cloud</b>
+		<p>View a visual representation of your repository's commit messages.</p>
+	</div>
+	</center>
+</div>
 </center>
 </form>
 

@@ -27,9 +27,8 @@
 
 <form method="POST" enctype="multipart/form-data">
 
-  <div class="row">
+  <center>
     <div class="col-lg-6">
-      <h2>Select a Project:</h2>
     <div class="btn-group btn-group" data-toggle="buttons">
     {% for project in list_of_projects %}
       <label class="btn active">
@@ -41,19 +40,19 @@
       </label>
     </div>
     <br>
-    <br>
       <p>
         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" href="#">
           View details &raquo;
         </button>
       </p>
+      <p>
+        <button type="submit" id="nextbutton" name="submit_button" value="3" class="btn btn-lg btn-primary" role="button">
+          Next
+        </button>
+      </p>
     </div>
-  <p>
-      <button type="submit" id="nextbutton" name="submit_button" value="3" class="btn btn-lg btn-primary" role="button">
-        Next
-      </button>
-  </p>
-  </form>
+  </center>
+</form>
 
 <!-- modal for viewing project details
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
