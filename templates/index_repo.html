@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+{% extends "layout.html" %}
 
-<html>
-<head>
-  {% block head %}
+{% block title %} Repos {% endblock %}
+
+{% block head %}
     <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
@@ -11,101 +11,78 @@
     <!-- <script src = "../static/jquery-1.12.3.js"></script> -->
     <!-- <link rel=stylesheet type=text/css href='../static/bootstrap.css'> -->
     <!-- <script src = "../static/bootstrap.js"></script>  -->
-    <title>{% block title %}{% endblock %} - V3</title>
-  {% endblock %}
-</head>
+{% endblock %}
 
-<body>
+{% block content %}
 
-<style> body{
-  font-family: 'Roboto Slab', serif;
-}
-</style>
-
-  <nav class="navbar navbar-inverse" role="navigation">
-      <div class="container">
-        <nav>
-          <ul class="nav nav-pills pull-right">
-            <li role="presentation"><a href="index">Home</a></li>
-            <li role="presentation"><a href="about.html">About</a></li>
-            <li role="presentation"><a href="#">Contact</a></li>
-          </ul>
-        </nav>
-        <a class="navbar-brand" href="/">V3</a>
-      </div>    
-  </nav>
-
-	<div class="container" style="min-height:100% width:80%">
-	{% with messages = get_flashed_messages() %}
-	  {% if messages %}
-	    {% for message in messages %}
-		  <div class="alert alert-warning alert-dismissible" role="alert">
-		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-			{{message}}
-		  </div>
-		{% endfor %}
-	  {% endif %}
-	{% endwith %}
-	
-	{% block body %}{% endblock %}
-	</div>
+<div class="container" style="min-height:100% width:80%">
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+	  <div class="alert alert-warning alert-dismissible" role="alert">
+	  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+		{{message}}
+	  </div>
+	{% endfor %}
+  {% endif %}
+{% endwith %}
+</div>
 
 <form method="POST" enctype="multipart/form-data">
 
-    <h2>Select a Repository:</h2>
-    <br>
-    <div class="col-lg-6">
-    <div class="btn-group btn-group-vertical" data-toggle="buttons">
-    {% for repo_name in repo_list %}
-      <label class="btn active">
-        <input type="radio" name="repo_name" value={{repo_name['url']}} autocomplete="off">
-      {{repo_name['name']}}
-      </label>
-    {% endfor %}
-      <label class="btn active">
-        <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
-      </label>
+<h2>Select a Repository:</h2>
+<br>
+<p>
+  <div class="col-lg-6">
+    <div class="form-group">
+      <label for="formInput">Enter Start Date:</label>
+      <p>(Default: Repo creation date)</p>
+      <input type="date" class="form-control" id="formInput" name="from_date">
     </div>
+    <div class="form-group">
+      <label for="formInput">Enter End Date:</label>
+      <p>(Default: Present)</p>
+      <input type="date" class="form-control" id="formInput" name="to_date">
+    </div>
+  <!-- <p>
+    <label>Select a repository type:</label>
     <br>
-    <br>
-      <p>
-        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" href="#">
-          View details &raquo;
-        </button>
-      </p>
-    </div>      
+    <input type="checkbox" name='checkbox' value="summary"> Summary
+    <input type="checkbox" name='checkbox' value="metrics"> Metrics
+    <input type="checkbox" name='checkbox' value="coupling"> Coupling
+    <input type="checkbox" name='checkbox' value="hotspots"> Hotspots
+    <input type="hidden" name='checkbox' value="0">
+  </p> -->
+  </div>
+</p>
 
-      <p>
-      <div class="col-lg-6">
-      <div class="form-group">
-        <label for="formInput">Enter Start Date:</label>
-        <p>(From selected date to today if selected alone)</p>
-        <input type="date" class="form-control" id="formInput" name="from_date">
-      </div>
-      <div class="form-group">
-        <label for="formInput">Enter End Date:</label>
-        <p>(From repository creation to selected date if selected alone)</p>
-        <input type="date" class="form-control" id="formInput" name="to_date">
-      </div>
-      </div>
-    </p>
-    <p>
-      <label>Select a repository type:</label>
-      <br>
-    <!-- <div class="btn-group btn-group" data-toggle="buttons"> -->
-      <input type="checkbox" name='checkbox' value="summary"> Summary
-      <input type="checkbox" name='checkbox' value="metrics"> Metrics
-      <input type="checkbox" name='checkbox' value="coupling"> Coupling
-      <input type="checkbox" name='checkbox' value="hotspots"> Hotspots
-      <input type="hidden" name='checkbox' value="0">
-  <!-- </div> -->
-    </p>
+<div class="col-lg-6">
+  <center>
+  <div class="list">
+    <div class="btn-group btn-group-vertical" data-toggle="buttons">
+      {% for repo_name in repo_list %}
+      <label class="btn active">
+        <input type="radio" name="repo_name" value={{repo_name['name']+'|'+repo_name['url']}} autocomplete="off"> {{repo_name['name']}}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+  </center>   
+  <!-- <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" href="#">
+    View details &raquo;
+  </button> -->
+</div>   
+<br>
+<br>
+<center>
   <p>
-      <button type="submit" id="nextbutton" class="btn btn-lg btn-primary" role="button">
-        Next
-      </button>
+    <button type="submit" name="submit_button" value="2" id="nextbutton" class="btn btn-lg btn-primary" role="button">
+      Next
+    </button>
   </p>
-  </form>
+</center>   
+      
+</form>
 
 <!-- modal for viewing repository details
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -139,10 +116,10 @@
   //   $btn.button('loading');
   //   // $btn.button('reset')
   // });
-    $("#nextbutton").click(function() {
-    var $btn = $(this);
-    $btn.button('loading');
+$("#nextbutton").click(function() {
+  var $btn = $(this);
+  $btn.button('loading');
 });
 </script>
-</body>
-</html>
+
+{% endblock %}

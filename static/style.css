@@ -74,8 +74,8 @@ div[data-toggle="buttons"] label.active{
     color: #7AA3CC;
 }
 div.list {
-  overflow-y: scroll;
-  height: 500px;
+  overflow-y: auto;
+  height: 250px;
 }
 div[data-toggle="buttons"] label {
 display: inline-block;

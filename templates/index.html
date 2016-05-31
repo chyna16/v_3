@@ -27,16 +27,16 @@
 
 <!-- <form method="POST" enctype="multipart/form-data"> -->
 <ul id="tabs" class="nav nav-tabs nav-justified"  data-tabs="tabs">
-    <li role="presentation" class="active"><a href="#tab1" data-toggle="tab">Clone a Repository</a></li>
-    <li role="presentation" ><a href="#tab2" data-toggle="tab">Available Repositories</a></li>
-    <li role="presentation" ><a href="#tab3" data-toggle="tab">Stash Repositories</a></li>
+    <li role="presentation" ><a href="#tab1" data-toggle="tab">Clone a Repository</a></li>
+    <li role="presentation" class="active"><a href="#tab2" data-toggle="tab">Available Repositories</a></li>
+    <li role="presentation" ><a href="#tab3" data-toggle="tab">Find a Repository</a></li>
 </ul>
 
 <div class="tab-content">
-    <div class="tab-pane fade in active" id="tab1">
+    <div class="tab-pane fade in" id="tab1">
     	{% include 'clone.html' %}
     </div>
-    <div class="tab-pane fade in" id="tab2">
+    <div class="tab-pane fade in active" id="tab2">
         {% include 'index_available.html' %}
     </div>
     <div class="tab-pane fade in" id="tab3">

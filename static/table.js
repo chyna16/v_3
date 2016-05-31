@@ -1,5 +1,5 @@
 function setTableRows(row, elem_id, data) {
-    for (i=0; i<keys_len; i++) {
+    for (i = 0; i < keys.length; i++) {
         var col = document.createElement(elem_id);
 
         if (i == 0) { col.style.width = "40%"; }
@@ -12,12 +12,18 @@ function setTableRows(row, elem_id, data) {
         // col.style.backgroundColor = "white"; INTERFERES W/ OVERFLOW
 
         if (data == keys) {
-            if (i != 0) { col.setAttribute('onClick', 'chooseColumn(this)'); }
+            if (i != 0 && keys[i] != "coupled") { 
+                col.onclick = function() { chooseColumn(this); }
+                col.style.cursor = 'pointer';
+            }
             col.setAttribute('value', data[i]);
             col.appendChild(document.createTextNode(data[i])); 
         } 
         else { 
-            if (i == 0) { col.setAttribute('onClick', 'chooseModule(this)'); }
+            if (i == 0 && analysis_type == "coupling") { 
+                col.onclick = function() { chooseModule(this); }
+                col.style.cursor = 'pointer';
+            }
             col.setAttribute('value', data[keys[i]]);
             col.appendChild(document.createTextNode(data[keys[i]])); 
         }
