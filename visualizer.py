@@ -53,7 +53,9 @@ def index():
 		elif request.form['submit_button'] == "3":
 			# if a selection was made from 'Stash Repositories'
 			project_name = request.form['project_name']
-			return redirect(url_for('index_repo', project_name=project_name, project_description=generator.project_description))
+			# project_desc = stash_api.get_details() # needs to be modified for this
+			return redirect(url_for('index_repo', project_name=project_name))
+			# project_description=generator.project_description))
 
 
 # page where user can select a repository after selecting a Stash project
