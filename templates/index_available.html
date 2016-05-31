@@ -21,90 +21,66 @@
   font-family: 'Roboto Slab', serif;
 }
 </style>
-<!-- 
-  <nav class="navbar navbar-inverse" role="navigation">
-      <div class="container">
-        <nav>
-          <ul class="nav nav-pills pull-right">
-            <li role="presentation"><a href="index">Home</a></li>
-            <li role="presentation"><a href="about.html">About</a></li>
-            <li role="presentation"><a href="#">Contact</a></li>
-          </ul>
-        </nav>
-        <a class="navbar-brand" href="/">V3</a>
-      </div>    
-  </nav>
- -->
-<!-- <h1>Welcome to the Viacom Value Visualizer</h1> -->
 
 <form method="POST" enctype="multipart/form-data">
 
-    <h2>Select a Repository:</h2>
+<h2>Select a Repository:</h2>
+<br>
+<p>
+  <div class="col-lg-6">
+    <div class="form-group">
+      <label for="formInput">Enter Start Date:</label>
+      <p>(Default: Repo creation date)</p>
+      <input type="date" class="form-control" id="formInput" name="from_date">
+    </div>
+    <div class="form-group">
+      <label for="formInput">Enter End Date:</label>
+      <p>(Default: Present)</p>
+      <input type="date" class="form-control" id="formInput" name="to_date">
+    </div>
+  <!-- <p>
+    <label>Select a repository type:</label>
     <br>
-    <div class="col-lg-6">
-    <div class="list">
+    <input type="checkbox" name='checkbox' value="summary"> Summary
+    <input type="checkbox" name='checkbox' value="metrics"> Metrics
+    <input type="checkbox" name='checkbox' value="coupling"> Coupling
+    <input type="checkbox" name='checkbox' value="hotspots"> Hotspots
+    <input type="hidden" name='checkbox' value="0">
+  </p> -->
+  </div>
+</p>
+
+<div class="col-lg-6">
+  <center>
+  <div class="list">
     <div class="btn-group btn-group-vertical" data-toggle="buttons">
     {% for repo in repo_list %}
       <label class="btn active">
         <input type="radio" name="repo_name" value={{repo}} autocomplete="off">{{repo}}
       </label>
     {% endfor %}
-      <label class="btn active">
-        <input type="radio" class="list-group-item" name="options" id="option2" autocomplete="off"> Blank Radio
-      </label>
     </div>
-<!--       <label class="btn active">
-        <input type="radio" name="repo_name" value="projects" autocomplete="off">Select a Project
-      </label> -->
-    </div>
-    <br>
-    <br>
-      <p>
-      <!-- <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"> -->
-        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" href="#">
-          View details &raquo;
-        </button>
-      </p>
-    </div>      
-<!--     <div class="col-lg-6">
-      <h2>Repository Details:</h2>
-      <br>
-          <p>
-            Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-          </p>
-    </div> -->
-      <p>
-      <div class="col-lg-6">
-      <div class="form-group">
-        <label for="formInput">Enter Start Date:</label>
-        <p>(From selected date to today if selected alone)</p>
-        <input type="date" class="form-control" id="formInput" name="from_date">
-      </div>
-      <div class="form-group">
-        <label for="formInput">Enter End Date:</label>
-        <p>(From repository creation to selected date if selected alone)</p>
-        <input type="date" class="form-control" id="formInput" name="to_date">
-      </div>
-      <p>
-      <label>Select a repository type:</label>
-      <br>
-    <!-- <div class="btn-group btn-group" data-toggle="buttons"> -->
-      <input type="checkbox" name='checkbox' value="summary"> Summary
-      <input type="checkbox" name='checkbox' value="metrics"> Metrics
-      <input type="checkbox" name='checkbox' value="coupling"> Coupling
-      <input type="checkbox" name='checkbox' value="hotspots"> Hotspots
-      <input type="hidden" name='checkbox' value="0">
-  <!-- </div> -->
-    </p>
-    <p>
-      <button type="submit" name="submit_button" value="2" id="nextbutton" class="btn btn-lg btn-primary" role="button">
-        Next
-      </button>
+  </div>
+  </center>
+  <!-- <p>
+    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" href="#">
+      View details &raquo;
+    </button>
+  </p> -->
+</div>   
+<br>
+<br>
+<center>
+  <p>
+    <button type="submit" name="submit_button" value="2" id="nextbutton" class="btn btn-lg btn-primary" role="button">
+      Next
+    </button>
   </p>
-      </div>
-    </p>
-  </form>
-  <button onclick="test_name()">Check name</button>
+</center>   
+      
+</form>
+
+<!-- <button onclick="test_name()">Check name</button> -->
   
 <!-- modal for viewing repository details
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -133,15 +109,15 @@
 </div> -->
 
 <script>
-function test_name(){
-var value = $('input[name=repo_name]:checked').val();
-alert(value);
+function test_name() {
+  var value = $('input[name=repo_name]:checked').val();
+  alert(value);
 }
 
- // $btn.button('reset')
-    $("#nextbutton").click(function() {
-    var $btn = $(this);
-    $btn.button('loading');
+// $btn.button('reset')
+$("#nextbutton").click(function() {
+  var $btn = $(this);
+  $btn.button('loading');
 });
 </script>
 </body>

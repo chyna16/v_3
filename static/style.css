@@ -75,7 +75,7 @@ div[data-toggle="buttons"] label.active{
 }
 div.list {
   overflow-y: scroll;
-  height: 500px;
+  height: 250px;
 }
 div[data-toggle="buttons"] label {
 display: inline-block;
