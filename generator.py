@@ -115,12 +115,14 @@ def generate_data(address, repo_name, date_after, date_before):
 	print("-" * 60)
 
 
+# NOTE: currently NOT IN USE
 def generate_data_summary(address, repo_name, date_after, date_before):
 	time.sleep(1)
 	print("Creating repository summary...")
 	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
 	print("-" * 60)
 
+# NOTE: currently NOT IN USE
 def generate_data_hotspot(address, repo_name, date_after, date_before):
 	time.sleep(1)
 	print("Creating repository hotspots...")
@@ -130,6 +132,7 @@ def generate_data_hotspot(address, repo_name, date_after, date_before):
 	merge_csv(repo_name)
 	print("-" * 60)
 
+# NOTE: currently NOT IN USE
 def generate_data_metrics(address, repo_name, date_after, date_before):
 	time.sleep(1)
 	print("Creating organizational metrics...")
@@ -137,38 +140,34 @@ def generate_data_metrics(address, repo_name, date_after, date_before):
 		# Reports the number of authors/revisions made per module
 	print("-" * 60)
 
+# NOTE: currently NOT IN USE
 def generate_data_coupling(address, repo_name, date_after, date_before):
 	time.sleep(1)
 	print("Creating coupling history...")
 	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
 	print("-" * 60)
 
-
+# NOTE: currently NOT IN USE
 # called by select_folder
 # reads user selection of analyses 
 # calls helper functions that run codemaat 
 # FIX: currently does not read multiple selections
-def select_analysis(repo_dir, repo, from_date, to_date):
+def select_analysis(address, repo, from_date, to_date):
 	if request.form['checkbox'] == "summary":
 		print ("button: " + request.form['checkbox'])
-		generate_data_summary(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
+		generate_data_summary(address, repo, from_date, to_date)
 	if request.form['checkbox'] == "hotspots":
 		print ("button: " + request.form['checkbox'])
-		generate_data_hotspot(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
+		generate_data_hotspot(address, repo, from_date, to_date)
 	if request.form['checkbox'] == "metrics":
 		print ("button: " + request.form['checkbox'])
-		generate_data_metrics(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
+		generate_data_metrics(address, repo, from_date, to_date)
 	if request.form['checkbox'] == "coupling":
 		print ("button: " + request.form['checkbox'])
-		generate_data_coupling(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
+		generate_data_coupling(address, repo, from_date, to_date)
 	if request.form['checkbox'] == "0":
 		print("none selected- button: " + request.form['checkbox'])
-		generate_data(repo_dir + repo + '/.git', 
-			repo, from_date, to_date)
+		generate_data(address, repo, from_date, to_date)
 
 
 # called by index view
@@ -191,13 +190,14 @@ def select_folder(repo_dir, repo, from_date, to_date):
 		change_folder(repo, from_date, to_date) 
 			# create that folder and switch to it
 
-	create_log(repo, from_date, to_date, repo_dir + repo + '/.git')
+	address = repo_dir + repo + '/.git'
+
+	create_log(repo, from_date, to_date, address)
 		# while in the csv folder of chosen repo, create log file
 	print("2: " + os.getcwd())
 
-	select_analysis(repo_dir, repo, from_date, to_date)
-	# generate_data(repo_dir + repo + '/.git', 
-	# 	repo, from_date, to_date)
+	# select_analysis(address, repo, from_date, to_date)
+	generate_data(address, repo, from_date, to_date)
 	directory_return() # go back to parent directory ('v3')
 	print("3: " + os.getcwd())
 	flash('Analysis complete.')
