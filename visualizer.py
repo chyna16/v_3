@@ -13,6 +13,7 @@ app.secret_key = secret
 maat_dir = settings.maat_directory # address of codemaat
 repo_dir = settings.repo_directory # address of cloned repositories
 list_of_projects = stash_api.get_projects() # list of projects on Stash
+generator.set_path(maat_dir) # set path for codemaat
 
 
 # homepage where user can select/add a repository to begin analysis process
@@ -32,7 +33,6 @@ def index():
 			repo_name = request.form['repo_name']
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
-			generator.set_path(maat_dir) # set path for codemaat
 			root_dir = generator.select_folder(
 				repo_dir, repo_name, from_date, to_date
 			)	# select_folder called to handle folders and files
@@ -64,14 +64,25 @@ def index_repo():
 	# retrieves passed in query from index view
 	project_name = request.args.get('project_name') 
 	project_repos = stash_api.get_project_repos(project_name) 
-		# list of repos in Stash belong to selected project
+		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
 		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
-		selected_repo = request.form['repo_name'] # string: clone url
-		generator.submit_url(selected_repo, settings.password) # uses our pass
-		return redirect(url_for('index')) 
+		selected_repo = request.form['repo_name'].split('|')
+		repo_name = selected_repo[0]
+		repo_url = selected_repo[1] # string: clone url
+		from_date = request.form['from_date']
+		to_date = request.form['to_date']
+		generator.submit_url(repo_url, settings.password) # uses our pass
+		root_dir = generator.select_folder(
+			repo_dir, repo_name, from_date, to_date
+		)
+		return redirect(url_for(
+			'dashboard',
+			root_dir=root_dir, repo_name=repo_name, 
+			from_date=from_date, to_date=to_date
+		))
 			# after selecting a repo, the user is returned to the homepage 
 			# where selected repo is now added to list of available repos
 			# TO DO: skip the step of returning to homepage?
