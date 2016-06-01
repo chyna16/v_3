@@ -1,19 +1,19 @@
-
+// this is called by chooseColumn() when the user selects data for y-axis
 function createGraph(data) {
     if (analysis_type == "hotspots") {
         createBubbleChart(data);
     }
     else if (analysis_type == "coupling") {
-        d3.select('#wrapperBar').html("Choose an enitity to view degree of coupling.");
+        d3.select("#wrapper").html('<p><p>Choose an enitity to view degree of coupling.</p></p>');
     }
     else {
         createBarGraph(data);
     }
 }
 
-// this is called by chooseColumn() when the user selects data for y-axis
+
 function createBarGraph(data) {
-    d3.select('#wrapperBar').html("");
+    d3.select("#wrapper").html('');
         // .html("") causes the wrapper to be emptied out
         // this prevents copies from being made each time function is called
         // NOTE: this apparently does not work in Safari; fix later
@@ -30,7 +30,6 @@ function createBarGraph(data) {
     else { w = 1000; }
     width = w - margin.left - margin.right;
 
-///////////////////////////// B A R  G R A P H ///////////////////////////////
     if (chosen_key == 'default') {
         // if no column was specified, the data from all value columns is used
         var labels = d3.keys(data[0]).filter(function(key) 
@@ -74,7 +73,7 @@ function createBarGraph(data) {
     x0Scale.domain(data.map(function(d) { return d[domain_key]; }));
     x1Scale.domain(labels).rangeBands([0, x0Scale.rangeBand()]);
 
-    var canvas = d3.select("#wrapperBar")
+    var canvas = d3.select("#wrapper")
         .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -163,7 +162,7 @@ function createBarGraph(data) {
 
 
 function createBubbleChart(data) {
-    d3.select('#wrapperBar').html("");
+    d3.select("#wrapper").html('');
 
     var diameter = 700;
 
@@ -180,7 +179,7 @@ function createBubbleChart(data) {
 
     var nodes = chart.nodes({children: data}).filter(function(d) { return !d.children; });
 
-    var canvas = d3.select("#wrapperBar")
+    var canvas = d3.select("#wrapper")
         .append("svg")
             .attr("width", diameter)
             .attr("height", diameter)
@@ -209,8 +208,9 @@ function createBubbleChart(data) {
             .style("font-size", "12px");
 }
 
+
 function createMeter(data, module) {
-    d3.select('#wrapperBar').html("");
+    d3.select("#wrapper").html('');
 
     var r = 75,
         w = data.length * 200;
@@ -224,11 +224,12 @@ function createMeter(data, module) {
         .innerRadius(r-30)
         .outerRadius(r);
 
-    d3.select("#wrapperBar").append("text")
+    d3.select("#header").html('')
+        .append("text")
             .attr('text-anchor', 'middle')
             .text('Coupled with: ' + module);
 
-    var svg = d3.select("#wrapperBar")
+    var svg = d3.select("#wrapper")
         .append("svg")
             .attr('width', w)
             .attr('height', 250)

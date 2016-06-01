@@ -33,10 +33,13 @@ function chooseModule(elem) {
     coupled_data = [];
 
     filtered_json.forEach(function(d) {
-        if (d[keys[0]] == chosen_module) {
+        if (d[keys[0]] == chosen_module || d[keys[1]] == chosen_module) {
             var temp_obj = {};
             keys.forEach(function(k, i) {
-                if (i != 0) { temp_obj[k] = d[k]; }
+                if (d[k] != chosen_module) {
+                    if (k == 'entity') { temp_obj.coupled = d[k]; }
+                    else { temp_obj[k] = d[k]; }
+                }
             })
             console.log(temp_obj);
             coupled_data.push(temp_obj);
