@@ -96,23 +96,23 @@ def generate_data(address, repo_name, date_after, date_before):
 	time.sleep(1)
 	print("Creating repository summary...")
 	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
-	# Reports an overview of mined data from git's log file
-	print("Creating organizational metrics...")
-	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	# Reports the number of authors/revisions made per module
-	print("Creating coupling history...")
-	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
-	# Reports correlation of files that often commit together
-	# degree = % of commits where the two files were changed in the same commit
-	print("Creating code age summary...")
-	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
-	# Reports how long ago the last change was made in measurement of months
+	# # Reports an overview of mined data from git's log file
+	# print("Creating organizational metrics...")
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# # Reports the number of authors/revisions made per module
+	# print("Creating coupling history...")
+	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	# # Reports correlation of files that often commit together
+	# # degree = % of commits where the two files were changed in the same commit
+	# print("Creating code age summary...")
+	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	# # Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
-	# run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
-	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-	# 	+ "lines_" + repo_name + ".csv")
-	# merge_csv(repo_name)
-	print("Done. Check your current folder for your files.")
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+		+ "hotspots_" + repo_name + ".csv")
+	merge_csv(repo_name)
+	# print("Done. Check your current folder for your files.")
 	print("-" * 60)
 
 
@@ -260,7 +260,7 @@ def merge_csv(repo_name):
 		for row in merge_array:
 			writer.writerow(row)
 
-# stop_words = ['merge', 'merged', 'feature', "'feature'", 'and', 'or']
+
 # called by get_word_frequency
 # filters out non-significant words
 stop_words = get_stop_words('en')
@@ -277,6 +277,7 @@ def redundant_word(word):
 	else: 
 		return False
 
+
 # called by get_word_frequency
 # iterates over word_list & checks for given word within each dict
 def word_exists(word, word_list):
@@ -285,7 +286,7 @@ def word_exists(word, word_list):
 			word_pair['size'] += 1
 			return True
 
-# CURRENTLY NOT IN USE
+
 # aqcuires list of all words from commit messages
 # creates a list of dictionaries of words paired with frequency of occurrence
 def get_word_frequency(logfile):
@@ -306,9 +307,8 @@ def get_word_frequency(logfile):
 
 	return(word_list)
 
-
-if __name__ == '__main__':
-	# print (folder_list)
-	# print (project_list)
-	# print(project_key)
-	get_word_frequency()
+# if __name__ == '__main__':
+# 	print (folder_list)
+# 	print (project_list)
+# 	print(project_key)
+# 	get_word_frequency()
