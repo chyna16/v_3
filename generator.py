@@ -4,6 +4,7 @@ import time
 import fnmatch
 import subprocess
 from flask import request, flash
+from stop_words import get_stop_words
 
 
 # called by index view
@@ -259,11 +260,15 @@ def merge_csv(repo_name):
 		for row in merge_array:
 			writer.writerow(row)
 
-
+# stop_words = ['merge', 'merged', 'feature', "'feature'", 'and', 'or']
 # called by get_word_frequency
 # filters out non-significant words
+stop_words = get_stop_words('en')
 def redundant_word(word):
-	if word in ('merge', 'merged', 'feature', "'feature'"):
+	if word in stop_words:
+		return True
+	elif word in ('1)', '2)', '3)', '4)', '5)', '1', '2', '3', '4', '5', '=',
+	 '*', '&', ':', '+', '|', '*/', '/**', '(', ')', 'l', '-'):
 		return True
 	elif word[:4] in ('http', '~ben'):
 		return True

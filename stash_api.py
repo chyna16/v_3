@@ -6,7 +6,7 @@ import codecs
 import settings # our script
 
 
-url_projects = 'https://stash.mtvi.com/rest/api/1.0/projects' 
+url_projects = 'https://stash.mtvi.com/rest/api/1.0/projects?limit=100' 
 projects = requests.get(
 	url=url_projects, auth=(settings.username, settings.password)
 )	# retrieves data from api call using given username & password
@@ -22,7 +22,6 @@ def get_projects():
 	project_keys_list = []
 	for project in json_projects['values']:
 		project_keys_list.append(project['key'])
-
 	return project_keys_list
 
 
@@ -59,5 +58,8 @@ def get_project_repos(selected_key):
 				repo_list.append(
 					{'name': repo_name['name'], 'url': link['href']}
 				)	# creates a list of dictionaries for every repo
-
 	return repo_list
+
+if __name__ == '__main__':
+	get_projects()
+
