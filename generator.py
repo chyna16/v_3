@@ -267,11 +267,15 @@ stop_words = get_stop_words('en')
 def redundant_word(word):
 	if word in stop_words:
 		return True
-	elif word in ('1)', '2)', '3)', '4)', '5)', '1', '2', '3', '4', '5', '=',
-	 '*', '&', ':', '+', '|', '*/', '/**', '(', ')', 'l', '-'):
+	elif word in ('1)', '2)', '3)', '4)', '5)'):
 		return True
-	elif word[:4] in ('http', '~ben'):
+	elif word[:4] in ('http'):
 		return True
+	elif word[:1] in ('1', '2', '3', '4', '5', '=', '~', '*', '&', 
+					  ':', '+', '|', '*/', '/**', '(', ')', 'l', '-'):
+		return True
+	else: 
+		return False
 
 # called by get_word_frequency
 # iterates over word_list & checks for given word within each dict
