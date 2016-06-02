@@ -23,7 +23,7 @@ function createBarGraph(data) {
     var margin = {top: 20, left: 70, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
     var padding = 1;
-    var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);
+    var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);  
     
     if (data.length > 50) { w = data.length * 20; }
     else if (data.length < 10) { w = data.length * 100; }
@@ -47,11 +47,6 @@ function createBarGraph(data) {
             return {type: label, value: +d[label]};
         });
     });
-
-    // var xScale = d3.scale.ordinal()
-    //         .domain(type).rangePoints([0, width - (width / values.length)]);
-    // var yScale = d3.scale.linear()
-    //         .domain([0, Math.max.apply(Math, values)]).range([height, 0]);
 
     var x0Scale = d3.scale.ordinal().rangeBands([0, width], .05);
     var x1Scale = d3.scale.ordinal();
@@ -85,7 +80,7 @@ function createBarGraph(data) {
             .enter()
         .append("g")
             .attr("class", "category")
-            .attr("transform", function(d) { return "translate("+ x0Scale(d[domain_key]) + ",0)"; });
+            .attr("transform", function(d) { return "translate(" + x0Scale(d[domain_key]) + ",0)"; });
 
     var bar = category.selectAll("rect")
             .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
@@ -117,25 +112,6 @@ function createBarGraph(data) {
             // .style("font-size", "12px"); 
         // });
 
-
-    /* canvas.selectAll("text")
-            .data(values)
-            .enter()
-            .append("text")
-            .attr("fill", "steelblue")
-            .style("font-size", ".7em")
-            .attr("x", function (d, i) {
-                return i * (width / vlength) + (width / vlength) / 2
-            })
-            .attr("y", function (d) {
-                return height - (height - yScale(d)) - 5
-            })
-            .text(function (d) {
-                return d;
-            })
-            .style("text-anchor", "middle");
-    */
-
     canvas.append("g")
             .attr('class', 'axis')
             .attr('transform', 'translate(0,' + (height) + ')')
@@ -158,6 +134,31 @@ function createBarGraph(data) {
             .attr("dy", ".15em")
             .style("font-size", ".8em")
             .attr("fill", "steelblue");
+
+    var hScale = d3.scale.linear()
+        .domain([0, labels.length - 1])
+        .range([0, 225]);
+
+    var legend = d3.select("#header").html('')
+        .append("svg")
+            .attr('height', 25)
+            .attr('width', 300)
+        .selectAll("legend")
+            .data(labels)
+            .enter();
+
+    legend.append("circle")
+            .attr('r', 10)
+            .attr('transform', function(d, i) { return 'translate(' + (hScale(i) + 10) + ',10)'; })
+            .style('fill', function(d) { return color(d); });
+
+    legend.append("text")
+            .attr("x", function(d, i) { return hScale(i) + 20; })
+            .attr("y", function(d) { return 10; })
+            .attr("text-anchor", "right")
+        .text(function(d) { return d; })
+            .style("fill", "black") 
+            .style("font-size", "12px");
 }
 
 
@@ -240,7 +241,7 @@ function createMeter(data, module) {
         .data(data).enter()
         .append("g")
             .attr('transform', function(d, i) { 
-                return 'translate(' + xScale(i) + ',130)'; 
+                return 'translate(' + xScale(i) + ',130)';
             });
 
     meter.append("path")
@@ -249,7 +250,7 @@ function createMeter(data, module) {
 
     meter.append("path")
         .attr('d', arc.endAngle(function(d) { 
-            return (d.degree / 100) * (2 * Math.PI) + Math.PI; 
+            return (d.degree / 100) * (2 * Math.PI) + Math.PI;
         }))
         .attr('fill', '#a57103');
 
