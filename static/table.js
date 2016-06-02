@@ -20,7 +20,7 @@ function setTableRows(row, elem_id, data) {
             col.appendChild(document.createTextNode(data[i])); 
         } 
         else { 
-            if (i == 0 && analysis_type == "coupling") { 
+            if ((i == 0 || i == 1) && analysis_type == "coupling") { 
                 col.onclick = function() { chooseModule(this); }
                 col.style.cursor = 'pointer';
             }

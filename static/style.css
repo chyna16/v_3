@@ -1,4 +1,4 @@
-body{
+body {
   font-family: 'Roboto Slab', serif;
   font-size: 20px;
 }
@@ -7,6 +7,33 @@ body{
   float: none;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* RESULT PAGE */
+
+.help {
+  font-size: 50px; 
+  color: #337ab7; 
+  float: left; 
+  margin-left: 65px; 
+  position: absolute;
+  cursor: pointer;
+}
+
+.help-drop {
+  width: 400px;
+  display: none;
+  background-color: skyblue;
+  opacity: .9;
+  color: white;
+  font-size: 20px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid black;
+}
+
+.help:hover .help-drop {
+  display: block;
 }
 
 /* scroll feature acquired from:
@@ -48,6 +75,9 @@ tbody td, thead th {
   font-size: 11px;
 }
 /* end axes styling */
+
+/* END RESULT PAGE */
+
 
 h1 {
   padding: 20px;
