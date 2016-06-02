@@ -16,8 +16,8 @@
     <p id="help" class="help-drop"></p>
 </div>
 
-<h1>Results for: {{ repo_name }}</h1>
-<h2> 
+<h1 style="padding-bottom:0;">Results for: {{ repo_name }}</h1>
+<h2 style="padding-top:0;"> 
     From
         {% if from_date != '' %} {{ from_date }}
         {% else %} Beginning 
@@ -84,10 +84,11 @@
 
     var help = document.getElementById("help");
     var help_desc = {
-        "metrics": "View raw data for each module. Click on a column header to see data only for that column. Select a column to use for filtering, and enter the range (blank equals min / max respectively).",
-        "age": "Compare lines added vs lines deleted. Click on a column header to see data only for that column. Select a column to use for filtering, and enter the range (blank equals min / max respectively).",
-        "hotspots": "Hotspots indicate which modules you may need to take a closer look at. The size of the module is determined by complexity (n-lines) and the shade of red determined by effort (n-revs). Look out for the big and bright red ones. Select a column to use for filtering, and enter the range (blank equals min / max respectively).",
-        "coupling": "Coupling shows relational data between modules based on how often they were committed together. Click on a module from the entity column to what other modules it is coupled with and to what extent. Degree shows percentage of times that module was committed with the selected entity."
+        "metrics": "View raw data for each module. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Click on a column header to see data only for that column. Place your mouse over a bar to see exact value.",
+        "age": "Compare lines added vs lines deleted. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Click on a column header to see data only for that column. Place your mouse over a bar to see exact value.",
+        "hotspots": "Hotspots indicate which modules you may need to take a closer look at. The size of the module is determined by complexity (n-lines) and the shade of red determined by effort (n-revs), proportional to the repository. Look out for the big and bright red ones. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Place your mouse over the bubbles to see module name.",
+        "coupling": "Coupling shows relational data between modules based on how often they were committed together. Click on a module name to see what other modules it is coupled with and to what extent. Degree shows percentage of times that module was committed with the selected entity."
+        "cloud": "View the patterns within commit messages. See which words are used the most while committing to get an understanding of things that are commonly worked on. The size of the word is proportional to frequency."
     };
     help.innerHTML = help_desc[analysis_type]; // text that will appear when ? is hovered
 

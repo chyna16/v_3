@@ -24,10 +24,12 @@ body {
   width: 400px;
   display: none;
   background-color: skyblue;
-  opacity: .7;
+  opacity: .9;
   color: white;
   font-size: 20px;
   padding: 10px;
+  border-radius: 10px;
+  border: 2px solid black;
 }
 
 .help:hover .help-drop {
