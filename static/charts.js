@@ -23,7 +23,7 @@ function createBarGraph(data) {
     var margin = {top: 20, left: 70, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
     var padding = 1;
-    var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6"]);  
+    var color = d3.scale.ordinal().range(["#6d9af6", "#52465f"]);  
     
     if (data.length > 50) { w = data.length * 20; }
     else if (data.length < 10) { w = data.length * 100; }
@@ -122,7 +122,7 @@ function createBarGraph(data) {
             .attr("dy", ".05em")
             .attr("transform", function(d) { return "rotate(-55)" })
             .style("font-size", ".7em")
-            .attr("fill", "steelblue");
+            .attr("fill", "#325a7e");
 
     canvas.append("g")
             .attr('class', 'axis')
@@ -133,16 +133,18 @@ function createBarGraph(data) {
             .attr("dx", "-1em")
             .attr("dy", ".15em")
             .style("font-size", ".8em")
-            .attr("fill", "steelblue");
+            .attr("fill", "#325a7e");
+
+    var h_width = labels.length * 150;
 
     var hScale = d3.scale.linear()
         .domain([0, labels.length - 1])
-        .range([0, 225]);
+        .range([0, h_width - 75]);
 
     var legend = d3.select("#header").html('')
         .append("svg")
             .attr('height', 25)
-            .attr('width', 300)
+            .attr('width', h_width)
         .selectAll("legend")
             .data(labels)
             .enter();
