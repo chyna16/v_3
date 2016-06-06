@@ -6,14 +6,15 @@ import generator # our script
 import stash_api # our script
 import settings # our script
 
-app = Flask(__name__)
-secret = os.urandom(24)
-app.secret_key = secret
-
 maat_dir = settings.maat_directory # address of codemaat
 repo_dir = settings.repo_directory # address of cloned repositories
 list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
+generator.clone_repos(repo_dir, settings.password)
+
+app = Flask(__name__)
+secret = os.urandom(24)
+app.secret_key = secret
 
 
 # homepage where user can select/add a repository to begin analysis process
@@ -160,5 +161,5 @@ def bad_request(e):
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run()
 	# app.run(host='0.0.0.0')

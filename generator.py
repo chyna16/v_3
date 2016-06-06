@@ -16,19 +16,24 @@ def clone_repos(repo_dir, password):
 			if os.path.isdir(os.path.join(repo_dir, item)) ]
 		# list of cloned repositories
 
+	print(repo_list)
+
 	os.chdir('..') # cd out of v3 dir into repo dir
+	print(os.getcwd())
 
 	for repo in repo_list:
 		clone_url = stash_api.get_repo_url(repo) # api call to get clone url
-		if not repo_clone_url: break # if function returned false
-		if not repo == 'v3':
+		if not clone_url: continue # if function returned false
+		if repo == 'v3': continue
+		else:
 			# if the repository is not v3
-			shutil.rmtree('/' + repo) # delete repository before cloning
+			shutil.rmtree(repo) # delete repository before cloning
 			char = clone_url.index('@')
 			command = clone_url[:char] + ':' + password + clone_url[char:]
 			os.system('git clone ' + command)
 
 	os.chdir('v3')
+	print(os.getcwd())
 
 
 # called by index view

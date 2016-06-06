@@ -76,7 +76,7 @@ def get_repo_url(repo_name):
 		if link['name'] == "http":
 			repo_url = link['href']
 
-	print(repo_url)
+	return repo_url
 
 
 if __name__ == '__main__':
