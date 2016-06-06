@@ -60,6 +60,25 @@ def get_project_repos(selected_key):
 				)	# creates a list of dictionaries for every repo
 	return repo_list
 
+
+# called by clone_repos in generator
+# makes api call to search for a repo by name
+def get_repo_url(repo_name):
+	repo_call = ('https://stash.mtvi.com/rest/api/1.0/repos?name=' + repo_name)
+	repo_info = requests.get(
+		url=repo_call, auth=(settings.username, settings.password)
+	)
+	json_repo = json.loads(repo_info.text)
+
+	if json_repo['size'] == 0: return False
+
+	for link in json_repo['values'][0]['links']['clone']:
+		if link['name'] == "http":
+			repo_url = link['href']
+
+	print(repo_url)
+
+
 if __name__ == '__main__':
 	get_projects()
 

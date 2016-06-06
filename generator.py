@@ -5,6 +5,30 @@ import fnmatch
 import subprocess
 from flask import request, flash
 from stop_words import get_stop_words
+import stash_api
+import shutil
+
+
+# called by visualizer at timed intervals
+# updates already cloned repositories
+def clone_repos(repo_dir, password):
+	repo_list = [ item for item in os.listdir(repo_dir) 
+			if os.path.isdir(os.path.join(repo_dir, item)) ]
+		# list of cloned repositories
+
+	os.chdir('..') # cd out of v3 dir into repo dir
+
+	for repo in repo_list:
+		clone_url = stash_api.get_repo_url(repo) # api call to get clone url
+		if not repo_clone_url: break # if function returned false
+		if not repo == 'v3':
+			# if the repository is not v3
+			shutil.rmtree('/' + repo) # delete repository before cloning
+			char = clone_url.index('@')
+			command = clone_url[:char] + ':' + password + clone_url[char:]
+			os.system('git clone ' + command)
+
+	os.chdir('v3')
 
 
 # called by index view
@@ -108,9 +132,9 @@ def generate_data(address, repo_name, date_after, date_before):
 	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
-	# run_codemaat('revisions', 'hotspots', repo_name, date_after, date_before)
+	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-	# 	+ "lines_" + repo_name + ".csv")
+	# 	+ "hotspots_" + repo_name + ".csv")
 	# merge_csv(repo_name)
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
