@@ -314,3 +314,65 @@ function createMeter(data, module) {
         .style('font-size', '13px')
         .text(function(d) { return d.coupled.split('/').pop(); });
 }
+
+function createPieChart(data, module) {
+    d3.select("#wrapper").html('');
+
+    d3.select("#header").html('')
+        .append("text")
+            .attr('text-anchor', 'middle')
+            .text('Coupled with: ' + module);
+
+    var r = 200,
+        w = 400;
+
+    var color = d3.scale.category20();
+
+    var arc = d3.svg.arc()
+        .outerRadius(r);
+
+    var textArc = d3.svg.arc()
+        .innerRadius(r - 50)
+        .outerRadius(r - 50);
+
+    var pie = d3.layout.pie()
+        .sort(null)
+        .value(function(d) { return d['average-revs']; });
+
+    var svg = d3.select("#wrapper")
+        .append("svg")
+            .attr('width', w)
+            .attr('height', w)
+        .append("g")
+            .attr('transform', 'translate(200, 200)');
+
+    var slice = svg.selectAll("slice")
+        .data(pie(data))
+        .enter()
+        .append("g");
+
+    slice.append("path")
+        .attr('d', arc)
+        .attr('fill', function(d) { return color(d.data.coupled); });
+
+    // following function retrieved from:
+    // http://stackoverflow.com/questions/26127849/d3-aligning-text-to-centroid-angle
+    function angle(d) {
+        var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
+        return a > 90 ? a - 180 : a;
+    }
+
+    slice.append("text")
+        .attr('transform', function(d) { 
+            return 'translate(' + textArc.centroid(d) + ')'
+                + 'rotate(' + angle(d) + ')';
+        })
+        .attr('dy', '.35em')
+        .attr('text-anchor', 'middle')
+        .style('font-size', '10px')
+        .text(function(d) { return d.data.coupled.split('/').pop(); });
+
+    slice.append("title")
+        .text(function(d) { return d.data['average-revs']; });
+
+}

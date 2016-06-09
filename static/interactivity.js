@@ -66,7 +66,8 @@ function chooseModule(elem) {
         }
     });
 
-    createMeter(coupled_data, chosen_module); // meter chart is created
+    if (chosen_key == "average-revs") { createPie(coupled_data, chosen_module); }
+    else { createMeter(coupled_data, chosen_module); } // meter chart is created
 }
 
 
