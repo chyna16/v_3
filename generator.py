@@ -137,10 +137,10 @@ def generate_data(address, repo_name, date_after, date_before):
 	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "lines_" + repo_name + ".csv")
-	merge_csv(repo_name)
+	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+	# 	+ "lines_" + repo_name + ".csv")
+	# merge_csv(repo_name)
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 
@@ -234,6 +234,15 @@ def select_folder(repo_dir, repo, from_date, to_date):
 	return root_dir
 
 
+# called by parse_csv
+# checks is passed in string is in list of modules to be ignored
+def ignore_module(entity):
+	ignore_list = ['bower.json', '.gitignore']
+		# list to be expanded
+	if entity in ignore_list: return True
+	else: return False
+
+
 # called by result view
 # reads opened csv file
 # creates a list of the headers, and a dictionary of each row
@@ -248,9 +257,10 @@ def parse_csv(uploaded_file):
 		if i == 0:
 			key_array = row
 		else:
-			for j, key in enumerate(key_array):
-				row_array[key] = row[j]
-			data_dict.append(row_array)
+			if not ignore_module(row[0]):
+				for j, key in enumerate(key_array):
+					row_array[key] = row[j]
+				data_dict.append(row_array)
 
 	return (data_dict, key_array)
 
