@@ -20,23 +20,29 @@ json_projects = json.loads(projects.text)
 # traverses api data and creates a list of project names
 def get_projects():
 	project_keys_list = []
-	for project in json_projects['values']:
-		project_keys_list.append(project['key'])
+	try:
+		for project in json_projects['values']:
+			project_keys_list.append(project['key'])
+	except KeyError:
+		print("api call failed")
 	return project_keys_list
 
 
 # CURRENTLY NOT IN USE
 # traverses api data and reads details for each project
 def get_details():
-	for project in json_projects['values']:
-		project_key = project['key']
-		project_name = project['name']
-		print ("Project Name: " + project_name)
-		print ("Key: " + project_key)
-		if 'description' in project:
-			project_description = project['description']
-			print ("Description: " + project_description)
-		print ("-" * 60)
+	try:
+		for project in json_projects['values']:
+			project_key = project['key']
+			project_name = project['name']
+			print ("Project Name: " + project_name)
+			print ("Key: " + project_key)
+			if 'description' in project:
+				project_description = project['description']
+				print ("Description: " + project_description)
+			print ("-" * 60)
+	except KeyError:
+		print("api call failed")
 
 
 # called by index_repo view
@@ -51,13 +57,17 @@ def get_project_repos(selected_key):
 	json_repos = json.loads(repos.text)
 	repo_list = []
 
-	for repo_name in json_repos['values']:
-		# traverses api data to find name and clone url for each repo
-		for link in repo_name['links']['clone']:
-			if link['name'] == "http":
-				repo_list.append(
-					{'name': repo_name['name'], 'url': link['href']}
-				)	# creates a list of dictionaries for every repo
+	try:
+		for repo_name in json_repos['values']:
+			# traverses api data to find name and clone url for each repo
+			for link in repo_name['links']['clone']:
+				if link['name'] == "http":
+					repo_list.append(
+						{'name': repo_name['name'], 'url': link['href']}
+					)	# creates a list of dictionaries for every repo
+	except KeyError:
+		print("api call failed")
+
 	return repo_list
 
 
@@ -72,9 +82,12 @@ def get_repo_url(repo_name):
 
 	if json_repo['size'] == 0: return False
 
-	for link in json_repo['values'][0]['links']['clone']:
-		if link['name'] == "http":
-			repo_url = link['href']
+	try:
+		for link in json_repo['values'][0]['links']['clone']:
+			if link['name'] == "http":
+				repo_url = link['href']
+	except KeyError:
+		print("api call failed")
 
 	return repo_url
 
