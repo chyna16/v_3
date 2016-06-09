@@ -137,10 +137,10 @@ def generate_data(address, repo_name, date_after, date_before):
 	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
-	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-	# 	+ "hotspots_" + repo_name + ".csv")
-	# merge_csv(repo_name)
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+		+ "lines_" + repo_name + ".csv")
+	merge_csv(repo_name)
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 
@@ -158,7 +158,7 @@ def generate_data_hotspot(address, repo_name, date_after, date_before):
 	print("Creating repository hotspots...")
 	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "hotspots_" + repo_name + ".csv")
+		+ "lines_" + repo_name + ".csv")
 	merge_csv(repo_name)
 	print("-" * 60)
 
@@ -264,7 +264,7 @@ def merge_csv(repo_name):
 	merge_array = []
 
 	try:
-		with open("hotspots_" + repo_name + ".csv") as lines_file:
+		with open("lines_" + repo_name + ".csv") as lines_file:
 			lines_reader = csv.DictReader(lines_file)
 			for row in lines_reader:
 				lines_array.append({'entity': row['filename'], 'lines': row['code']})
