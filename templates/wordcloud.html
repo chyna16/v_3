@@ -46,9 +46,14 @@
 <script type="text/javascript">
 	var commit_words = {{ word_list | safe }};
 	var height = 1000,
-		width = 1000,
+		width = 1600,
 		padding = 50;
 
+	var font = d3.scale.linear()
+					.range([20, 150])
+					.domain(d3.extent(commit_words, function(d) {
+						return +d['size'];
+					}));
 	var color = d3.scale.linear()
 			.domain([0, d3.max(commit_words, function(d) { return +d['size']; })])
 			.range(["#c63939", "#130505"]);
@@ -56,20 +61,14 @@
 	var cloud_layout = d3.layout.cloud()
 					.size([width, height])
 					.words(commit_words)
-					.padding(10)
+					.padding(15)
 					.font('monospace')
 					// rotates random words 90 degrees
 					// .rotate(function(d) { return Math.floor(Math.random() * 2) * 90; })
 					.rotate(function (d) {return 0})
 					//not all words are being displayed if font size is too large
-			{% if word_list | length >= 300 %}
-					.fontSize(function(d) {return d.size * 10})
-			{% elif word_list | length <= 50 %}
-					.fontSize(function(d) {return d.size * 20})
-			{% else %}
-					.fontSize(function(d) {return d.size * 15})
-			{% endif %}
 					.text(function(d) {return d.text;})
+					.fontSize(function(d) {return font(d['size'])})
 					.spiral("rectangular")
 					.on("end", draw)
 					.start();
@@ -82,19 +81,22 @@
 				.style("display", "block")
 				.attr("class", "wordcloud")
 				.append("g")
-				.attr("transform", "translate(500,500)")
+				.attr("transform", "translate(800,500)")
 				.selectAll("text")
 				.data(words)
 				.enter().append("text")
+
 				.style("font-size", function(d) { return d.size + "px"; })
 				.style("fill", function(d, i) { return color(i); })
 				// .on("mouseover", function(d, i){
 				// 	word = d3.select(this)
-				// 			 .enter().append("size")
+				// 			 .enter().append("font-size")
 				// 			 .style("font-size", function(d) { return d.size + "px"; })
 				// 			 .style("fill", function(d, i) { return color(i); })
-				// 			 .style('display','block');
+				// 			 .style('display','none');
 				// })
+            	.transition()
+            	.duration(1000)
 				.attr("text-anchor", "middle")
 				.attr("transform", function(d) {
 					return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
