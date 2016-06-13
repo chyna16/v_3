@@ -6,19 +6,25 @@ import subprocess
 from flask import request, flash
 from stop_words import get_stop_words
 import stash_api
+import settings
 import shutil
+
+
+# switches working directory to passed in address
+def change_directory(path):
+	if not os.getcwd() == path:
+		os.chdir(path)
+	else: return False
 
 
 # called by visualizer at timed intervals
 # updates already cloned repositories
-def clone_repos(repo_dir):
+def refresh_repos(repo_dir):
 	repo_list = [ item for item in os.listdir(repo_dir) 
 			if os.path.isdir(os.path.join(repo_dir, item)) ]
 		# list of cloned repositories
 
-	print(repo_list)
-
-	os.chdir('..') # cd out of v3 dir into repo dir
+	change_directory(repo_dir) # cd out of v3 dir into repo dir
 	print(os.getcwd())
 
 	for repo in repo_list:
@@ -30,23 +36,39 @@ def clone_repos(repo_dir):
 			shutil.rmtree(repo) # delete repository before cloning
 			os.system('git clone ' + clone_url)
 
-	os.chdir('v3')
+	change_directory(settings.v3_dir) # cd back into v3
 	print(os.getcwd())
 
-# called by index view
-# sets the path to the location of codemaat in order to call maat command
-def set_path(maat_dir):
-	print("Setting a path for codemaat...")
-	os.environ['PATH'] += os.pathsep + maat_dir
+
+# called by index view to set path for codemaat
+# sets the path to the passed in address
+def set_path(path):
+	print("Setting a path to " + path)
+	os.environ['PATH'] += os.pathsep + path
 	print("Done.")
 	print("-" * 60)
 
 
-# called by index view & index_repo view
-# handles command line inputs for cloning a repository
-def submit_url(clone_url):
-	os.chdir('..')
-	clone = os.system('git clone ' + clone_url)
+# calls git clone command with an appropriate url
+def clone_repo(clone_url):
+	change_directory(settings.repo_dir)
+	os.system('git clone ' + clone_url)
+	change_directory(settings.v3_dir)
+
+
+# parses the user given clone url and password; returns combined http url
+def get_clone_command(clone_url, password):
+	char = clone_url.index('@')
+	command = clone_url[:char] + ':' + password + clone_url[char:]
+	print(command)
+	return command
+
+
+# called by index view to generate message
+# FIX: currently cd's into repo_dir and re-clones the repo
+# 	causing the message to be "already exists"
+def get_status_message(clone_url):
+	change_directory(settings.repo_dir)
 	# temporary message handler for cloning repositories
 	clone_status = subprocess.getoutput('git clone ' + clone_url)
 	print ("this is the status: " + clone_status)
@@ -60,7 +82,7 @@ def submit_url(clone_url):
 		not have permission to access it."""
 	else:
 		message = "Cloning complete. Check the 'Available Repositories tab."
-	os.chdir('v3')
+	change_directory(settings.v3_dir)
 	return message
 
 
@@ -121,15 +143,15 @@ def generate_data(address, repo_name, date_after, date_before):
 	print("Creating repository summary...")
 	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
 	# # Reports an overview of mined data from git's log file
-	# print("Creating organizational metrics...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	print("Creating organizational metrics...")
+	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	# # Reports the number of authors/revisions made per module
-	# print("Creating coupling history...")
-	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	print("Creating coupling history...")
+	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
 	# # Reports correlation of files that often commit together
 	# # degree = % of commits where the two files were changed in the same commit
-	# print("Creating code age summary...")
-	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	print("Creating code age summary...")
+	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# # Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
 	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)

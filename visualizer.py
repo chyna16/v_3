@@ -11,14 +11,14 @@ app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
 
-maat_dir = settings.maat_directory # address of codemaat
-repo_dir = settings.repo_directory # address of cloned repositories
+maat_dir = settings.maat_dir # address of codemaat
+repo_dir = settings.repo_dir # address of cloned repositories
 list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 # generator.clone_repos(repo_dir)
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
-clone_sched.add_job(lambda:generator.clone_repos(repo_dir),
+clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
 				 'cron', day='0-6', hour='0')
 	# lambda passes function as parameter
 	# cron is a configuration for time schedules
@@ -56,8 +56,10 @@ def index():
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			message = generator.submit_url(clone_url)
-				# submit_url called to handle cloning of repo
+			clone_cmd = generator.get_clone_command(clone_url, password) 
+				# get the appropriate url-password combined git command
+			generator.clone_repo(clone_cmd) # go to repo_dir and clone the repo
+			message = generator.get_status_message(clone_cmd)
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
 		elif request.form['submit_button'] == "3":
@@ -84,7 +86,7 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
-		generator.submit_url(repo_url)
+		generator.clone_repo(repo_url) # go to repo_dir and clone the repo
 		root_dir = generator.select_folder(
 			repo_dir, repo_name, from_date, to_date
 		)
