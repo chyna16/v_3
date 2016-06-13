@@ -6,7 +6,6 @@ import subprocess
 from flask import request, flash
 from stop_words import get_stop_words
 
-
 # called by index view
 # sets the path to the location of codemaat in order to call maat command
 def set_path(maat_dir):
@@ -18,13 +17,11 @@ def set_path(maat_dir):
 
 # called by index view & index_repo view
 # handles command line inputs for cloning a repository
-def submit_url(clone_url, password):
+def submit_url(clone_url):
 	os.chdir('..')
-	char = clone_url.index('@')
-	command = clone_url[:char] + ':' + password + clone_url[char:]
-	clone = os.system('git clone ' + command)
+	clone = os.system('git clone ' + clone_url)
 	# temporary message handler for cloning repositories
-	clone_status = subprocess.getoutput('git clone ' + command)
+	clone_status = subprocess.getoutput('git clone ' + clone_url)
 	print ("this is the status: " + clone_status)
 	if 'Authentication failed' 	in clone_status:
 		message = "Authentication failed."

@@ -54,7 +54,7 @@ def get_project_repos(selected_key):
 	for repo_name in json_repos['values']:
 		# traverses api data to find name and clone url for each repo
 		for link in repo_name['links']['clone']:
-			if link['name'] == "http":
+			if link['name'] == "ssh":
 				repo_list.append(
 					{'name': repo_name['name'], 'url': link['href']}
 				)	# creates a list of dictionaries for every repo

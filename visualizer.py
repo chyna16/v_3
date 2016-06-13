@@ -74,7 +74,7 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
-		generator.submit_url(repo_url, settings.password) # uses our pass
+		generator.submit_url(repo_url)
 		root_dir = generator.select_folder(
 			repo_dir, repo_name, from_date, to_date
 		)
