@@ -65,30 +65,26 @@
 </center>
 
 <script>
-    var keys = {{keys|safe}}; // an array of the data type in original order
-    var json_data = {{data|safe}}; // a dictionary w/ each key (data type) holding an array
+    var keys = {{keys|safe}}; // an array of the column headers in original order
+    var json_data = {{data|safe}}; // an array of objects for row of data
     var analysis_type = {{analysis|safe}}
     var repo = {{repo_name|safe}}
-    var keys_len = keys.length; 
-    var data_len = json_data.length;
-    console.log(analysis_type);
 
     // default filter variables
     // declared outside so that value can be changed/accessed by other functions
     var filter_key = "blank"; // if left "blank" then filter will not apply
     var filter_start;
     var filter_end;
-    var filtered_json = json_data; // to be used as a filtered copy of json_data
+    var filtered_data = json_data; // to be used as a filtered copy of json_data
 
- 
     var chosen_key = "default"; // the default key represents all columns
 
     var help = document.getElementById("help");
     var help_desc = {
         "metrics": "View raw data for each module. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Click on a column header to see data only for that column. Place your mouse over a bar to see exact value.",
         "age": "Compare lines added vs lines deleted. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Click on a column header to see data only for that column. Place your mouse over a bar to see exact value.",
-        "hotspots": "Hotspots indicate which modules you may need to take a closer look at. The size of the module is determined by complexity (n-lines) and the shade of red determined by effort (n-revs), proportional to the repository. Look out for the big and bright red ones. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Place your mouse over the bubbles to see module name.",
-        "coupling": "Coupling shows relational data between modules based on how often they were committed together. Click on a module name to see what other modules it is coupled with and to what extent. Degree shows percentage of times that module was committed with the selected entity.",
+        "hotspots": "Hotspots indicate which modules you may need to take a closer look at. The size of the module is determined by complexity (n-lines) and the shade of red determined by effort (n-revs), proportional to the repository. Look out for the big and bright red ones. These are the ones which may need refactoring. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Place your mouse over the bubbles to see module name.",
+        "coupling": "Coupling shows relational data between modules based on how often they were committed together. Click on a module name to see what other modules it is coupled with and to what extent. Degree shows percentage of times that module was committed with the selected entity. Paired modules with high degree of coupling implies dependency; if one is changed, the other is likely to be affected.",
         "cloud": "View the patterns within commit messages. See which words are used the most while committing to get an understanding of things that are commonly worked on. The size of the word is proportional to frequency."
     };
     help.innerHTML = help_desc[analysis_type]; // text that will appear when ? is hovered

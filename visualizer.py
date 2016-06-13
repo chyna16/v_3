@@ -5,6 +5,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 import generator # our script
 import stash_api # our script
 import settings # our script
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 secret = os.urandom(24)
@@ -14,6 +15,15 @@ maat_dir = settings.maat_directory # address of codemaat
 repo_dir = settings.repo_directory # address of cloned repositories
 list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
+# generator.clone_repos(repo_dir)
+
+clone_sched = BackgroundScheduler() # configuration for apscheduler
+clone_sched.add_job(lambda:generator.clone_repos(repo_dir),
+				 'cron', day='0-6', hour='0')
+	# lambda passes function as parameter
+	# cron is a configuration for time schedules
+	# configured for everyday of week (0-6), at 12 AM (0)
+clone_sched.start()
 
 
 # homepage where user can select/add a repository to begin analysis process
@@ -46,7 +56,7 @@ def index():
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			message = generator.submit_url(clone_url, password)
+			message = generator.submit_url(clone_url)
 				# submit_url called to handle cloning of repo
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))

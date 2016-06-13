@@ -5,6 +5,33 @@ import fnmatch
 import subprocess
 from flask import request, flash
 from stop_words import get_stop_words
+import stash_api
+import shutil
+
+
+# called by visualizer at timed intervals
+# updates already cloned repositories
+def clone_repos(repo_dir):
+	repo_list = [ item for item in os.listdir(repo_dir) 
+			if os.path.isdir(os.path.join(repo_dir, item)) ]
+		# list of cloned repositories
+
+	print(repo_list)
+
+	os.chdir('..') # cd out of v3 dir into repo dir
+	print(os.getcwd())
+
+	for repo in repo_list:
+		clone_url = stash_api.get_repo_url(repo) # api call to get clone url
+		if not clone_url: continue # if function returned false
+		if repo == 'v3': continue
+		else:
+			# if the repository is not v3
+			shutil.rmtree(repo) # delete repository before cloning
+			os.system('git clone ' + clone_url)
+
+	os.chdir('v3')
+	print(os.getcwd())
 
 # called by index view
 # sets the path to the location of codemaat in order to call maat command
@@ -105,11 +132,11 @@ def generate_data(address, repo_name, date_after, date_before):
 	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# # Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "hotspots_" + repo_name + ".csv")
-	merge_csv(repo_name)
-	# print("Done. Check your current folder for your files.")
+	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
+	# 	+ "lines_" + repo_name + ".csv")
+	# merge_csv(repo_name)
+	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 
 
@@ -126,7 +153,7 @@ def generate_data_hotspot(address, repo_name, date_after, date_before):
 	print("Creating repository hotspots...")
 	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "hotspots_" + repo_name + ".csv")
+		+ "lines_" + repo_name + ".csv")
 	merge_csv(repo_name)
 	print("-" * 60)
 
@@ -202,6 +229,15 @@ def select_folder(repo_dir, repo, from_date, to_date):
 	return root_dir
 
 
+# called by parse_csv
+# checks is passed in string is in list of modules to be ignored
+def ignore_module(entity):
+	ignore_list = ['bower.json', '.gitignore']
+		# list to be expanded
+	if entity in ignore_list: return True
+	else: return False
+
+
 # called by result view
 # reads opened csv file
 # creates a list of the headers, and a dictionary of each row
@@ -216,9 +252,10 @@ def parse_csv(uploaded_file):
 		if i == 0:
 			key_array = row
 		else:
-			for j, key in enumerate(key_array):
-				row_array[key] = row[j]
-			data_dict.append(row_array)
+			if not ignore_module(row[0]):
+				for j, key in enumerate(key_array):
+					row_array[key] = row[j]
+				data_dict.append(row_array)
 
 	return (data_dict, key_array)
 
@@ -232,7 +269,7 @@ def merge_csv(repo_name):
 	merge_array = []
 
 	try:
-		with open("hotspots_" + repo_name + ".csv") as lines_file:
+		with open("lines_" + repo_name + ".csv") as lines_file:
 			lines_reader = csv.DictReader(lines_file)
 			for row in lines_reader:
 				lines_array.append({'entity': row['filename'], 'lines': row['code']})
