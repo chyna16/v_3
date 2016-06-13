@@ -364,15 +364,15 @@ function createPieChart(data, module) {
 
     slice.append("text")
         .attr('transform', function(d) { 
-            return 'translate(' + textArc.centroid(d) + ')'
-                + 'rotate(' + angle(d) + ')';
+            return 'translate(' + textArc.centroid(d) + ')';
+                // + 'rotate(' + angle(d) + ')';
         })
         .attr('dy', '.35em')
         .attr('text-anchor', 'middle')
         .style('font-size', '10px')
-        .text(function(d) { return d.data.coupled.split('/').pop(); });
+        .text(function(d) { return d.data['average-revs']; });
 
     slice.append("title")
-        .text(function(d) { return d.data['average-revs']; });
+        .text(function(d) { return d.data.coupled; });
 
 }
