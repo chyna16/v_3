@@ -15,10 +15,10 @@ maat_dir = settings.maat_directory # address of codemaat
 repo_dir = settings.repo_directory # address of cloned repositories
 list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
-# generator.clone_repos(repo_dir, settings.password)
+# generator.clone_repos(repo_dir)
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
-clone_sched.add_job(lambda:generator.clone_repos(repo_dir, settings.password),
+clone_sched.add_job(lambda:generator.clone_repos(repo_dir),
 				 'cron', day='0-6', hour='0')
 	# lambda passes function as parameter
 	# cron is a configuration for time schedules
@@ -56,7 +56,7 @@ def index():
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			message = generator.submit_url(clone_url, password)
+			message = generator.submit_url(clone_url)
 				# submit_url called to handle cloning of repo
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
@@ -84,7 +84,7 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
-		generator.submit_url(repo_url, settings.password) # uses our pass
+		generator.submit_url(repo_url)
 		root_dir = generator.select_folder(
 			repo_dir, repo_name, from_date, to_date
 		)
@@ -170,5 +170,5 @@ def bad_request(e):
 
 
 if __name__ == '__main__':
-	app.run()
+	app.run(debug=True)
 	# app.run(host='0.0.0.0')

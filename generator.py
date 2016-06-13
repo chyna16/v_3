@@ -11,7 +11,7 @@ import shutil
 
 # called by visualizer at timed intervals
 # updates already cloned repositories
-def clone_repos(repo_dir, password):
+def clone_repos(repo_dir):
 	repo_list = [ item for item in os.listdir(repo_dir) 
 			if os.path.isdir(os.path.join(repo_dir, item)) ]
 		# list of cloned repositories
@@ -28,13 +28,10 @@ def clone_repos(repo_dir, password):
 		else:
 			# if the repository is not v3
 			shutil.rmtree(repo) # delete repository before cloning
-			char = clone_url.index('@')
-			command = clone_url[:char] + ':' + password + clone_url[char:]
-			os.system('git clone ' + command)
+			os.system('git clone ' + clone_url)
 
 	os.chdir('v3')
 	print(os.getcwd())
-
 
 # called by index view
 # sets the path to the location of codemaat in order to call maat command
@@ -47,13 +44,11 @@ def set_path(maat_dir):
 
 # called by index view & index_repo view
 # handles command line inputs for cloning a repository
-def submit_url(clone_url, password):
+def submit_url(clone_url):
 	os.chdir('..')
-	char = clone_url.index('@')
-	command = clone_url[:char] + ':' + password + clone_url[char:]
-	clone = os.system('git clone ' + command)
+	clone = os.system('git clone ' + clone_url)
 	# temporary message handler for cloning repositories
-	clone_status = subprocess.getoutput('git clone ' + command)
+	clone_status = subprocess.getoutput('git clone ' + clone_url)
 	print ("this is the status: " + clone_status)
 	if 'Authentication failed' 	in clone_status:
 		message = "Authentication failed."
@@ -125,17 +120,17 @@ def generate_data(address, repo_name, date_after, date_before):
 	time.sleep(1)
 	print("Creating repository summary...")
 	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
-	# Reports an overview of mined data from git's log file
-	print("Creating organizational metrics...")
-	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	# Reports the number of authors/revisions made per module
-	print("Creating coupling history...")
-	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
-	# Reports correlation of files that often commit together
-	# degree = % of commits where the two files were changed in the same commit
-	print("Creating code age summary...")
-	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
-	# Reports how long ago the last change was made in measurement of months
+	# # Reports an overview of mined data from git's log file
+	# print("Creating organizational metrics...")
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# # Reports the number of authors/revisions made per module
+	# print("Creating coupling history...")
+	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	# # Reports correlation of files that often commit together
+	# # degree = % of commits where the two files were changed in the same commit
+	# print("Creating code age summary...")
+	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	# # Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
 	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
@@ -299,7 +294,7 @@ def merge_csv(repo_name):
 		for row in merge_array:
 			writer.writerow(row)
 
-# stop_words = ['merge', 'merged', 'feature', "'feature'", 'and', 'or']
+
 # called by get_word_frequency
 # filters out non-significant words
 stop_words = get_stop_words('en')
@@ -316,6 +311,7 @@ def redundant_word(word):
 	else: 
 		return False
 
+
 # called by get_word_frequency
 # iterates over word_list & checks for given word within each dict
 def word_exists(word, word_list):
@@ -324,7 +320,7 @@ def word_exists(word, word_list):
 			word_pair['size'] += 1
 			return True
 
-# CURRENTLY NOT IN USE
+
 # aqcuires list of all words from commit messages
 # creates a list of dictionaries of words paired with frequency of occurrence
 def get_word_frequency(logfile):
@@ -345,9 +341,8 @@ def get_word_frequency(logfile):
 
 	return(word_list)
 
-
-if __name__ == '__main__':
-	# print (folder_list)
-	# print (project_list)
-	# print(project_key)
-	get_word_frequency()
+# if __name__ == '__main__':
+# 	print (folder_list)
+# 	print (project_list)
+# 	print(project_key)
+# 	get_word_frequency()
