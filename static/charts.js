@@ -86,14 +86,20 @@ function createBarGraph(data) {
             .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
             .enter()
         .append("rect")
+            .attr("height", 0)
+            .attr("width", 0)
+            .transition()
+            .duration(900)
             .attr("height", function(d) { return height - yScale(d.value); })
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
             .attr("y", function(d) { return yScale(d.value); })
             .style("fill", function(d) { return color(d.type); })
-        .append("svg:title")
+        //labels dont display with this + transition enabled
+        // .append("svg:title")
             .text(function(d) { return d.value; });
-        
+     
+     //bar values  
      // var text = category.selectAll("text")
      //        .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
      //        .enter()
@@ -101,8 +107,20 @@ function createBarGraph(data) {
      //        .attr("x", function(d) { return x1Scale(d.type); })
      //        .attr("y", function(d) { return yScale(d.value); })
      //        .text(function(d){ return d.value })
-     //        .style("display", "block");
-        
+     //        .style("display", "none");
+
+        //labels hide all text
+        d3.select("button").on("click", function(d) {
+            var current_display = d3.select("text").style("display");
+            if (current_display == "block") {
+                d3.select(this).text("Show Labels")
+                d3.selectAll("text").style("display", "none");
+            } else {
+                d3.select(this).text("Hide Labels");
+            d3.selectAll("text").style("display","block");
+        }
+
+        });
         //feature to display numerical values on mouse enter broken
         // text.on("mouseenter", function(d){
         //     word = d3.select(this);
