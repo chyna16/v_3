@@ -137,3 +137,7 @@ div[data-toggle="buttons"] label:active, div[data-toggle="buttons"] label.active
 box-shadow: none;
 text-align: center;
 }
+
+.project {
+  color: #337ab7;
+}

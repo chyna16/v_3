@@ -62,9 +62,10 @@ def index():
 			message = generator.get_status_message(clone_cmd)
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
-		elif request.form['submit_button'] == "3":
+		# elif request.form['submit_button'] == "3":
+		else:
 			# if a selection was made from 'Stash Repositories'
-			project_name = request.form['project_name']
+			project_name = request.form['submit_button']
 			# project_desc = stash_api.get_details() # needs to be modified for this
 			return redirect(url_for('index_repo', project_name=project_name))
 			# project_description=generator.project_description))
