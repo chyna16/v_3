@@ -94,26 +94,70 @@ function createBarGraph(data) {
             .attr("class", "category")
             .attr("transform", function(d) { 
                 return "translate(" + x0Scale(d[keys[0]]) + ",0)"; 
+            })
+             .on("mouseover", function(d) {
+                d3.select(".tooltipinfo h2").text(function() {
+                    return d.entity;
+                });
             });
-
     // bars appended to each category depending on how many columns are being displayed
     var bar = category.selectAll("rect")
             .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
             .enter()
         .append("rect")
-            .attr("height", 0)
-            .attr("width", 0)
-            .transition()
-            .duration(900)
+            // .attr("height", 0)
+            // .attr("width", 0)
+            // .transition()
+            // .duration(900)
             .attr("height", function(d) { return height - yScale(d.value); })
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
             .attr("y", function(d) { return yScale(d.value); })
             .style("fill", function(d) { return color(d.type); })
+            .on("mouseover", function(d) {
+                d3.select(".tooltipinfo #type td").text(function() {
+                    return d.type;
+                });
+                d3.select(".tooltipinfo #value td").text(function() {
+                    return d.value;
+                });
+
+                d3.select(".tooltipinfo")
+                    .style("display", "block")
+                    //stops the tooltip from overflowing past the right side of the page
+                    .style("left", function(){
+                        var right_edge = d3.event.pageX + this.offsetWidth;
+                        if (right_edge > width) {
+                            return (d3.event.pageX = this.offsetWidth)+"px";
+                        }
+                        return (d3.event.pageX)+"px";
+                    })
+                    //stops the tooltip from overflowing past the bottom of the page
+                    .style("top", function(){
+                        var bottom_edge = d3.event.pageY + this.offsetHeight;
+                        if (bottom_edge > height) {
+                            return (d3.event.pageY - this.offsetHeight)+"px";
+                        }
+                        return (d3.event.pageY)+"px";
+                    });
+            })
+            .on("mouseout", function(d, i) {
+                d3.select(".tooltipinfo").style("display", "none");
+            })
         //labels dont display with this + transition enabled
-        // .append("svg:title")
+        .append("svg:title")
             .text(function(d) { return d.value; });
-     
+
+        //move tooltip    
+        // d3.select(".tooltipinfo")
+        //     .style("display", "block")
+        //     .style("left", function(){
+        //         return (d3.event.pageX) + "px";
+        //     })
+        //     .style("top", function(){
+        //         return (d3.event.pageY)+"px"
+        //     })
+
      //bar values  
      // var text = category.selectAll("text")
      //        .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
