@@ -43,15 +43,19 @@ def index():
 			repo_name = request.form['repo_name']
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
-			root_dir = generator.select_folder(
-				repo_dir, repo_name, from_date, to_date
-			)	# select_folder called to handle folders and files
+			# root_dir = generator.manage_csv_folder(
+			# 	repo_dir, repo_name, from_date, to_date
+			# )	# manage_csv_folder called to handle folders and files
 				# returns address of folder that contains csv files
-			return redirect(url_for(
-				'dashboard',
-				root_dir=root_dir, repo_name=repo_name, 
-				from_date=from_date, to_date=to_date
-			)) 	# redirects to dashboard view which opens input.html
+			generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
+			# return redirect(url_for(
+			# 	'dashboard',
+			# 	root_dir=root_dir, repo_name=repo_name, 
+			# 	from_date=from_date, to_date=to_date
+			# )) 	# redirects to dashboard view which opens input.html
+			return redirect(url_for('dashboard',
+				repo_name=repo_name, from_date=from_date, to_date=to_date)) 	
+				# redirects to dashboard view which opens input.html
 		elif request.form['submit_button'] == "1":
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
@@ -88,14 +92,16 @@ def index_repo():
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
 		generator.clone_repo(repo_url) # go to repo_dir and clone the repo
-		root_dir = generator.select_folder(
-			repo_dir, repo_name, from_date, to_date
-		)
-		return redirect(url_for(
-			'dashboard',
-			root_dir=root_dir, repo_name=repo_name, 
-			from_date=from_date, to_date=to_date
-		))
+		# root_dir = generator.manage_csv_folder(repo_dir, 
+		# 	repo_name, from_date, to_date)
+		generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
+		# return redirect(url_for(
+		# 	'dashboard',
+		# 	root_dir=root_dir, repo_name=repo_name, 
+		# 	from_date=from_date, to_date=to_date
+		# ))
+		return redirect(url_for('dashboard',
+			repo_name=repo_name, from_date=from_date, to_date=to_date))
 			# after selecting a repo, the user is returned to the homepage 
 			# where selected repo is now added to list of available repos
 			# TO DO: skip the step of returning to homepage?
@@ -105,19 +111,20 @@ def index_repo():
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
 	# retrieves passed in queries from index view
-	root_dir = request.args.get('root_dir')
+	# root_dir = request.args.get('root_dir')
 	repo_name = request.args.get('repo_name')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
 
 	if request.method == 'GET':
-		csv_list = []
-		for root, dirs, files in os.walk(root_dir):
-			# traverses filesystem of root_dir
-			for filename in fnmatch.filter(files, '*.csv'):  
-				# traverses files and picks out csv files
-				csv_list.append(filename) # list of csv files
-		return render_template('input.html', csv_list=csv_list) 
+		# csv_list = []
+		# for root, dirs, files in os.walk(root_dir):
+		# 	# traverses filesystem of root_dir
+		# 	for filename in fnmatch.filter(files, '*.csv'):  
+		# 		# traverses files and picks out csv files
+		# 		csv_list.append(filename) # list of csv files
+		# return render_template('input.html', csv_list=csv_list)
+		return render_template('input.html') 
 			# NOTE: csv_list currently not being used in webpage
 			# TO DO: get rid of csv_list and have all csv's always available?
 	elif request.method == 'POST':

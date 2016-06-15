@@ -11,6 +11,7 @@ import shutil
 
 
 # switches working directory to passed in address
+# NOTE: might be pointless; get rid of it?
 def change_directory(path):
 	if not os.getcwd() == path:
 		os.chdir(path)
@@ -24,7 +25,7 @@ def refresh_repos(repo_dir):
 			if os.path.isdir(os.path.join(repo_dir, item)) ]
 		# list of cloned repositories
 
-	change_directory(repo_dir) # cd out of v3 dir into repo dir
+	os.chdir(repo_dir) # cd out of v3 dir into repo dir
 	print(os.getcwd())
 
 	for repo in repo_list:
@@ -36,7 +37,7 @@ def refresh_repos(repo_dir):
 			shutil.rmtree(repo) # delete repository before cloning
 			os.system('git clone ' + clone_url)
 
-	change_directory(settings.v3_dir) # cd back into v3
+	os.chdir(settings.v3_dir) # cd back into v3
 	print(os.getcwd())
 
 
@@ -51,9 +52,9 @@ def set_path(path):
 
 # calls git clone command with an appropriate url
 def clone_repo(clone_url):
-	change_directory(settings.repo_dir)
+	os.chdir(settings.repo_dir)
 	os.system('git clone ' + clone_url)
-	change_directory(settings.v3_dir)
+	os.chdir(settings.v3_dir)
 
 
 # parses the user given clone url and password; returns combined http url
@@ -68,7 +69,7 @@ def get_clone_command(clone_url, password):
 # FIX: currently cd's into repo_dir and re-clones the repo
 # 	causing the message to be "already exists"
 def get_status_message(clone_url):
-	change_directory(settings.repo_dir)
+	os.chdir(settings.repo_dir)
 	# temporary message handler for cloning repositories
 	clone_status = subprocess.getoutput('git clone ' + clone_url)
 	print ("this is the status: " + clone_status)
@@ -82,79 +83,40 @@ def get_status_message(clone_url):
 		not have permission to access it."""
 	else:
 		message = "Cloning complete. Check the 'Available Repositories tab."
-	change_directory(settings.v3_dir)
+	os.chdir(settings.v3_dir)
 	return message
-
-
-def change_folder(repo_name, date_after, date_before):
-	os.system("mkdir csv_files_" + repo_name + "_" + date_after + "_" + date_before)
-	os.chdir("csv_files_" + repo_name + "_" + date_after + "_" + date_before)
-
-
-def directory_return():
-	os.chdir("..")
-
-
-# called by select_folder
-# handles command line inputs for creating a logfile
-def create_log(repo_name, date_after, date_before, address):
-	print("Obtaining repository logs...")
-	sys_command = "" # resets to blank
-	# first part of command same for any date specification
-	sys_command = 'git --git-dir ' + address + ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat'
-	sys_command_cloud = 'git --git-dir ' + address + ' log --pretty=format:"%s"'
-	#the following commands change depending on date specification
-	if not date_after == "" and date_before == "":
-		print("date after selected")
-		sys_command += ' --after=' + date_after
-		sys_command_cloud += ' --after=' + date_after 	
-	elif date_after == "" and not date_before == "":
-		print("date before selected")
-		sys_command += ' --before=' + date_before
-		sys_command_cloud += ' --before=' + date_before 	
-	elif not date_after == "" and not date_before == "":
-		print("date_after and date_before selected")
-		sys_command += ' --after=' + date_after + ' --before=' + date_before
-		sys_command_cloud += ' --after=' + date_after + ' --before=' + date_before 	
-	# last part of command same for any date specification			
-	sys_command += ' > logfile_' + repo_name + '_' + date_after + '_' + date_before + '.log'
-	sys_command_cloud += ' > cloud_' + repo_name + '_' + date_after + '_' + date_before + '.log'
-	os.system(sys_command) # command line call using the updated string
-	os.system(sys_command_cloud) 
-	# os.system('git --git-dir ' + address + ' log --pretty=format:"%s" > logfile_string.log')
-	print("Done.")
-	print("-" * 60)
 
 
 # called by generate_data functions
 # helper function to handle command line input for running codemaat
-def run_codemaat(analysis_type, analysis_name, repo_name, date_after, date_before):
+def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
 	os.system("maat -l logfile_" 
-		+ repo_name + "_" + date_after + "_" + date_before 
+		+ repo_name + "_" + from_date + "_" + to_date 
 		+ ".log -c git -a " + analysis_type + " > " 
 		+ analysis_name + "_" + repo_name + ".csv")
 
 
-# called by select_folder/select_analysis
+# called by manage_csv_folder/select_analysis
 # currently only calls run_codemaat on all analyses
-def generate_data(address, repo_name, date_after, date_before):
+def generate_data(address, repo_name, from_date, to_date):
+	os.chdir
 	print("Creating csv files from generated log...")
 	time.sleep(1)
 	print("Creating repository summary...")
-	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	# run_codemaat('summary', 'summary', repo_name, from_date, to_date)
 	# # Reports an overview of mined data from git's log file
 	print("Creating organizational metrics...")
-	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
 	# # Reports the number of authors/revisions made per module
 	print("Creating coupling history...")
-	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	# run_codemaat('coupling', 'coupling', repo_name, from_date, to_date)
 	# # Reports correlation of files that often commit together
 	# # degree = % of commits where the two files were changed in the same commit
 	print("Creating code age summary...")
-	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	# run_codemaat('entity-churn', 'age', repo_name, from_date, to_date)
 	# # Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
-	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
 	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
 	# 	+ "lines_" + repo_name + ".csv")
 	# merge_csv(repo_name)
@@ -163,39 +125,39 @@ def generate_data(address, repo_name, date_after, date_before):
 
 
 # NOTE: currently NOT IN USE
-def generate_data_summary(address, repo_name, date_after, date_before):
+def generate_data_summary(address, repo_name, from_date, to_date):
 	time.sleep(1)
 	print("Creating repository summary...")
-	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	run_codemaat('summary', 'summary', repo_name, from_date, to_date)
 	print("-" * 60)
 
 # NOTE: currently NOT IN USE
-def generate_data_hotspot(address, repo_name, date_after, date_before):
+def generate_data_hotspot(address, repo_name, from_date, to_date):
 	time.sleep(1)
 	print("Creating repository hotspots...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
 	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
 		+ "lines_" + repo_name + ".csv")
 	merge_csv(repo_name)
 	print("-" * 60)
 
 # NOTE: currently NOT IN USE
-def generate_data_metrics(address, repo_name, date_after, date_before):
+def generate_data_metrics(address, repo_name, from_date, to_date):
 	time.sleep(1)
 	print("Creating organizational metrics...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
 		# Reports the number of authors/revisions made per module
 	print("-" * 60)
 
 # NOTE: currently NOT IN USE
-def generate_data_coupling(address, repo_name, date_after, date_before):
+def generate_data_coupling(address, repo_name, from_date, to_date):
 	time.sleep(1)
 	print("Creating coupling history...")
-	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	run_codemaat('coupling', 'coupling', repo_name, from_date, to_date)
 	print("-" * 60)
 
 # NOTE: currently NOT IN USE
-# called by select_folder
+# called by manage_csv_folder
 # reads user selection of analyses 
 # calls helper functions that run codemaat 
 # FIX: currently does not read multiple selections
@@ -217,38 +179,64 @@ def select_analysis(address, repo, from_date, to_date):
 		generate_data(address, repo, from_date, to_date)
 
 
+# called by manage_csv_folder
+# handles command line inputs for creating a logfile
+def create_log(repo_name, from_date, to_date, address):
+	print("Obtaining repository logs...")
+	sys_command = "" # resets to blank
+	# first part of command same for any date specification
+	sys_command = ('git --git-dir ' + address 
+		+ ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat')
+	sys_command_cloud = 'git --git-dir ' + address + ' log --pretty=format:"%s"'
+	#the following commands change depending on date specification
+	if not from_date == "" and to_date == "":
+		sys_command += ' --after=' + from_date
+		sys_command_cloud += ' --after=' + from_date 	
+	elif from_date == "" and not to_date == "":
+		sys_command += ' --before=' + to_date
+		sys_command_cloud += ' --before=' + to_date 	
+	elif not from_date == "" and not to_date == "":
+		sys_command += ' --after=' + from_date + ' --before=' + to_date
+		sys_command_cloud += ' --after=' + from_date + ' --before=' + to_date 	
+	# last part of command same for any date specification			
+	sys_command += (' > logfile_' 
+		+ repo_name + '_' + from_date + '_' + to_date + '.log')
+	sys_command_cloud += (' > cloud_' 
+		+ repo_name + '_' + from_date + '_' + to_date + '.log')
+	os.system(sys_command) # command line call using the updated string
+	os.system(sys_command_cloud) 
+	print("Done.")
+	print("-" * 60)
+
+
 # called by index view
 # sets the address where csv files are/will be located
 # handles switching between directories
 # calls helper functions that handle folder, logfile, & codemaat
-def select_folder(repo_dir, repo, from_date, to_date):
+def manage_csv_folder(repo_dir, repo, from_date, to_date):
 	print("1: " + os.getcwd())
-	root_dir = os.getcwd() + '/csv_files_' + repo + "_" + from_date + "_" + to_date
-		# root_dir is the complete address of csv folder for chosen repo
+	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
+	csv_path = settings.v3_dir + "/" + folder_name
+		# csv_path is the complete address of csv folder for chosen repo
 
-	if(os.path.exists(root_dir)):
-		# if the csv folder for the chosen repo exists in 'v3'
-		print("folder exists: " + root_dir)
-		os.chdir("csv_files_" + repo + "_" + from_date + "_" + to_date)
-			# switch to that folder
-	else:
+	if not os.path.exists(csv_path):
 		# if that csv folder doesn't exist
-		print("creating folder: " + root_dir)
-		change_folder(repo, from_date, to_date) 
-			# create that folder and switch to it
+		print("creating folder: " + csv_path)
+		os.system("mkdir " + folder_name)
+	else: print("folder exists: " + csv_path)
 
-	address = repo_dir + repo + '/.git'
+	repo_address = repo_dir + repo + '/.git'
 
-	create_log(repo, from_date, to_date, address)
-		# while in the csv folder of chosen repo, create log file
+	os.chdir(csv_path) # switch to csv folder of chosen repo
 	print("2: " + os.getcwd())
-
+	create_log(repo, from_date, to_date, repo_address) # make logfile
 	# select_analysis(address, repo, from_date, to_date)
-	generate_data(address, repo, from_date, to_date)
-	directory_return() # go back to parent directory ('v3')
+	generate_data(repo_address, repo, from_date, to_date)
+
+	os.chdir(settings.v3_dir)
 	print("3: " + os.getcwd())
 	flash('Analysis complete.')
-	return root_dir
+	# return csv_path
 
 
 # called by parse_csv
@@ -294,7 +282,8 @@ def merge_csv(repo_name):
 		with open("lines_" + repo_name + ".csv") as lines_file:
 			lines_reader = csv.DictReader(lines_file)
 			for row in lines_reader:
-				lines_array.append({'entity': row['filename'], 'lines': row['code']})
+				lines_array.append({'entity': row['filename'], 
+									'lines': row['code']})
 	except IOError:
 		print("file not found")
 		return
