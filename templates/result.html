@@ -78,6 +78,8 @@
     var filtered_data = json_data; // to be used as a filtered copy of json_data
 
     var chosen_key = "default"; // the default key represents all columns
+    if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
+        // if the analysis is metrics, then revs column should be default
 
     var help = document.getElementById("help");
     var help_desc = {
