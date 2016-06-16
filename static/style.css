@@ -10,7 +10,15 @@ body {
 }
 
 /* RESULT PAGE */
-
+.tooltipinfo{
+        background: silver;
+        height: 200px;
+        border: 1px solid #dedede;
+        display: none;
+        position: absolute;
+        max-width: 400px;
+        overflow: hidden;
+}
 .help {
   font-size: 50px; 
   color: #337ab7; 
