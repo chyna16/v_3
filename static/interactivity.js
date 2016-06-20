@@ -63,22 +63,22 @@ function createSlider() {
     keys.forEach(function(key) {
         if (key != keys[0] && key != 'coupled') {
             var slider = d3.select("#filter");
-            var p = slider.append("p");
+            var p = slider.append("center").append("p");
             p.append("label")
                 .attr('for', key + '-amount')
-                .text(key + ': ');
-            p.append("input")
+                .attr('class', 'filter-key')
+                .text(key + ':');
+            p.append("text")
                 .attr('type', 'text')
-                .attr('id', key + '-amount')
-                .style('border', 0)
-                .style('color', '#f6931f')
-                .style('font-weight', 'bold');
+                .attr('class', 'range')
+                .attr('id', key + '-amount');
             slider.append("div")
                 .attr('id', key + '-slider-range');
 
             var max_value = d3.max(json_data, function(d) { return +d[key]; })
 
-            // slider puglin retrieved from: http://jqueryui.com/slider/#range
+            // original version of jquery function retrieved from: 
+            // http://jqueryui.com/slider/#range
             $(function() {
                 $( "#" + key + "-slider-range" ).slider({
                   range: true,
@@ -87,15 +87,20 @@ function createSlider() {
                   values: [ 0, max_value ],
                   slide: function( event, ui ) {
                     $( "#" + key + "-amount" )
-                        .val( ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+                        .text( ui.values[ 0 ] + " - " + ui.values[ 1 ] );
                   }
                 });
-                $( "#" + key + "-amount" ).val( $( "#" + key + "-slider-range" )
+                $( "#" + key + "-amount" ).text( $( "#" + key + "-slider-range" )
                     .slider( "values", 0 ) + " - " + $( "#" + key + "-slider-range" )
                     .slider( "values", 1 ) );
             });
         }
     })
+
+    d3.select("#filter").append("input")
+        .attr('type', 'button')
+        .attr('value', 'Filter')
+        .on('click', function() { setFilter(); });
 }
 
 

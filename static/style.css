@@ -10,15 +10,17 @@ body {
 }
 
 /* RESULT PAGE */
-.tooltipinfo{
-        background: silver;
-        height: 200px;
-        border: 1px solid #dedede;
-        display: none;
-        position: absolute;
-        max-width: 400px;
-        overflow: hidden;
+
+.tooltipinfo {
+  background: silver;
+  height: 200px;
+  border: 1px solid #dedede;
+  display: none;
+  position: absolute;
+  max-width: 400px;
+  overflow: hidden;
 }
+
 .help {
   font-size: 50px; 
   color: #337ab7; 
@@ -44,10 +46,7 @@ body {
   display: block;
 }
 
-/* tooltip styling from 
-https://github.com/Caged/d3-tip
-*/
-
+/* tooltip styling from: https://github.com/Caged/d3-tip */
 .d3-tip {
   line-height: 1;
   font-weight: bold;
@@ -116,6 +115,31 @@ tbody td, thead th {
   font-size: 11px;
 }
 /* end axes styling */
+
+form#filter {
+  font-size: 15px;
+  width: 300px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+label.filter-key {
+  margin-right: 10px;
+  margin-bottom: 0;
+  font-weight: bold;
+}
+
+input.range {
+  width: auto;
+  border: 0;
+  color: #325a7e;
+  font-weight: bold;
+}
+
+div.ui-slider {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
 
 /* END RESULT PAGE */
 

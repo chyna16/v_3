@@ -50,38 +50,8 @@
 </center>
 
 <center>
-<form id="filter" style="font-size:15px; width: 300px;">
-    <!-- Column: {% for key in keys|fromjson %}
-                {% if key != (keys|fromjson)[0] and key != "coupled" %}
-                <input type="radio" name="key" value={{ key }}> {{ key }} 
-                {% endif %}
-            {% endfor %} 
-    &nbsp;&nbsp;&nbsp;
-    From: <input type="text" name="start" style="width:40px">
-    To: <input type="text" name="end" style="width:40px">
-    &nbsp;&nbsp;&nbsp;
-    <input type="button" value="Filter" onclick="setFilter()">
-    <br> -->
-    <!-- {% for key in keys|fromjson %}
-        {% if key != (keys|fromjson)[0] and key != "coupled" %}
-        <div id={{key}} class="row" name={{key}} style="float: left; margin: 25px;">
-        {{key}}: <br>
-        from: <input id="slider" type="range" name="from" min="0" max="10" value="0" style="width: 100px;">
-        to: <input id="slider" type="range" name="to" min="0" max="10" value="10" style="width: 100px;">
-        </div>
-        {% endif %}
-    {% endfor %} -->
-
-    <input type="button" value="Filter" onclick="setFilter()">
-</form>
+<form id="filter"></form>
 </center>
-
-<div id="slidertest">
-
-</div>
-
-<br>
-<br>
 
 <center>
 <div class="col-md-10" style="float:none">
