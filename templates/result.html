@@ -46,9 +46,6 @@
     <button> Hide labels</button>
 </center>
 
-<br>
-<br>
-
 <center>
 <form id="filter" style="font-size:15px; width: 300px;">
     <!-- Column: {% for key in keys|fromjson %}
@@ -96,10 +93,21 @@
 
     // default filter variables
     // declared outside so that value can be changed/accessed by other functions
-    var filter_key = "blank"; // if left "blank" then filter will not apply
-    var filter_start;
-    var filter_end;
     var filtered_data = json_data; // to be used as a filtered copy of json_data
+    var filter_obj = [];
+
+    // sets the min and max values of sliders appropriately
+    function adjustSlider() {
+        keys.forEach(function(key) {
+            if (key != keys[0] && key != 'coupled') {
+                var max = d3.max(json_data, function(d) { return +d[key]; })
+                var slider = document.getElementById(key);
+                slider.children[1].max = max;
+                slider.children[2].max = max;
+                slider.children[2].value = max;
+            }
+        });
+    }
 
     var chosen_key = "default"; // the default key represents all columns
     if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
@@ -120,6 +128,7 @@
     // to create the default table/graph
     document.addEventListener("DOMContentLoaded", function(event) {
         createTable(json_data);
+        adjustSlider();
     })
 
 </script>
