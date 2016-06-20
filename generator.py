@@ -7,6 +7,7 @@ from flask import request, flash
 from stop_words import get_stop_words
 import stash_api
 import shutil
+from nltk.stem.lancaster import LancasterStemmer
 
 
 # called by visualizer at timed intervals
@@ -119,23 +120,22 @@ def generate_data(address, repo_name, date_after, date_before):
 	print("Creating csv files from generated log...")
 	time.sleep(1)
 	print("Creating repository summary...")
-	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
+	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
 	# # Reports an overview of mined data from git's log file
-	# print("Creating organizational metrics...")
+	print("Creating organizational metrics...")
 	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	# # Reports the number of authors/revisions made per module
-	# print("Creating coupling history...")
+	print("Creating coupling history...")
 	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
 	# # Reports correlation of files that often commit together
 	# # degree = % of commits where the two files were changed in the same commit
-	# print("Creating code age summary...")
+	print("Creating code age summary...")
 	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# # Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
-	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	# os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-	# 	+ "lines_" + repo_name + ".csv")
-	# merge_csv(repo_name)
+	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=lines_" + repo_name + ".csv")
+	merge_csv(repo_name)
 	print("Done. Check your current folder for your files.")
 	print("-" * 60)
 
@@ -216,6 +216,7 @@ def select_folder(repo_dir, repo, from_date, to_date):
 			# create that folder and switch to it
 
 	address = repo_dir + repo + '/.git'
+	print(address)
 
 	create_log(repo, from_date, to_date, address)
 		# while in the csv folder of chosen repo, create log file
@@ -314,10 +315,12 @@ def redundant_word(word):
 
 # called by get_word_frequency
 # iterates over word_list & checks for given word within each dict
-def word_exists(word, word_list):
+def word_exists(stem, word, word_list):
 	for word_pair in word_list:
-		if word.lower() == word_pair['text']:
-			word_pair['size'] += 1
+		if stem == word_pair['stem']:
+			if len(word) < len(word_pair['text']):
+				word_pair['text'] = word
+			word_pair['freq'] += 1
 			return True
 
 
@@ -328,18 +331,24 @@ def get_word_frequency(logfile):
 	logfile.close()
 
 	word_list = []
+	stemmer = LancasterStemmer()
 
 	for word in log_list:
-		if redundant_word(word.lower()): continue
+		# Remove unwanted leading and trailing characters
+		word = word.strip("\"'/;:?{}[]!.,()").lower()
+		#Stemming
+		stem = stemmer.stem(word)
+
+		if redundant_word(word) or len(word) == 1 : continue
 		else:
 			if not word_list:
-				word_list.append({'text': word.lower(), 'size': 1})
+				word_list.append({'stem': stem, 'text': word, 'freq': 1})
 			else:
-				if word_exists(word, word_list): continue
+				if word_exists(stem, word, word_list): continue
 				else:
-					word_list.append({'text': word.lower(), 'size': 1})
-
-	return(word_list)
+					word_list.append({'stem': stem, 'text': word, 'freq': 1})
+	# Return the top 50 ocurring words
+	return(sorted(word_list, key = lambda x: x['freq'], reverse = True)[:100])
 
 # if __name__ == '__main__':
 # 	print (folder_list)
