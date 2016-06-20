@@ -36,7 +36,7 @@ def index():
 			# a list of all currently cloned repositories
 			# refreshes everytime user chooses a new repository
 		return render_template('index.html', 
-			repo_list=repo_list, list_of_projects=list_of_projects)
+			repo_list=repo_list, list_of_projects=list_of_projects, previous_date=generator.previous_date)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "2":
 			# if a selection was made from 'Available Repositories'

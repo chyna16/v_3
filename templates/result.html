@@ -8,6 +8,7 @@
     <script src="../static/table.js"></script>
     <script src="../static/charts.js"></script>
     <script src="../static/interactivity.js"></script>
+    <script src="../static/d3-tip.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -15,7 +16,6 @@
     ?
     <p id="help" class="help-drop"></p>
 </div>
-
 <h1 style="padding-bottom:0;">Results for: {{ repo_name }}</h1>
 <h2 style="padding-top:0;"> 
     From
@@ -90,7 +90,6 @@
     var json_data = {{data|safe}}; // an array of objects for row of data
     var analysis_type = {{analysis|safe}}
     var repo = {{repo_name|safe}}
-
     // default filter variables
     // declared outside so that value can be changed/accessed by other functions
     var filtered_data = json_data; // to be used as a filtered copy of json_data

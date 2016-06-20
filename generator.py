@@ -8,6 +8,7 @@ from stop_words import get_stop_words
 import stash_api
 import settings
 import shutil
+from datetime import datetime
 
 
 # switches working directory to passed in address
@@ -352,8 +353,21 @@ def get_word_frequency(logfile):
 
 	return(word_list)
 
+
+def monthdelta(date, delta):
+	m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
+	if not m: m = 12
+	d = min(date.day, [31,
+		29 if y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
+	return date.replace(day=d,month=m, year=y)
+
+for m in range(-2, -1):
+	time = str (monthdelta(datetime.now(), m))
+previous_date=((time)[:10])
+
 # if __name__ == '__main__':
-# 	print (folder_list)
-# 	print (project_list)
-# 	print(project_key)
-# 	get_word_frequency()
+	# print (folder_list)
+	# print (project_list)
+	# print(project_key)
+	# get_word_frequency()
+
