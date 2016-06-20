@@ -56,6 +56,12 @@ function setFilter() {
     filterData();
 }
 
+function resetFilter() {
+    filter_obj = [];
+
+    filterData();
+}
+
 
 // appends all necessary divs needed for filtering slider
 // uses jquery plugin to create and adjust slider range
@@ -101,6 +107,11 @@ function createSlider() {
         .attr('type', 'button')
         .attr('value', 'Filter')
         .on('click', function() { setFilter(); });
+
+    d3.select("#filter").append("input")
+        .attr('type', 'button')
+        .attr('value', 'Reset')
+        .on('click', function() { resetFilter(); });
 }
 
 
