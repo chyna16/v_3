@@ -97,12 +97,12 @@ def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
 		+ analysis_name + "_" + repo_name + ".csv")
 
 
+# NOTE: currently NOT IN USE
 # called by manage_csv_folder/select_analysis
 # currently only calls run_codemaat on all analyses
 def generate_data(address, repo_name, from_date, to_date):
-	os.chdir
 	print("Creating csv files from generated log...")
-	time.sleep(1)
+	# # time.sleep(1)
 	print("Creating repository summary...")
 	# run_codemaat('summary', 'summary', repo_name, from_date, to_date)
 	# # Reports an overview of mined data from git's log file
@@ -125,42 +125,52 @@ def generate_data(address, repo_name, from_date, to_date):
 	print("-" * 60)
 
 
-# NOTE: currently NOT IN USE
-def generate_data_summary(address, repo_name, from_date, to_date):
-	time.sleep(1)
+# reports an overview of mined data from git's log file
+def generate_data_summary(repo_name, from_date, to_date):
+	# time.sleep(1)
 	print("Creating repository summary...")
 	run_codemaat('summary', 'summary', repo_name, from_date, to_date)
 	print("-" * 60)
 
-# NOTE: currently NOT IN USE
-def generate_data_hotspot(address, repo_name, from_date, to_date):
-	time.sleep(1)
-	print("Creating repository hotspots...")
-	run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
-	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
-		+ "lines_" + repo_name + ".csv")
-	merge_csv(repo_name)
-	print("-" * 60)
-
-# NOTE: currently NOT IN USE
-def generate_data_metrics(address, repo_name, from_date, to_date):
-	time.sleep(1)
+# reports the number of authors/revisions made per module
+def generate_data_metrics(repo_name, from_date, to_date):
+	# time.sleep(1)
 	print("Creating organizational metrics...")
 	run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
 		# Reports the number of authors/revisions made per module
 	print("-" * 60)
 
-# NOTE: currently NOT IN USE
-def generate_data_coupling(address, repo_name, from_date, to_date):
-	time.sleep(1)
+# reports correlation of files that often commit together
+def generate_data_coupling(repo_name, from_date, to_date):
+	# time.sleep(1)
 	print("Creating coupling history...")
 	run_codemaat('coupling', 'coupling', repo_name, from_date, to_date)
 	print("-" * 60)
 
+# reports number of lines added vs deleted over the chosen date range
+def generate_data_age(repo_name, from_date, to_date):
+	# time.sleep(1)
+	print("Creating code age summary")
+	run_codemaat('entity-churn', 'age', repo_name, from_date, to_date)
+	print("-" * 60)
+
+# runs cloc to retrieve number of lines of code
+# merges with metrics data to show hotspots
+def generate_data_hotspots(repo_name, from_date, to_date):
+	# time.sleep(1)
+	print("Creating repository hotspots...")
+	if not os.path.isfile("metrics"):
+		run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
+	os.system("cloc ../../" 
+		+ repo_name + " --unix --by-file --csv --quiet --report-file=" 
+		+ "lines_" + repo_name + ".csv")
+	merge_csv(repo_name)
+	print("-" * 60)
+
+
 # NOTE: currently NOT IN USE
 # called by manage_csv_folder
-# reads user selection of analyses 
-# calls helper functions that run codemaat 
+# reads user selection of analyses & calls helper functions that run codemaat 
 # FIX: currently does not read multiple selections
 def select_analysis(address, repo, from_date, to_date):
 	if request.form['checkbox'] == "summary":
@@ -168,7 +178,7 @@ def select_analysis(address, repo, from_date, to_date):
 		generate_data_summary(address, repo, from_date, to_date)
 	if request.form['checkbox'] == "hotspots":
 		print ("button: " + request.form['checkbox'])
-		generate_data_hotspot(address, repo, from_date, to_date)
+		generate_data_hotspots(address, repo, from_date, to_date)
 	if request.form['checkbox'] == "metrics":
 		print ("button: " + request.form['checkbox'])
 		generate_data_metrics(address, repo, from_date, to_date)
@@ -217,13 +227,13 @@ def create_log(repo_name, from_date, to_date, address):
 def manage_csv_folder(repo_dir, repo, from_date, to_date):
 	print("1: " + os.getcwd())
 	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
-	csv_path = settings.v3_dir + "/" + folder_name
+	csv_path = settings.csv_dir + "/" + folder_name
 		# csv_path is the complete address of csv folder for chosen repo
 
 	if not os.path.exists(csv_path):
 		# if that csv folder doesn't exist
 		print("creating folder: " + csv_path)
-		os.system("mkdir " + folder_name)
+		os.system("mkdir " + csv_path)
 	else: print("folder exists: " + csv_path)
 
 	repo_address = repo_dir + repo + '/.git'
@@ -231,8 +241,10 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 	os.chdir(csv_path) # switch to csv folder of chosen repo
 	print("2: " + os.getcwd())
 	create_log(repo, from_date, to_date, repo_address) # make logfile
-	# select_analysis(address, repo, from_date, to_date)
-	generate_data(repo_address, repo, from_date, to_date)
+	generate_data_summary(repo, from_date, to_date)
+	generate_data_metrics(repo, from_date, to_date)
+	generate_data_coupling(repo, from_date, to_date)
+	generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)
 	print("3: " + os.getcwd())
