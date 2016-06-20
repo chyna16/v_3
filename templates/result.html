@@ -8,6 +8,7 @@
     <script src="../static/table.js"></script>
     <script src="../static/charts.js"></script>
     <script src="../static/interactivity.js"></script>
+    <script src="../static/d3-tip.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -15,7 +16,6 @@
     ?
     <p id="help" class="help-drop"></p>
 </div>
-
 <h1 style="padding-bottom:0;">Results for: {{ repo_name }}</h1>
 <h2 style="padding-top:0;"> 
     From
@@ -27,19 +27,28 @@
         {% else %} Present 
         {% endif %}
 </h2>
-
+    <div class ="tooltipinfo">
+        <h2></h2>
+        <table>
+            <tr id="type">
+                <th></th>
+                <td></td>
+            </tr>
+            <tr id="value">
+                <th></th>
+                <td></td>
+            </tr>
+        </table>
+    </div>
 <center>
     <div id="header"></div>
     <div id="wrapper" style="display: block; width: 1000px; overflow-x: auto;"></div>
     <button> Hide labels</button>
 </center>
 
-<br>
-<br>
-
 <center>
-<form id="filter" style="font-size:15px">
-    Column: {% for key in keys|fromjson %}
+<form id="filter" style="font-size:15px; width: 300px;">
+    <!-- Column: {% for key in keys|fromjson %}
                 {% if key != (keys|fromjson)[0] and key != "coupled" %}
                 <input type="radio" name="key" value={{ key }}> {{ key }} 
                 {% endif %}
@@ -48,6 +57,18 @@
     From: <input type="text" name="start" style="width:40px">
     To: <input type="text" name="end" style="width:40px">
     &nbsp;&nbsp;&nbsp;
+    <input type="button" value="Filter" onclick="setFilter()">
+    <br> -->
+    {% for key in keys|fromjson %}
+        {% if key != (keys|fromjson)[0] and key != "coupled" %}
+        <div id={{key}} class="row" name={{key}} style="float: left; margin: 25px;">
+        {{key}}: <br>
+        from: <input id="slider" type="range" name="from" min="0" max="10" value="0" style="width: 100px;">
+        to: <input id="slider" type="range" name="to" min="0" max="10" value="10" style="width: 100px;">
+        </div>
+        {% endif %}
+    {% endfor %}
+
     <input type="button" value="Filter" onclick="setFilter()">
 </form>
 </center>
@@ -69,15 +90,27 @@
     var json_data = {{data|safe}}; // an array of objects for row of data
     var analysis_type = {{analysis|safe}}
     var repo = {{repo_name|safe}}
-
     // default filter variables
     // declared outside so that value can be changed/accessed by other functions
-    var filter_key = "blank"; // if left "blank" then filter will not apply
-    var filter_start;
-    var filter_end;
     var filtered_data = json_data; // to be used as a filtered copy of json_data
+    var filter_obj = [];
+
+    // sets the min and max values of sliders appropriately
+    function adjustSlider() {
+        keys.forEach(function(key) {
+            if (key != keys[0] && key != 'coupled') {
+                var max = d3.max(json_data, function(d) { return +d[key]; })
+                var slider = document.getElementById(key);
+                slider.children[1].max = max;
+                slider.children[2].max = max;
+                slider.children[2].value = max;
+            }
+        });
+    }
 
     var chosen_key = "default"; // the default key represents all columns
+    if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
+        // if the analysis is metrics, then revs column should be default
 
     var help = document.getElementById("help");
     var help_desc = {
@@ -94,6 +127,7 @@
     // to create the default table/graph
     document.addEventListener("DOMContentLoaded", function(event) {
         createTable(json_data);
+        adjustSlider();
     })
 
 </script>

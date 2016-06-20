@@ -11,14 +11,14 @@ app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
 
-maat_dir = settings.maat_directory # address of codemaat
-repo_dir = settings.repo_directory # address of cloned repositories
+maat_dir = settings.maat_dir # address of codemaat
+repo_dir = settings.repo_dir # address of cloned repositories
+csv_dir = settings.csv_dir # address of csv fodlers
 list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
-# generator.clone_repos(repo_dir)
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
-clone_sched.add_job(lambda:generator.clone_repos(repo_dir),
+clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
 				 'cron', day='0-6', hour='0')
 	# lambda passes function as parameter
 	# cron is a configuration for time schedules
@@ -36,36 +36,34 @@ def index():
 			# a list of all currently cloned repositories
 			# refreshes everytime user chooses a new repository
 		return render_template('index.html', 
-			repo_list=repo_list, list_of_projects=list_of_projects)
+			repo_list=repo_list, list_of_projects=list_of_projects, 
+			previous_date=generator.previous_date)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "2":
 			# if a selection was made from 'Available Repositories'
 			repo_name = request.form['repo_name']
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
-			root_dir = generator.select_folder(
-				repo_dir, repo_name, from_date, to_date
-			)	# select_folder called to handle folders and files
-				# returns address of folder that contains csv files
-			return redirect(url_for(
-				'dashboard',
-				root_dir=root_dir, repo_name=repo_name, 
-				from_date=from_date, to_date=to_date
-			)) 	# redirects to dashboard view which opens input.html
+			generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
+				# called to handle directory/file creation/accessing
+			return redirect(url_for('dashboard',
+				repo_name=repo_name, from_date=from_date, to_date=to_date)) 	
+				# redirects to dashboard view which opens input.html
 		elif request.form['submit_button'] == "1":
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			message = generator.submit_url(clone_url)
-				# submit_url called to handle cloning of repo
+			clone_cmd = generator.get_clone_command(clone_url, password) 
+				# get the appropriate url-password combined git command
+			generator.clone_repo(clone_cmd) # go to repo_dir and clone the repo
+			message = generator.get_status_message(clone_cmd)
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
-		elif request.form['submit_button'] == "3":
+		# elif request.form['submit_button'] == "3":
+		else:
 			# if a selection was made from 'Stash Repositories'
-			project_name = request.form['project_name']
-			# project_desc = stash_api.get_details() # needs to be modified for this
+			project_name = request.form['submit_button']
 			return redirect(url_for('index_repo', project_name=project_name))
-			# project_description=generator.project_description))
 
 
 # page where user can select a repository after selecting a Stash project
@@ -84,39 +82,24 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
-		generator.submit_url(repo_url)
-		root_dir = generator.select_folder(
-			repo_dir, repo_name, from_date, to_date
-		)
-		return redirect(url_for(
-			'dashboard',
-			root_dir=root_dir, repo_name=repo_name, 
-			from_date=from_date, to_date=to_date
-		))
-			# after selecting a repo, the user is returned to the homepage 
-			# where selected repo is now added to list of available repos
-			# TO DO: skip the step of returning to homepage?
+		generator.clone_repo(repo_url) # go to repo_dir and clone the repo
+		generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
+		return redirect(url_for('dashboard',
+			repo_name=repo_name, from_date=from_date, to_date=to_date))
+			# go straight to dashboard after cloning repo and generating files
 
 
 # page where user can select the specific analysis to view
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
 	# retrieves passed in queries from index view
-	root_dir = request.args.get('root_dir')
 	repo_name = request.args.get('repo_name')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
 
 	if request.method == 'GET':
-		csv_list = []
-		for root, dirs, files in os.walk(root_dir):
-			# traverses filesystem of root_dir
-			for filename in fnmatch.filter(files, '*.csv'):  
-				# traverses files and picks out csv files
-				csv_list.append(filename) # list of csv files
-		return render_template('input.html', csv_list=csv_list) 
-			# NOTE: csv_list currently not being used in webpage
-			# TO DO: get rid of csv_list and have all csv's always available?
+		# buttons to all analyses available; assumed all have been run
+		return render_template('input.html') 
 	elif request.method == 'POST':
 		analysis = request.form['analysis']
 		return redirect(url_for('result',
@@ -133,14 +116,17 @@ def result():
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
 	if analysis == "cloud":
-		with open("csv_files_" + repo_name + "_" + from_date + "_" + to_date + "/"
-		+ analysis + "_" + repo_name + "__.log", 'rt') as log_file:
+		with open(csv_dir + "csv_files_" + repo_name + "_" 
+			+ from_date + "_" + to_date + "/"
+			+ analysis + "_" + repo_name + "__.log", 'rt') as log_file:
 			word_list = generator.get_word_frequency(log_file)
 		return render_template('wordcloud.html', 
-		word_list=word_list, repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
-		from_date=from_date, to_date=to_date)
+			word_list=word_list, repo_name=json.dumps(repo_name), 
+			analysis=json.dumps(analysis),
+			from_date=from_date, to_date=to_date)
 	else:
-		with open("csv_files_" + repo_name + "_" + from_date + "_" + to_date + "/"
+		with open(csv_dir + "csv_files_" + repo_name + "_" 
+			+ from_date + "_" + to_date + "/"
 			+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
 			# opens respective csv file for chosen analysis
 			data, keys = generator.parse_csv(csv_file) 
@@ -149,7 +135,7 @@ def result():
 				repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
 				from_date=from_date, to_date=to_date, 
 				data=json.dumps(data), keys=json.dumps(keys))
-					# json.dumps() converts data into a string format for javascript
+					# json.dumps() converts data into a string format
 
 
 # this filter allows using '|fromjson' in a jinja template
@@ -171,4 +157,4 @@ def bad_request(e):
 
 if __name__ == '__main__':
 	app.run(debug=True)
-	# app.run(host='0.0.0.0')
+	# app.run()

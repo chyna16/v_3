@@ -25,7 +25,7 @@ function createBarGraph(data) {
     var width;
     var margin = {top: 20, left: 70, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
-    var color = d3.scale.ordinal().range(["#6d9af6", "#52465f"]);  
+    var color = d3.scale.ordinal().domain(keys).range(["#6d9af6", "#52465f"]);  
     
     if (data.length > 50) { w = data.length * 20; }
     else if (data.length < 10) { w = data.length * 100; }
@@ -78,6 +78,13 @@ function createBarGraph(data) {
         .scale(yScale)
         .orient("left");
 
+    var tip = d3.tip()
+      .attr('class', 'd3-tip')
+      .offset([-10, 0])
+      .html(function(d) {
+        return "<strong>" + d.type + ":</strong> <span style='color:red'>" + d.value + "</span>";
+      });
+
     // appending the general svg as well as the div for the graph itself
     var canvas = d3.select("#wrapper")
         .append("svg")
@@ -85,6 +92,7 @@ function createBarGraph(data) {
             .attr("height", height + margin.top + margin.bottom)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 
     // category represents each module/row; one category per object in the data
     var category = canvas.selectAll(".category")
@@ -101,6 +109,19 @@ function createBarGraph(data) {
             .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
             .enter()
         .append("rect")
+            .attr("class", "bar")
+            .style("fill", function(d) { return color(d.type); })
+            .call(tip)
+            .on('mouseover', function(d){
+                tip.show(d);
+                d3.select(this)
+                    .style("fill", "red");
+                })
+            .on('mouseout', function(d){
+                tip.hide(d);
+                d3.select(this)
+                    .style("fill", function(d) { return color(d.type); });
+                })
             .attr("height", 0)
             .attr("width", 0)
             .transition()
@@ -109,20 +130,9 @@ function createBarGraph(data) {
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
             .attr("y", function(d) { return yScale(d.value); })
-            .style("fill", function(d) { return color(d.type); })
         //labels dont display with this + transition enabled
         // .append("svg:title")
             .text(function(d) { return d.value; });
-     
-     //bar values  
-     // var text = category.selectAll("text")
-     //        .data(function(d) { if (typeof d.values != 'undefined') return d.values; })
-     //        .enter()
-     //    .append('text')
-     //        .attr("x", function(d) { return x1Scale(d.type); })
-     //        .attr("y", function(d) { return yScale(d.value); })
-     //        .text(function(d){ return d.value })
-     //        .style("display", "none");
 
         //labels hide all text
         d3.select("button").on("click", function(d) {
@@ -136,14 +146,6 @@ function createBarGraph(data) {
         }
 
         });
-        //feature to display numerical values on mouse enter broken
-        // text.on("mouseenter", function(d){
-        //     word = d3.select(this);
-        //     word.select("text")
-        //     .style("display", "block")
-            // // .style("fill", "black") 
-            // .style("font-size", "12px"); 
-        // });
 
     // appending and styling of x-axis to graph
     canvas.append("g")
@@ -171,38 +173,65 @@ function createBarGraph(data) {
             .attr("fill", "#325a7e");
 
 
-    var h_width = labels.length * 150; // width for header div
+    // var h_width = labels.length * 150; // width for header div
 
-    // scale for placing legend ticks on header div
-    var hScale = d3.scale.linear()
-        .domain([0, labels.length - 1])
-        .range([0, h_width - 75]);
+    // // scale for placing legend ticks on header div
+    // var hScale = d3.scale.linear()
+    //     .domain([0, labels.length - 1])
+    //     .range([0, h_width - 75]);
 
-    // svg is appended to header div
-    var legend = d3.select("#header").html('')
-        .append("svg")
-            .attr('height', 25)
-            .attr('width', h_width)
-        .selectAll("legend")
-            .data(labels)
-            .enter();
+    // // svg is appended to header div
+    // var legend = d3.select("#header").html('')
+    //     .append("svg")
+    //         .attr('height', 25)
+    //         .attr('width', h_width)
+    //     .selectAll("legend")
+    //         .data(labels)
+    //         .enter();
 
-    // circles to represent legend ticks are appended
-    legend.append("circle")
-        .attr('r', 10)
-        .attr('transform', function(d, i) { 
-            return 'translate(' + (hScale(i) + 10) + ',10)'; 
-        })
-        .style('fill', function(d) { return color(d); });
+    // // circles to represent legend ticks are appended
+    // legend.append("circle")
+    //     .attr('r', 10)
+    //     .attr('transform', function(d, i) { 
+    //         return 'translate(' + (hScale(i) + 10) + ',10)'; 
+    //     })
+    //     .style('fill', function(d) { return color(d); });
 
-    // text is added to the circles
-    legend.append("text")
-            .attr("x", function(d, i) { return hScale(i) + 20; })
-            .attr("y", function(d) { return 10; })
-            .attr("text-anchor", "right")
+    // // text is added to the circles
+    // legend.append("text")
+    //         .attr("x", function(d, i) { return hScale(i) + 20; })
+    //         .attr("y", function(d) { return 10; })
+    //         .attr("text-anchor", "right")
+    //     .text(function(d) { return d; })
+    //         .style("fill", "black") 
+    //         .style("font-size", "12px");
+    createHeader(color);
+}
+
+function createHeader(color) {
+    var header = d3.select("#header").html('').append("p");
+
+    header
+        .selectAll("button")
+            .data(keys.filter(function(key) { return key != keys[0]; }))
+            .enter()
+        .append("button")
+        .attr('class', 'btn')
         .text(function(d) { return d; })
-            .style("fill", "black") 
-            .style("font-size", "12px");
+        .style('background-color', function(d) { return color(d); })
+        .style('color', 'white')
+        .style('margin', '10px')
+        .attr('value', function(d) { return d; })
+        .on('click', function() { chooseColumn(this); });
+
+    header.append("button")
+        .attr('class', 'btn')
+        .text('all')
+        .style('background-color', 'black')
+        .style('color', 'white')
+        .style('margin', '10px')
+        .attr('value', 'default')
+        .on('click', function() { chooseColumn(this); });
 }
 
 
@@ -382,15 +411,15 @@ function createPieChart(data, module) {
 
     slice.append("text")
         .attr('transform', function(d) { 
-            return 'translate(' + textArc.centroid(d) + ')'
-                + 'rotate(' + angle(d) + ')';
+            return 'translate(' + textArc.centroid(d) + ')';
+                // + 'rotate(' + angle(d) + ')';
         })
         .attr('dy', '.35em')
         .attr('text-anchor', 'middle')
         .style('font-size', '10px')
-        .text(function(d) { return d.data.coupled.split('/').pop(); });
+        .text(function(d) { return d.data['average-revs']; });
 
     slice.append("title")
-        .text(function(d) { return d.data['average-revs']; });
+        .text(function(d) { return d.data.coupled; });
 
 }
