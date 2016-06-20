@@ -62,7 +62,6 @@ def clone_repo(clone_url):
 def get_clone_command(clone_url, password):
 	char = clone_url.index('@')
 	command = clone_url[:char] + ':' + password + clone_url[char:]
-	print(command)
 	return command
 
 
@@ -77,7 +76,7 @@ def get_status_message(clone_url):
 	if 'Authentication failed' 	in clone_status:
 		message = "Authentication failed."
 	elif 'already exists' in clone_status:
-		message = """Repository already exists. Check the 'Available
+		message = """Repository exists. Check the 'Available
 		 Repositories' tab."""
 	elif 'not found' in clone_status:
 		message = """Repository not found. Either it does not exist, or you do 
@@ -159,10 +158,11 @@ def generate_data_age(repo_name, from_date, to_date):
 def generate_data_hotspots(repo_name, from_date, to_date):
 	# time.sleep(1)
 	print("Creating repository hotspots...")
-	if not os.path.isfile("metrics"):
+	if not os.path.isfile("metrics_" + repo_name + ".csv"):
+		print("Creating metrics...")
 		run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
-	os.system("cloc ../../" 
-		+ repo_name + " --unix --by-file --csv --quiet --report-file=" 
+	os.system("cloc " + settings.repo_dir + repo_name 
+		+ " --unix --by-file --csv --quiet --report-file=" 
 		+ "lines_" + repo_name + ".csv")
 	merge_csv(repo_name)
 	print("-" * 60)
@@ -227,7 +227,7 @@ def create_log(repo_name, from_date, to_date, address):
 def manage_csv_folder(repo_dir, repo, from_date, to_date):
 	print("1: " + os.getcwd())
 	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
-	csv_path = settings.csv_dir + "/" + folder_name
+	csv_path = settings.csv_dir + folder_name
 		# csv_path is the complete address of csv folder for chosen repo
 
 	if not os.path.exists(csv_path):
@@ -244,6 +244,7 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 	generate_data_summary(repo, from_date, to_date)
 	generate_data_metrics(repo, from_date, to_date)
 	generate_data_coupling(repo, from_date, to_date)
+	generate_data_age(repo, from_date, to_date)
 	generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)
@@ -255,7 +256,7 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 # called by parse_csv
 # checks is passed in string is in list of modules to be ignored
 def ignore_module(entity):
-	ignore_list = ['bower.json', '.gitignore']
+	ignore_list = ['bower.json', '.gitignore', 'README.md']
 		# list to be expanded
 	if entity in ignore_list: return True
 	else: return False
@@ -263,8 +264,7 @@ def ignore_module(entity):
 
 # called by result view
 # reads opened csv file
-# creates a list of the headers, and a dictionary of each row
-# returns the list of headers, and a list of the dictionaries
+# returns a list of the headers, and a dictionary of each row
 def parse_csv(uploaded_file):
 	reader = csv.reader(uploaded_file)
 	data_dict = []
@@ -284,9 +284,8 @@ def parse_csv(uploaded_file):
 
 
 # called by generate_data/generate_data_hotspot
-# collects num of revs from metrics.csv & lines from hotspots.csv
-# merges them together with respective modules
-# re-writes hotspots.csv w/ merged data
+# collects num of revs from metrics.csv & lines from lines.csv
+# merges them together with respective modules into hotspots.csv
 def merge_csv(repo_name):
 	lines_array = []
 	merge_array = []
@@ -297,26 +296,26 @@ def merge_csv(repo_name):
 			for row in lines_reader:
 				lines_array.append({'entity': row['filename'], 
 									'lines': row['code']})
+
+		with open("metrics_" + repo_name + ".csv", "rt") as rev_file:
+			revs_reader = csv.DictReader(rev_file)
+			for row in revs_reader:
+				for module in lines_array:
+					if row['entity'] in module['entity']:
+						merge_array.append({
+							'entity': row['entity'], 
+							'n-revs': row['n-revs'], 
+							'lines': module['lines']})
+
+		with open("hotspots_" + repo_name + ".csv", "wt") as hotspot_file:
+			fieldnames = ['entity', 'n-revs', 'lines']
+			writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames) 
+			writer.writeheader()
+			for row in merge_array:
+				writer.writerow(row)
 	except IOError:
 		print("file not found")
 		return
-
-	with open("metrics_" + repo_name + ".csv", "rt") as rev_file:
-		revs_reader = csv.DictReader(rev_file)
-		for row in revs_reader:
-			for module in lines_array:
-				if row['entity'] in module['entity']:
-					merge_array.append({
-						'entity': row['entity'], 
-						'n-revs': row['n-revs'], 
-						'lines': module['lines']})
-
-	with open("hotspots_" + repo_name + ".csv", "wt") as hotspot_file:
-		fieldnames = ['entity', 'n-revs', 'lines']
-		writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames) 
-		writer.writeheader()
-		for row in merge_array:
-			writer.writerow(row)
 
 
 # called by get_word_frequency
