@@ -77,6 +77,11 @@ https://github.com/Caged/d3-tip
   left: 0;
 }
 
+.d3-tip.s:after {
+  content: "\25B2";
+  display: none;
+}
+
 /* scroll feature acquired from:
  * http://stackoverflow.com/questions/21168521/scrollable-table-with-fixed-header-in-bootstrap
  */
