@@ -9,6 +9,9 @@
     <script src="../static/charts.js"></script>
     <script src="../static/interactivity.js"></script>
     <script src="../static/d3-tip.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -47,34 +50,8 @@
 </center>
 
 <center>
-<form id="filter" style="font-size:15px; width: 300px;">
-    <!-- Column: {% for key in keys|fromjson %}
-                {% if key != (keys|fromjson)[0] and key != "coupled" %}
-                <input type="radio" name="key" value={{ key }}> {{ key }} 
-                {% endif %}
-            {% endfor %} 
-    &nbsp;&nbsp;&nbsp;
-    From: <input type="text" name="start" style="width:40px">
-    To: <input type="text" name="end" style="width:40px">
-    &nbsp;&nbsp;&nbsp;
-    <input type="button" value="Filter" onclick="setFilter()">
-    <br> -->
-    {% for key in keys|fromjson %}
-        {% if key != (keys|fromjson)[0] and key != "coupled" %}
-        <div id={{key}} class="row" name={{key}} style="float: left; margin: 25px;">
-        {{key}}: <br>
-        from: <input id="slider" type="range" name="from" min="0" max="10" value="0" style="width: 100px;">
-        to: <input id="slider" type="range" name="to" min="0" max="10" value="10" style="width: 100px;">
-        </div>
-        {% endif %}
-    {% endfor %}
-
-    <input type="button" value="Filter" onclick="setFilter()">
-</form>
+<form id="filter"></form>
 </center>
-
-<br>
-<br>
 
 <center>
 <div class="col-md-10" style="float:none">
@@ -95,19 +72,6 @@
     var filtered_data = json_data; // to be used as a filtered copy of json_data
     var filter_obj = [];
 
-    // sets the min and max values of sliders appropriately
-    function adjustSlider() {
-        keys.forEach(function(key) {
-            if (key != keys[0] && key != 'coupled') {
-                var max = d3.max(json_data, function(d) { return +d[key]; })
-                var slider = document.getElementById(key);
-                slider.children[1].max = max;
-                slider.children[2].max = max;
-                slider.children[2].value = max;
-            }
-        });
-    }
-
     var chosen_key = "default"; // the default key represents all columns
     if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
         // if the analysis is metrics, then revs column should be default
@@ -127,7 +91,8 @@
     // to create the default table/graph
     document.addEventListener("DOMContentLoaded", function(event) {
         createTable(json_data);
-        adjustSlider();
+        // adjustSlider();
+        createSlider();
     })
 
 </script>

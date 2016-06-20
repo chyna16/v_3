@@ -41,14 +41,77 @@ function setFilter() {
     keys.forEach(function(d, i) { 
         if (d != keys[0] && d != 'coupled') {
             var filter_key = d;
-            var from_value = parseInt(document.getElementById(d).children[1].value);
-            var to_value = parseInt(document.getElementById(d).children[2].value);
+            // var from_value = parseInt(document.getElementById(d).children[1].value);
+            // var to_value = parseInt(document.getElementById(d).children[2].value);
+
+            var values = $("#" + d + "-slider-range").slider( "option", "values" );
+            var from_value = values[0];
+            var to_value = values[1];
+            console.log(from_value);
             if (from_value > to_value) { return; }
             filter_obj.push({key: filter_key, value: {from: from_value, to: to_value}})
         }
     });
 
     filterData();
+}
+
+function resetFilter() {
+    filter_obj = [];
+
+    filterData();
+}
+
+
+// appends all necessary divs needed for filtering slider
+// uses jquery plugin to create and adjust slider range
+function createSlider() {
+    keys.forEach(function(key) {
+        if (key != keys[0] && key != 'coupled') {
+            var slider = d3.select("#filter");
+            var p = slider.append("center").append("p");
+            p.append("label")
+                .attr('for', key + '-amount')
+                .attr('class', 'filter-key')
+                .text(key + ':');
+            p.append("text")
+                .attr('type', 'text')
+                .attr('class', 'range')
+                .attr('id', key + '-amount');
+            slider.append("div")
+                .attr('id', key + '-slider-range');
+
+            var max_value = d3.max(json_data, function(d) { return +d[key]; })
+
+            // original version of jquery function retrieved from: 
+            // http://jqueryui.com/slider/#range
+            $(function() {
+                $( "#" + key + "-slider-range" ).slider({
+                  range: true,
+                  min: 0,
+                  max: max_value,
+                  values: [ 0, max_value ],
+                  slide: function( event, ui ) {
+                    $( "#" + key + "-amount" )
+                        .text( ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+                  }
+                });
+                $( "#" + key + "-amount" ).text( $( "#" + key + "-slider-range" )
+                    .slider( "values", 0 ) + " - " + $( "#" + key + "-slider-range" )
+                    .slider( "values", 1 ) );
+            });
+        }
+    })
+
+    d3.select("#filter").append("input")
+        .attr('type', 'button')
+        .attr('value', 'Filter')
+        .on('click', function() { setFilter(); });
+
+    d3.select("#filter").append("input")
+        .attr('type', 'button')
+        .attr('value', 'Reset')
+        .on('click', function() { resetFilter(); });
 }
 
 
