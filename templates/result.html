@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="../static/d3.layout.cloud.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -45,8 +46,8 @@
     </div>
 <center>
     <div id="header"></div>
-    <div id="wrapper" style="display: block; width: 1000px; overflow-x: auto;"></div>
-    <button> Hide labels</button>
+    <div id="wrapper" style="display: block;"></div>
+    <button id="hideLabels" style="display: none;"> Hide labels</button>
 </center>
 
 <center>
@@ -90,9 +91,19 @@
     // before calling the function
     // to create the default table/graph
     document.addEventListener("DOMContentLoaded", function(event) {
-        createTable(json_data);
         // adjustSlider();
-        createSlider();
+        if (analysis_type == "cloud") {
+            createGraph(json_data);
+        }
+
+        else {
+            d3.select("#wrapper").style("width","1000px").style("overflow-x","auto");
+            d3.select("#hideLabels").style("display","block");
+            createTable(json_data);
+            createSlider(); 
+        }
+
+
     })
 
 </script>

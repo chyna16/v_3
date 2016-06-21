@@ -9,6 +9,9 @@ function createGraph(data) {
         d3.select("#wrapper")
             .html('<p><p>Choose an enitity to view degree of coupling.</p></p>');
     }
+    else if (analysis_type == "cloud") {
+        createWordcloud(data);
+    }
     else {
         createBarGraph(data);
     }
@@ -422,4 +425,91 @@ function createPieChart(data, module) {
     slice.append("title")
         .text(function(d) { return d.data.coupled; });
 
+}
+
+function createWordcloud(data) {
+    var commit_words = data;
+    var padding = 30;
+    var height = window.innerHeight - 2*padding,
+        width = window.innerWidth - 2*padding;
+
+    var font = d3.scale.linear()
+                    .range([20, 150])
+                    .domain(d3.extent(commit_words, function(d) {
+                        return +d['freq'];
+                    }));
+    var color = d3.scale.linear()
+            .domain([0, d3.max(commit_words, function(d) { return +d['freq']; })])
+            .range(["#c63939", "#130505"]);
+
+    var tip = d3.tip()
+        .attr('class', "d3-tip")
+        .direction(function(d) {
+            var result = 's';
+            /* Posotion aware corner tip
+            if (d3.event.clientY > height/2) {
+                result = 'n';
+            } else {
+                result = 's';
+            }
+            if (d3.event.pageX > width/2) {
+                result += 'w';
+            } else {
+                result += 'e';
+            }
+            */
+            return result;
+        })
+        .html(function(d) {
+            return "<strong>Frequency:</strong> <span style='color:red'>" + d['freq'] + "</span>";
+        });
+
+
+    var cloud_layout = d3.layout.cloud()
+                    .size([width, height])
+                    .words(commit_words)
+                    .padding(10)
+                    .font('monospace')
+                    // rotates random words 90 degrees
+                    // .rotate(function(d) { return Math.floor(Math.random() * 2) * 90; })
+                    .rotate(function (d) {return 0})
+                    //not all words are being displayed if font size is too large
+                    .text(function(d) {return d.text;})
+                    .fontSize(function(d) {return font(d['freq'])})
+                    .spiral("rectangular")
+                    .on("end", draw)
+                    .start();
+
+    function draw(words) {
+        d3.select("#wrapper").append("svg")
+                .attr("width", width + padding)
+                .attr("height", height + padding)
+                .style("display", "block")
+                .attr("class", "wordcloud")
+                .append("g")
+                .attr("transform", "translate("+width/2+","+height/2+")")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return d.size + "px"; })
+                .style("fill", function(d, i) { return color(i); })
+                .call(tip)
+                .on('mouseover', function(d) {
+                    tip.show(d);
+                    d3.select(this)
+                        .style("fill", "blue");
+                })
+                .on('mouseout', function(d,i) {
+                    tip.hide(d);
+                    d3.select(this).style("fill", function(d, i) { return color(i); });
+                })
+                .transition()
+                .duration(1000)
+                .attr("text-anchor", "middle")
+
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+    }
 }
