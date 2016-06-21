@@ -45,20 +45,22 @@
     </div>
 <center>
     <div id="header"></div>
-    <div id="wrapper" style="display: block; width: 1000px; overflow-x: auto;"></div>
-    <button> Hide labels</button>
+    <form id="filter"></form>
 </center>
 
 <center>
-<form id="filter"></form>
-</center>
+<div id="container">
+    <div id="wrapper"></div>
+    <!-- <button> Hide labels</button> -->
 
-<center>
-<div class="col-md-10" style="float:none">
+
+<div id="table" class="col-md-10">
     <table class="table">
         <thead id="thead"></thead>
         <tbody id="tbody"></tbody>
     </table>
+</div>
+
 </div>
 </center>
 
@@ -75,6 +77,23 @@
     var chosen_key = "default"; // the default key represents all columns
     if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
         // if the analysis is metrics, then revs column should be default
+
+    if (analysis_type == 'coupling') {
+        var entity_list = {}
+
+        json_data.forEach(function(d) {
+            if (!entity_list[d.entity]) {
+                entity_list[d.entity] = d.degree;
+            }
+            if (!entity_list[d.coupled]) {
+                entity_list[d.coupled] = d.degree;
+            }
+        })
+
+        // for (var key in entity_list) {
+        //     console.log(key);
+        // }
+    }
 
     var help = document.getElementById("help");
     var help_desc = {

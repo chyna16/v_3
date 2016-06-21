@@ -298,12 +298,14 @@ function createMeter(data, module) {
     d3.select("#wrapper").html('');
 
     var r = 75, // meter outer radius
-        w = data.length * 200; // width of svg
+        h = data.length * 200; // width of svg
+
+    var width = parseInt(d3.select("#wrapper").style("width"));
 
     // scale for location of meter
-    var xScale = d3.scale.linear()
-        .domain([0, data.length - 1])
-        .range([r, w-r]);
+    // var xScale = d3.scale.linear()
+    //     .domain([0, data.length - 1])
+    //     .range([r, w-r]);
 
     // d3's arc creates settings for a circular path w/ radii & angles 
     var arc = d3.svg.arc()
@@ -321,8 +323,8 @@ function createMeter(data, module) {
     // svg and g div appended
     var svg = d3.select("#wrapper")
         .append("svg")
-            .attr('width', w) // scroll bar if w exceeds width of wrapper
-            .attr('height', 250)
+            .attr('width', width - 20) // scroll bar if w exceeds width of wrapper
+            .attr('height', h)
             .attr('class', 'percentage')
         .append("g");
 
@@ -331,8 +333,9 @@ function createMeter(data, module) {
         .data(data)
         .enter()
         .append("g")
+            // .attr('y', function(d, i) { return i * 130; })
             .attr('transform', function(d, i) { 
-                return 'translate(' + xScale(i) + ',130)';
+                return 'translate(' + (width / 2) + ',' +  (i * 200 + r) + ')';
             });
 
     // an svg path is appended to each meter div

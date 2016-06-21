@@ -161,3 +161,17 @@ function toggleGraph(elem) {
         { document.getElementById(elem.getAttribute('name')).style.display = "block"; }
     else { document.getElementById(elem.getAttribute('name')).style.display = "none"; }
 }
+
+
+function configureDivs() {
+    d3.select("#container")
+        .style('display', 'flex');
+
+    d3.select("#wrapper")
+        .style('width', '50%')
+        .style('height', '400px');
+
+    d3.select("#table")
+        .attr('class', '')
+        .style('height', '400px');
+}
