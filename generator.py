@@ -1,13 +1,12 @@
+from datetime import datetime
 import csv
 import os
-import time
 import fnmatch
 import subprocess
 from flask import request, flash
 from stop_words import get_stop_words
 import stash_api
 import shutil
-from datetime import datetime
 
 
 # called by visualizer at timed intervals
@@ -118,19 +117,18 @@ def run_codemaat(analysis_type, analysis_name, repo_name, date_after, date_befor
 # currently only calls run_codemaat on all analyses
 def generate_data(address, repo_name, date_after, date_before):
 	print("Creating csv files from generated log...")
-	time.sleep(1)
 	print("Creating repository summary...")
 	# run_codemaat('summary', 'summary', repo_name, date_after, date_before)
 	# # Reports an overview of mined data from git's log file
 	# print("Creating organizational metrics...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
+	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	# # Reports the number of authors/revisions made per module
 	# print("Creating coupling history...")
-	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
+	# run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
 	# # Reports correlation of files that often commit together
 	# # degree = % of commits where the two files were changed in the same commit
 	# print("Creating code age summary...")
-	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
+	# run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
 	# # Reports how long ago the last change was made in measurement of months
 	print("Creating repository hotspots...")
 	# run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
@@ -143,14 +141,12 @@ def generate_data(address, repo_name, date_after, date_before):
 
 # NOTE: currently NOT IN USE
 def generate_data_summary(address, repo_name, date_after, date_before):
-	time.sleep(1)
 	print("Creating repository summary...")
 	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
 	print("-" * 60)
 
 # NOTE: currently NOT IN USE
 def generate_data_hotspot(address, repo_name, date_after, date_before):
-	time.sleep(1)
 	print("Creating repository hotspots...")
 	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=" 
@@ -160,7 +156,6 @@ def generate_data_hotspot(address, repo_name, date_after, date_before):
 
 # NOTE: currently NOT IN USE
 def generate_data_metrics(address, repo_name, date_after, date_before):
-	time.sleep(1)
 	print("Creating organizational metrics...")
 	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
 		# Reports the number of authors/revisions made per module
@@ -168,7 +163,6 @@ def generate_data_metrics(address, repo_name, date_after, date_before):
 
 # NOTE: currently NOT IN USE
 def generate_data_coupling(address, repo_name, date_after, date_before):
-	time.sleep(1)
 	print("Creating coupling history...")
 	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
 	print("-" * 60)
