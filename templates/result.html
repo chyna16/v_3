@@ -9,6 +9,10 @@
     <script src="../static/charts.js"></script>
     <script src="../static/interactivity.js"></script>
     <script src="../static/d3-tip.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="../static/d3.layout.cloud.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -42,30 +46,13 @@
     </div>
 <center>
     <div id="header"></div>
-    <div id="wrapper" style="display: block; width: 1000px; overflow-x: auto;"></div>
-    <button> Hide labels</button>
+    <div id="wrapper" style="display: block;"></div>
+    <button id="hideLabels" style="display: none;"> Hide labels</button>
 </center>
-
-<br>
-<br>
 
 <center>
-<form id="filter" style="font-size:15px">
-    Column: {% for key in keys|fromjson %}
-                {% if key != (keys|fromjson)[0] and key != "coupled" %}
-                <input type="radio" name="key" value={{ key }}> {{ key }} 
-                {% endif %}
-            {% endfor %} 
-    &nbsp;&nbsp;&nbsp;
-    From: <input type="text" name="start" style="width:40px">
-    To: <input type="text" name="end" style="width:40px">
-    &nbsp;&nbsp;&nbsp;
-    <input type="button" value="Filter" onclick="setFilter()">
-</form>
+<form id="filter"></form>
 </center>
-
-<br>
-<br>
 
 <center>
 <div class="col-md-10" style="float:none">
@@ -83,12 +70,12 @@
     var repo = {{repo_name|safe}}
     // default filter variables
     // declared outside so that value can be changed/accessed by other functions
-    var filter_key = "blank"; // if left "blank" then filter will not apply
-    var filter_start;
-    var filter_end;
     var filtered_data = json_data; // to be used as a filtered copy of json_data
+    var filter_obj = [];
 
     var chosen_key = "default"; // the default key represents all columns
+    if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
+        // if the analysis is metrics, then revs column should be default
 
     var help = document.getElementById("help");
     var help_desc = {
@@ -104,7 +91,19 @@
     // before calling the function
     // to create the default table/graph
     document.addEventListener("DOMContentLoaded", function(event) {
-        createTable(json_data);
+        // adjustSlider();
+        if (analysis_type == "cloud") {
+            createGraph(json_data);
+        }
+
+        else {
+            d3.select("#wrapper").style("width","1000px").style("overflow-x","auto");
+            d3.select("#hideLabels").style("display","block");
+            createTable(json_data);
+            createSlider(); 
+        }
+
+
     })
 
 </script>

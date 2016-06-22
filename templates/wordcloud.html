@@ -9,6 +9,7 @@
 	<script src="../static/charts.js"></script>
 	<script src="../static/interactivity.js"></script>
 	<script src="../static/d3.layout.cloud.js"></script>
+	<script src="../static/d3-tip.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -23,13 +24,14 @@
 		{% else %} Present 
 		{% endif %}
 		<br><br>
-		{{word_list | length }} Words
+		{{word_list | length }} Most Frequent Words
 		<br>
 </h2>
 
-<style> body {
-  font-family: 'Roboto Slab', serif;
-}
+<style> 
+	body {
+	  font-family: 'Roboto Slab', serif;
+	}
 </style>
 <center>
 <div id="viz-wrapper"></div>
@@ -45,34 +47,56 @@
 </center>
 <script type="text/javascript">
 	var commit_words = {{ word_list | safe }};
-	var height = 1000,
-		width = 1600,
-		padding = 50;
+	var padding = 30;
+	var height = window.innerHeight - 2*padding,
+		width = window.innerWidth - 2*padding;
 
 	var font = d3.scale.linear()
 					.range([20, 150])
 					.domain(d3.extent(commit_words, function(d) {
-						return +d['size'];
+						return +d['freq'];
 					}));
 	var color = d3.scale.linear()
-			.domain([0, d3.max(commit_words, function(d) { return +d['size']; })])
+			.domain([0, d3.max(commit_words, function(d) { return +d['freq']; })])
 			.range(["#c63939", "#130505"]);
+
+	var tip = d3.tip()
+		.attr('class', "d3-tip")
+		.direction(function(d) {
+			var result = 's';
+			/* Posotion aware corner tip
+			if (d3.event.clientY > height/2) {
+				result = 'n';
+			} else {
+				result = 's';
+			}
+			if (d3.event.pageX > width/2) {
+				result += 'w';
+			} else {
+				result += 'e';
+			}
+			*/
+			return result;
+		})
+		.html(function(d) {
+    		return "<strong>Frequency:</strong> <span style='color:red'>" + d['freq'] + "</span>";
+  		});
+
 
 	var cloud_layout = d3.layout.cloud()
 					.size([width, height])
 					.words(commit_words)
-					.padding(15)
+					.padding(10)
 					.font('monospace')
 					// rotates random words 90 degrees
 					// .rotate(function(d) { return Math.floor(Math.random() * 2) * 90; })
 					.rotate(function (d) {return 0})
 					//not all words are being displayed if font size is too large
 					.text(function(d) {return d.text;})
-					.fontSize(function(d) {return font(d['size'])})
+					.fontSize(function(d) {return font(d['freq'])})
 					.spiral("rectangular")
 					.on("end", draw)
 					.start();
-
 
 	function draw(words) {
 		d3.select("#viz-wrapper").append("svg")
@@ -81,23 +105,26 @@
 				.style("display", "block")
 				.attr("class", "wordcloud")
 				.append("g")
-				.attr("transform", "translate(800,500)")
+				.attr("transform", "translate("+width/2+","+height/2+")")
 				.selectAll("text")
 				.data(words)
 				.enter().append("text")
-
 				.style("font-size", function(d) { return d.size + "px"; })
 				.style("fill", function(d, i) { return color(i); })
-				// .on("mouseover", function(d, i){
-				// 	word = d3.select(this)
-				// 			 .enter().append("font-size")
-				// 			 .style("font-size", function(d) { return d.size + "px"; })
-				// 			 .style("fill", function(d, i) { return color(i); })
-				// 			 .style('display','none');
-				// })
+				.call(tip)
+				.on('mouseover', function(d) {
+					tip.show(d);
+					d3.select(this)
+						.style("fill", "blue");
+				})
+				.on('mouseout', function(d,i) {
+					tip.hide(d);
+					d3.select(this).style("fill", function(d, i) { return color(i); });
+				})
             	.transition()
             	.duration(1000)
 				.attr("text-anchor", "middle")
+
 				.attr("transform", function(d) {
 					return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
 				})
