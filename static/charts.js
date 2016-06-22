@@ -213,7 +213,8 @@ function createHeader(color) {
 
     header
         .selectAll("button")
-            .data(keys.filter(function(key) { return key != keys[0]; }))
+            .data(keys.filter(function(key) { 
+                return key != keys[0] && key != 'coupled'; }))
             .enter()
         .append("button")
         .attr('class', 'btn')
@@ -224,14 +225,29 @@ function createHeader(color) {
         .attr('value', function(d) { return d; })
         .on('click', function() { chooseColumn(this); });
 
+    if (analysis_type != 'coupling') {
+        header.append("button")
+            .attr('class', 'btn')
+            .text('all')
+            .style('background-color', 'black')
+            .style('color', 'white')
+            .style('margin', '10px')
+            .attr('value', 'default')
+            .on('click', function() { chooseColumn(this); });
+    }
+
     header.append("button")
         .attr('class', 'btn')
-        .text('all')
-        .style('background-color', 'black')
+        .text('add filter')
+        .style('background-color', 'grey')
         .style('color', 'white')
         .style('margin', '10px')
-        .attr('value', 'default')
-        .on('click', function() { chooseColumn(this); });
+        .on('click', function() { toggleFilter(); });
+}
+
+function toggleFilter() {
+    var filter = document.getElementById("filter");
+    filter.style.display = filter.style.display == 'none' ? 'block' : 'none';
 }
 
 
@@ -302,6 +318,8 @@ function createMeter(data, module) {
 
     var width = parseInt(d3.select("#wrapper").style("width"));
 
+    var color = d3.scale.category20();
+
     // scale for location of meter
     // var xScale = d3.scale.linear()
     //     .domain([0, data.length - 1])
@@ -315,10 +333,11 @@ function createMeter(data, module) {
         // endAngle determined from data
 
     // the header is appended with name of selected module
-    d3.select("#header").html('')
-        .append("text")
-            .attr('text-anchor', 'middle')
-            .text('Coupled with: ' + module);
+    // d3.select("#wrapper")
+    //     .append("text")
+    //         .style('position', 'fixed')
+    //         .attr('text-anchor', 'middle')
+    //         .text('Coupled with: ' + module);
 
     // svg and g div appended
     var svg = d3.select("#wrapper")
@@ -363,6 +382,8 @@ function createMeter(data, module) {
         .attr('y', '95')
         .style('font-size', '13px')
         .text(function(d) { return d.coupled.split('/').pop(); });
+
+    createHeader(color);
 }
 
 function createPieChart(data, module) {

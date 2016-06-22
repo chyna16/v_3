@@ -54,12 +54,15 @@ function setFilter() {
     });
 
     filterData();
+    toggleFilter();
 }
+
 
 function resetFilter() {
     filter_obj = [];
 
     filterData();
+    toggleFilter();
 }
 
 
@@ -69,6 +72,7 @@ function createSlider() {
     keys.forEach(function(key) {
         if (key != keys[0] && key != 'coupled') {
             var slider = d3.select("#filter");
+            // slider.style('display', 'hidden')
             var p = slider.append("center").append("p");
             p.append("label")
                 .attr('for', key + '-amount')

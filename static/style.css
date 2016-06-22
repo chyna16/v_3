@@ -26,7 +26,11 @@ body {
 }
 
 #filter {
-  order: 3;
+  font-size: 15px;
+  width: 300px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  /*order: 3;*/
 }
 
 #table {
@@ -54,6 +58,7 @@ body {
   margin-left: 65px; 
   position: absolute;
   cursor: pointer;
+  z-index: 5;
 }
 
 .help-drop {
@@ -143,13 +148,6 @@ tbody td, thead th {
 }
 /* end axes styling */
 
-form#filter {
-  font-size: 15px;
-  width: 300px;
-  margin-top: 25px;
-  margin-bottom: 25px;
-}
-
 label.filter-key {
   margin-right: 10px;
   margin-bottom: 0;
@@ -166,6 +164,15 @@ input.range {
 div.ui-slider {
   margin-top: 0;
   margin-bottom: 10px;
+}
+
+div.ui-slider-horizontal {
+  height: .5em;
+}
+
+.ui-slider .ui-slider-handle {
+  width: .9em;
+  height: .9em;
 }
 
 /* END RESULT PAGE */

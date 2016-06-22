@@ -3,15 +3,15 @@
 {% block title %} Result {% endblock %}
 
 {% block head %}
-    <link rel=stylesheet type=text/css href="../static/style.css">
-    <script src="../static/d3.min.js"></script>
-    <script src="../static/table.js"></script>
-    <script src="../static/charts.js"></script>
-    <script src="../static/interactivity.js"></script>
-    <script src="../static/d3-tip.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="../static/d3.min.js"></script>
+    <script src="../static/d3-tip.js"></script>
+    <link rel=stylesheet type=text/css href="../static/style.css">
+    <script src="../static/table.js"></script>
+    <script src="../static/charts.js"></script>
+    <script src="../static/interactivity.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -19,8 +19,8 @@
     ?
     <p id="help" class="help-drop"></p>
 </div>
-<h1 style="padding-bottom:0;">Results for: {{ repo_name }}</h1>
-<h2 style="padding-top:0;"> 
+<h3 style="padding-bottom:0; font-weight: bold;">Results for: {{ repo_name }}</h3>
+<h3 style="padding-top:0;"> 
     From
         {% if from_date != '' %} {{ from_date }}
         {% else %} Beginning 
@@ -29,23 +29,25 @@
         {% if to_date != '' %} {{ to_date }}
         {% else %} Present 
         {% endif %}
-</h2>
-    <div class ="tooltipinfo">
-        <h2></h2>
-        <table>
-            <tr id="type">
-                <th></th>
-                <td></td>
-            </tr>
-            <tr id="value">
-                <th></th>
-                <td></td>
-            </tr>
-        </table>
-    </div>
+</h3>
+
+<div class ="tooltipinfo">
+    <h2></h2>
+    <table>
+        <tr id="type">
+            <th></th>
+            <td></td>
+        </tr>
+        <tr id="value">
+            <th></th>
+            <td></td>
+        </tr>
+    </table>
+</div>
+
 <center>
     <div id="header"></div>
-    <form id="filter"></form>
+    <form id="filter" style="display: none"></form>
 </center>
 
 <center>
@@ -73,13 +75,14 @@
     // declared outside so that value can be changed/accessed by other functions
     var filtered_data = json_data; // to be used as a filtered copy of json_data
     var filter_obj = [];
+    var entity_list = {};
 
     var chosen_key = "default"; // the default key represents all columns
     if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
         // if the analysis is metrics, then revs column should be default
 
     if (analysis_type == 'coupling') {
-        var entity_list = {}
+        entity_list = {}
 
         json_data.forEach(function(d) {
             if (!entity_list[d.entity]) {
@@ -104,6 +107,7 @@
         "cloud": "View the patterns within commit messages. See which words are used the most while committing to get an understanding of things that are commonly worked on. The size of the word is proportional to frequency."
     };
     help.innerHTML = help_desc[analysis_type]; // text that will appear when ? is hovered
+
 
     // the script waits until all the html content has been loaded
     // before calling the function
