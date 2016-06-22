@@ -38,7 +38,7 @@ def index():
 		return render_template('index.html', 
 			repo_list=repo_list, list_of_projects=list_of_projects, previous_date=generator.previous_date)
 	elif request.method == 'POST':
-		if request.form['submit_button'] == "2":
+		if request.form['submit_button'] == "available":
 			# if a selection was made from 'Available Repositories'
 			repo_name = request.form['repo_name']
 			from_date = request.form['from_date']
@@ -52,7 +52,7 @@ def index():
 				root_dir=root_dir, repo_name=repo_name, 
 				from_date=from_date, to_date=to_date
 			)) 	# redirects to dashboard view which opens input.html
-		elif request.form['submit_button'] == "1":
+		elif request.form['submit_button'] == "clone":
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
@@ -60,7 +60,7 @@ def index():
 				# submit_url called to handle cloning of repo
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
-		elif request.form['submit_button'] == "3":
+		elif request.form['submit_button'] == "remote":
 			# if a selection was made from 'Stash Repositories'
 			project_name = request.form['project_name']
 			# project_desc = stash_api.get_details() # needs to be modified for this
