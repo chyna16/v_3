@@ -3,6 +3,7 @@
 {% block title %} Result {% endblock %}
 
 {% block head %}
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
@@ -11,7 +12,10 @@
     <link rel=stylesheet type=text/css href="../static/style.css">
     <script src="../static/table.js"></script>
     <script src="../static/charts.js"></script>
+    <link rel="stylesheet" href="../static/jquery.mCustomScrollbar.css" />
+    <script src="../static/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="../static/interactivity.js"></script>
+    <script src="../static/d3.layout.cloud.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -53,7 +57,7 @@
 <center>
 <div id="container">
     <div id="wrapper"></div>
-    <!-- <button> Hide labels</button> -->
+    <button id="hideLabels" style="display: none;"> Hide labels</button>
 
 
 <div id="table" class="col-md-10">
@@ -76,6 +80,7 @@
     var filtered_data = json_data; // to be used as a filtered copy of json_data
     var filter_obj = [];
     var entity_list = {};
+    var temp_elem;
 
     var chosen_key = "default"; // the default key represents all columns
     if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
@@ -113,10 +118,26 @@
     // before calling the function
     // to create the default table/graph
     document.addEventListener("DOMContentLoaded", function(event) {
-        createTable(json_data);
         // adjustSlider();
-        createSlider();
+        if (analysis_type == "cloud") {
+            createGraph(json_data);
+        }
+
+        else {
+            // d3.select("#wrapper").style("width","1000px").style("overflow-x","auto");
+            // d3.select("#hideLabels").style("display","block");
+            createTable(json_data);
+            createSlider();
+
+            // $("#table").mCustomScrollbar(); 
+        }
     })
+
+    // (function($){
+    //     $(window).on("load",function(){
+    //         $("#wrapper").mCustomScrollbar();
+    //     });
+    // })(jQuery);
 
 </script>
 {% endblock %}

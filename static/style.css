@@ -18,11 +18,12 @@ body {
 }
 
 #wrapper {
-  display: block;
   width: 1000px;
+  /*height: 400px;*/
   overflow-x: auto;
   overflow-y: auto;
   order: 2;
+  float: none;
 }
 
 #filter {
@@ -40,6 +41,10 @@ body {
   height: 400px;
   overflow-y: auto;
   margin-top: 40px;
+}
+
+.list-column {
+  /*border-radius: 0 10px 10px 0;*/
 }
 
 .tooltipinfo {
@@ -106,6 +111,11 @@ body {
   margin: -1px 0 0 0;
   top: 100%;
   left: 0;
+}
+
+.d3-tip.s:after {
+  content: "\25B2";
+  display: none;
 }
 
 /* scroll feature acquired from:

@@ -125,6 +125,14 @@ function createSlider() {
 function chooseModule(elem) {
     var chosen_module = elem.getAttribute('value');
 
+    elem.style.backgroundColor = '#6d9af6';
+    elem.style.color = 'white';
+    if (temp_elem) {
+        temp_elem.style.backgroundColor = '';
+        temp_elem.style.color = '';
+    }
+    temp_elem = elem;
+
     coupled_data = [];
 
     filtered_data.forEach(function(d) {
@@ -144,6 +152,8 @@ function chooseModule(elem) {
 
     if (chosen_key == "average-revs") { createPie(coupled_data, chosen_module); }
     else { createMeter(coupled_data, chosen_module); } // meter chart is created
+
+    $("#wrapper").mCustomScrollbar("update");
 }
 
 
@@ -174,9 +184,17 @@ function configureDivs() {
     d3.select("#wrapper")
         .style('width', '50%')
         .style('height', '400px');
+        // .attr('class', 'mCustomScrollbar')
+        // .attr('data-mcs-theme', 'dark');
+
+    $("#wrapper").mCustomScrollbar();
 
     d3.select("#table")
-        .attr('class', '')
+        .attr('class', 'mCustomScrollbar')
+        .attr('data-mcs-theme', 'dark')
         .style('height', '400px')
         .style('margin-top', '0');
+
+    // d3.select("#hidelabels")
+    //     .style('display', 'none');
 }

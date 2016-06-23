@@ -120,10 +120,10 @@ def result():
 			+ from_date + "_" + to_date + "/"
 			+ analysis + "_" + repo_name + "__.log", 'rt') as log_file:
 			word_list = generator.get_word_frequency(log_file)
-		return render_template('wordcloud.html', 
-			word_list=word_list, repo_name=json.dumps(repo_name), 
+		return render_template('result.html', 
+			data=word_list, repo_name=json.dumps(repo_name), 
 			analysis=json.dumps(analysis),
-			from_date=from_date, to_date=to_date)
+			from_date=from_date, to_date=to_date, keys=[])
 	else:
 		with open(csv_dir + "csv_files_" + repo_name + "_" 
 			+ from_date + "_" + to_date + "/"

@@ -51,6 +51,8 @@ function setListRows(row, elem_id, data) {
         col.onclick = function() { chooseModule(this); }
         col.setAttribute('value', data);
         col.style.cursor = 'pointer';
+        col.style.width = '100%';
+        col.setAttribute('class', 'list-column')
     }
     col.appendChild(document.createTextNode(data));
     row.appendChild(col);
@@ -84,6 +86,6 @@ function createTable(data) {
         })
     }
     
-    createGraph(data);
     if (analysis_type == 'coupling') { configureDivs(); }
+    createGraph(data);
 }
