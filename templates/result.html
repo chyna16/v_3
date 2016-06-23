@@ -13,6 +13,8 @@
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="../static/d3.layout.cloud.js"></script>
+    <script src="https://d3js.org/d3-hierarchy.v0.3.min.js"></script>
+
 {% endblock %}
 
 {% block content %}
@@ -31,19 +33,7 @@
         {% else %} Present 
         {% endif %}
 </h2>
-    <div class ="tooltipinfo">
-        <h2></h2>
-        <table>
-            <tr id="type">
-                <th></th>
-                <td></td>
-            </tr>
-            <tr id="value">
-                <th></th>
-                <td></td>
-            </tr>
-        </table>
-    </div>
+
 <center>
     <div id="header"></div>
     <div id="wrapper" style="display: block;"></div>
@@ -62,7 +52,9 @@
     </table>
 </div>
 </center>
+<style>
 
+</style>
 <script>
     var keys = {{keys|safe}}; // an array of the column headers in original order
     var json_data = {{data|safe}}; // an array of objects for row of data
@@ -95,7 +87,11 @@
         if (analysis_type == "cloud") {
             createGraph(json_data);
         }
-
+/*
+        else if (analysis_type == "hotspots"){
+            createTable(json_data);
+        }
+*/
         else {
             d3.select("#wrapper").style("width","1000px").style("overflow-x","auto");
             d3.select("#hideLabels").style("display","block");
