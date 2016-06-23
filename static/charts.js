@@ -6,6 +6,8 @@ function createGraph(data) {
     }
     else if (analysis_type == "coupling") {
         // if coupling, graph is not create until chooseModule is called
+        var color = d3.scale.category20();
+        createHeader(color);
         d3.select("#wrapper")
             .html('<p><p>Choose an enitity to view degree of coupling.</p></p>');
     }
@@ -383,7 +385,7 @@ function createMeter(data, module) {
         .style('font-size', '13px')
         .text(function(d) { return d.coupled.split('/').pop(); });
 
-    createHeader(color);
+    // createHeader(color);
 }
 
 function createPieChart(data, module) {

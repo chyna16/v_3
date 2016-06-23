@@ -85,5 +85,5 @@ function createTable(data) {
     }
     
     createGraph(data);
-    configureDivs();
+    if (analysis_type == 'coupling') { configureDivs(); }
 }

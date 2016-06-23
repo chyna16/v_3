@@ -37,8 +37,9 @@ body {
   float: none;
   order: 1;
   font-size: .7em;
-  /*float: left;*/
+  height: 400px;
   overflow-y: auto;
+  margin-top: 40px;
 }
 
 .tooltipinfo {
@@ -112,9 +113,11 @@ body {
  */
 table {
   width: 1000px;
+  /*height: 400px;*/
   overflow-y: auto;
 }
 thead, tbody, tr, td, th { display: block; }
+
 tr:after {
     content: ' ';
     display: block;

@@ -177,5 +177,6 @@ function configureDivs() {
 
     d3.select("#table")
         .attr('class', '')
-        .style('height', '400px');
+        .style('height', '400px')
+        .style('margin-top', '0');
 }
