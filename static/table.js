@@ -86,6 +86,6 @@ function createTable(data) {
         })
     }
     
-    if (analysis_type == 'coupling') { configureDivs(); }
+    // if (analysis_type == 'coupling') { configureDivs(); }
     createGraph(data);
 }

@@ -18,9 +18,9 @@ body {
 }
 
 #wrapper {
-  width: 1000px;
+  /*width: 1000px;*/
   /*height: 400px;*/
-  overflow-x: auto;
+  /*overflow-x: auto;*/
   overflow-y: auto;
   order: 2;
   float: none;
@@ -31,7 +31,6 @@ body {
   width: 300px;
   margin-top: 25px;
   margin-bottom: 25px;
-  /*order: 3;*/
 }
 
 #table {

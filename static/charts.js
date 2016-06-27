@@ -8,7 +8,7 @@ function createGraph(data) {
         // if coupling, graph is not create until chooseModule is called
         var color = d3.scale.category20();
         createHeader(color);
-        d3.select("#wrapper")
+        d3.select("#graph")
             .html('<p><p>Choose an enitity to view degree of coupling.</p></p>');
     }
     else if (analysis_type == "cloud") {
@@ -21,7 +21,7 @@ function createGraph(data) {
 
 
 function createBarGraph(data) {
-    d3.select("#wrapper").html('');
+    d3.select("#graph").html('');
         // .html("") causes the wrapper to be emptied out
         // this prevents copies from being made each time function is called
         // NOTE: this apparently does not work in Safari; fix later
@@ -91,7 +91,7 @@ function createBarGraph(data) {
       });
 
     // appending the general svg as well as the div for the graph itself
-    var canvas = d3.select("#wrapper")
+    var canvas = d3.select("#graph")
         .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -177,39 +177,6 @@ function createBarGraph(data) {
             .style("font-size", ".8em")
             .attr("fill", "#325a7e");
 
-
-    // var h_width = labels.length * 150; // width for header div
-
-    // // scale for placing legend ticks on header div
-    // var hScale = d3.scale.linear()
-    //     .domain([0, labels.length - 1])
-    //     .range([0, h_width - 75]);
-
-    // // svg is appended to header div
-    // var legend = d3.select("#header").html('')
-    //     .append("svg")
-    //         .attr('height', 25)
-    //         .attr('width', h_width)
-    //     .selectAll("legend")
-    //         .data(labels)
-    //         .enter();
-
-    // // circles to represent legend ticks are appended
-    // legend.append("circle")
-    //     .attr('r', 10)
-    //     .attr('transform', function(d, i) { 
-    //         return 'translate(' + (hScale(i) + 10) + ',10)'; 
-    //     })
-    //     .style('fill', function(d) { return color(d); });
-
-    // // text is added to the circles
-    // legend.append("text")
-    //         .attr("x", function(d, i) { return hScale(i) + 20; })
-    //         .attr("y", function(d) { return 10; })
-    //         .attr("text-anchor", "right")
-    //     .text(function(d) { return d; })
-    //         .style("fill", "black") 
-    //         .style("font-size", "12px");
     createHeader(color);
 }
 
@@ -257,7 +224,7 @@ function toggleFilter() {
 
 
 function createBubbleChart(data) {
-    d3.select("#wrapper").html('');
+    d3.select("#graph").html('');
 
     var diameter = 700;
 
@@ -281,7 +248,7 @@ function createBubbleChart(data) {
         // d3 assigns each node with r, x, & y values
 
     // svg is appended
-    var canvas = d3.select("#wrapper")
+    var canvas = d3.select("#graph")
         .append("svg")
             .attr("width", diameter)
             .attr("height", diameter)
@@ -316,12 +283,12 @@ function createBubbleChart(data) {
 
 
 function createMeter(data, module) {
-    d3.select("#wrapper").html('');
+    d3.select("#graph").html('');
 
     var r = 75, // meter outer radius
         h = data.length * 200; // width of svg
 
-    var width = parseInt(d3.select("#wrapper").style("width"));
+    var width = parseInt(d3.select("#graph").style("width"));
 
     var color = d3.scale.category20();
 
@@ -338,7 +305,8 @@ function createMeter(data, module) {
         // endAngle determined from data
 
     // the header is appended with name of selected module
-    d3.select("#wrapper")
+    d3.select("#graph")
+        // .attr('class', 'mCustomScrollbar')
         .append("text")
             // .style('position', 'fixed')
             .attr('text-anchor', 'middle')
@@ -346,8 +314,7 @@ function createMeter(data, module) {
             // .attr('transform', 'translate(0, 0)');
 
     // svg and g div appended
-    var svg = d3.select("#wrapper")
-        // .attr('class', 'mCustomScrollbar')
+    var svg = d3.select("#graph")
         .append("svg")
             .attr('width', width - 20) // scroll bar if w exceeds width of wrapper
             .attr('height', h)
@@ -390,10 +357,16 @@ function createMeter(data, module) {
         .text(function(d) { return d.coupled.split('/').pop(); });
 
     // createHeader(color);
+
+    // $("#graph").mCustomScrollbar({
+    //     // advanced:{ updateOnContentResize: true }
+    //     advanced:{ updateOnSelectorChange: true }
+    // });
+    // $("#graph").mCustomScrollbar();
 }
 
 function createPieChart(data, module) {
-    d3.select("#wrapper").html('');
+    d3.select("#graph").html('');
 
     d3.select("#header").html('')
         .append("text")
@@ -416,7 +389,7 @@ function createPieChart(data, module) {
         .sort(null)
         .value(function(d) { return d['average-revs']; });
 
-    var svg = d3.select("#wrapper")
+    var svg = d3.select("#graph")
         .append("svg")
             .attr('width', w)
             .attr('height', w)
@@ -451,6 +424,7 @@ function createPieChart(data, module) {
 
     slice.append("title")
         .text(function(d) { return d.data.coupled; });
+
 
 }
 
@@ -508,7 +482,7 @@ function createWordcloud(data) {
                     .start();
 
     function draw(words) {
-        d3.select("#wrapper").append("svg")
+        d3.select("#graph").append("svg")
                 .attr("width", width + padding)
                 .attr("height", height + padding)
                 .style("display", "block")

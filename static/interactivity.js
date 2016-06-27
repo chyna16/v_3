@@ -153,7 +153,7 @@ function chooseModule(elem) {
     if (chosen_key == "average-revs") { createPie(coupled_data, chosen_module); }
     else { createMeter(coupled_data, chosen_module); } // meter chart is created
 
-    $("#wrapper").mCustomScrollbar("update");
+    // $("#wrapper").mCustomScrollbar("update");
 }
 
 
@@ -177,24 +177,38 @@ function toggleGraph(elem) {
 }
 
 
+// called by DOMContentLoaded event
+// modifies styling of divs depending on type of analysis
 function configureDivs() {
-    d3.select("#container")
-        .style('display', 'flex');
-
     d3.select("#wrapper")
-        .style('width', '50%')
-        .style('height', '400px');
-        // .attr('class', 'mCustomScrollbar')
-        // .attr('data-mcs-theme', 'dark');
-
-    $("#wrapper").mCustomScrollbar();
+        .attr('class', 'mCustomScrollbar')
+        .attr('data-mcs-theme', 'dark');
 
     d3.select("#table")
         .attr('class', 'mCustomScrollbar')
-        .attr('data-mcs-theme', 'dark')
-        .style('height', '400px')
-        .style('margin-top', '0');
+        .attr('data-mcs-theme', 'dark');
 
-    // d3.select("#hidelabels")
-    //     .style('display', 'none');
+    if (analysis_type == 'coupling') {
+        d3.select("#container")
+            .style('display', 'flex');
+
+        d3.select("#wrapper")
+            .style('width', '50%')
+            .style('height', '400px');
+
+        d3.select("#table")
+            .style('height', '400px')
+            .style('margin-top', '0');
+    }
+
+    else {
+        d3.select("#table")
+            .style('width', '1000px');
+
+        d3.select("#wrapper")
+            .style('width', '1000px')
+            .style('overflow-x', 'auto');
+
+        $("#wrapper").mCustomScrollbar({ axis: 'x' })
+    }
 }
