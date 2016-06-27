@@ -301,32 +301,21 @@ def merge_csv(repo_name):
 		return
 
 
-# called by get_word_frequency
-# filters out non-significant words
+#define stop_words as a global for efficiency
 stop_words = get_stop_words('en')
-def redundant_word(word):
-	if word in stop_words:
-		return True
-	elif word in ('1)', '2)', '3)', '4)', '5)'):
-		return True
-	elif word[:4] in ('http'):
-		return True
-	elif word[:1] in ('1', '2', '3', '4', '5', '=', '~', '*', '&', 
-					  ':', '+', '|', '*/', '/**', '(', ')', 'l', '-'):
-		return True
-	else: 
-		return False
+def parse_word(stem, word, word_list):
+	if word in stop_words or len(word) == 1:
+		return
 
-
-# called by get_word_frequency
-# iterates over word_list & checks for given word within each dict
-def word_exists(stem, word, word_list):
-	for word_pair in word_list:
-		if stem == word_pair['stem']:
-			if len(word) < len(word_pair['text']):
-				word_pair['text'] = word
-			word_pair['freq'] += 1
-			return True
+	entry = [x for x in word_list if x["stem"] == stem]
+	if entry:
+		entry[0]['freq'] += 1
+		if word in entry[0]['text']:
+			entry[0]['text'][word] += 1
+		else:
+			entry[0]['text'][word] = 1
+	else:
+		word_list.append({'stem': stem, 'text':{ word: 1 } , 'freq': 1 })
 
 
 # aqcuires list of all words from commit messages
@@ -343,16 +332,16 @@ def get_word_frequency(logfile):
 		word = word.strip("\"'/;:?{}[]!.,()").lower()
 		stem = stemmer.stem(word) # stemming
 
-		if redundant_word(word) or len(word) == 1 : continue
-		else:
-			if not word_list:
-				word_list.append({'stem': stem, 'text': word, 'freq': 1})
-			else:
-				if word_exists(stem, word, word_list): continue
-				else:
-					word_list.append({'stem': stem, 'text': word, 'freq': 1})
-	# Return the top 50 ocurring words
-	return(sorted(word_list, key = lambda x: x['freq'], reverse = True)[:100])
+		parse_word(stem,word,word_list)
+
+	# Sort and return selection of the word_list
+	sorted_word_list = sorted(word_list, key = lambda x: x['freq'], reverse = True)
+
+	textFreqPairs = []
+	for word in sorted_word_list[:100]:
+		key = max(word['text'].keys(), key=(lambda k: word['text'][k]))
+		textFreqPairs.append({'text': key, 'freq': word['freq']})
+	return textFreqPairs
 
 
 def monthdelta(date, delta):

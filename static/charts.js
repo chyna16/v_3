@@ -2,7 +2,7 @@
 // also called by createTable after table has been created / updated
 function createGraph(data) {
     if (analysis_type == "hotspots") {
-        createBubbleChart(data);
+        createBubblePack(data);
     }
     else if (analysis_type == "coupling") {
         // if coupling, graph is not create until chooseModule is called
@@ -222,6 +222,151 @@ function toggleFilter() {
     filter.style.display = filter.style.display == 'none' ? 'block' : 'none';
 }
 
+function createBubblePack(inputData) {
+    d3.select("#wrapper").html('');
+
+    var data = inputData.slice(0);
+
+    var margin = 20,
+        diameter = 610,
+        k=1;
+
+    var color = d3.scale.linear()
+        .domain([-1, 5])
+        .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
+        .interpolate(d3.interpolateHcl);
+
+    var colorHotspot = d3.scale.linear()
+        .domain([0, d3.max(data, function(d) { return +d['n-revs']; })])
+        .range(["#ffb3b3", "#e60000"]);
+
+    var tip = d3.tip()
+        .attr('class', "d3-tip")
+        .direction('e')
+        .offset([0, 10])
+        .html(function(d) {
+            return "<p>File: <text style='color:red'>" + d.data["entity"]+ "</p>"
+                +"<p>Revisions: " + d.data["n-revs"] + "</p>"
+                +"<p>Lines: " + d.data["lines"] + "</p>";
+        });
+
+    var pack = d3.layout.pack()
+        .padding(2)
+        .size([diameter - margin, diameter - margin])
+
+    var svg = d3.select("#wrapper").append("svg")
+        .attr("width", diameter)
+        .attr("height", diameter)
+        .append("g")
+        .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+    
+    data.forEach(function(d){
+        d["full-path"] = repo + "/" + d["entity"];
+        var splitItem =  d["full-path"].substring(0, d["full-path"].lastIndexOf("/"));
+        if (data.filter(function(a){ return a["full-path"] == splitItem })[0] == undefined) {
+            var pieces = splitItem.split('/');
+            var insertion = '';
+            for (var i=0; i<pieces.length; i=i+1){
+                insertion += pieces[i]
+                if(data.filter(function(a){ return a["full-path"] == insertion })[0] == undefined) {
+                    data.push({"full-path": insertion}); 
+                }
+                insertion += "/";
+            }          
+        }
+    });  
+
+    var stratify = d3.stratify()
+        .id(function(d) { return d["full-path"]; })
+        .parentId(function(d) {
+            var splitItem =  d["full-path"].substring(0, d["full-path"].lastIndexOf("/"));
+            return splitItem; 
+        });
+
+    data.sort(function(a,b){
+        var nameA=a["full-path"], nameB=b["full-path"];
+        if (nameA < nameB) //sort string ascending
+            return -1;
+        if (nameA > nameB)
+            return 1;
+        return 0; //default return value (no sorting)
+    });
+
+    var root = stratify(data)
+        .sum(function(d) { return d.lines; })
+        .sort(function(a, b) { return b.lines - a.lines; });
+
+
+    var focus = root,
+    nodes = pack.nodes(root),
+    view;
+
+    var circle = svg.selectAll("circle")
+        .data(nodes)
+        .enter().append("circle")
+        .attr("class", function(d) { return d.parent ? d.children ? "node node--middle" : "node node--leaf" : "node node--root"; })
+        .style("fill", function(d) { return d.children ? color(d.depth) : colorHotspot(d.data["n-revs"]); })
+        .on("click", function(d) { 
+            if (focus !== d) zoom(d), d3.event.stopPropagation(); 
+        });
+
+    var text = svg.selectAll("text")
+        .data(nodes)
+        .enter().append("text")
+        .attr("class", "label")
+        .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
+        .text(function(d) { return d.id.substring(d.id.lastIndexOf("/") + 1).split(/(?=[A-Z][^A-Z])/g); })
+        .style("display", function(d) { return (d.parent === root && labelFit(d,this)) ? "inline" : "none"; });
+
+    var node = svg.selectAll("circle,text");
+
+    d3.select("#wrapper")
+        //.style("background", color(-1))
+        .on("click", function() { zoom(root); });
+
+    svg.selectAll("circle.node--leaf")
+        .call(tip)
+        .on("mouseover", tip.show)
+        .on("mouseout", tip.hide);
+
+    zoomTo([root.x, root.y, root.r * 2 + margin]);
+
+    function zoom(d) {
+        var focus0 = focus; focus = d;
+
+        if (d.children !== undefined) {
+            var transition = d3.transition()
+                .duration(d3.event.altKey ? 7500 : 750)
+                .tween("zoom", function(d) {
+                  var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+                  return function(t) { zoomTo(i(t)); };
+            });
+
+            transition.selectAll("text")
+                .filter(function(d) { 
+                    if(d == undefined) return false;
+                    return (d.parent === focus || this.style.display === "inline"); 
+                })
+                .style("fill-opacity", function(d) { return (d.parent === focus) ? 1 : 0; })
+                .each("end", function(a) { 
+                    if (a.parent === focus && labelFit(a,this)) this.style.display = "inline";
+                    if (a.parent !== focus || !labelFit(a,this)) this.style.display = "none"; });
+        }
+    }
+
+    function zoomTo(v) {
+        k = diameter / v[2]; view = v;
+        node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+        circle.attr("r", function(d) { return d.r * k; })
+            .style("pointer-events", function(d) { return (d.parent === focus) ? "auto" : "none"; });
+    }
+
+    function labelFit(nodeElement, textElement) {
+        return textElement.getBBox().width <= nodeElement.r*2*k;
+    }
+
+    d3.select(self.frameElement).style("height", diameter + "px");
+}
 
 function createBubbleChart(data) {
     d3.select("#graph").html('');
@@ -502,7 +647,7 @@ function createWordcloud(data) {
                 })
                 .on('mouseout', function(d,i) {
                     tip.hide(d);
-                    d3.select(this).style("fill", function(d, i) { return color(i); });
+                    d3.select(this).style("fill", color(i));
                 })
                 .transition()
                 .duration(1000)
