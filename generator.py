@@ -19,13 +19,17 @@ def change_directory(path):
 		os.chdir(path)
 	else: return False
 
+def get_list_of_dirs(path):
+	dir_list = [ item for item in os.listdir(path) 
+			if os.path.isdir(os.path.join(path, item)) ]
+		# list of cloned repositories
+
+	return dir_list
 
 # called by visualizer at timed intervals
 # updates already cloned repositories
 def refresh_repos(repo_dir):
-	repo_list = [ item for item in os.listdir(repo_dir) 
-			if os.path.isdir(os.path.join(repo_dir, item)) ]
-		# list of cloned repositories
+	repo_list = get_list_of_dirs(repo_dir)
 
 	os.chdir(repo_dir) # cd out of v3 dir into repo dir
 	print(os.getcwd())
@@ -241,11 +245,11 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 	os.chdir(csv_path) # switch to csv folder of chosen repo
 	print("2: " + os.getcwd())
 	create_log(repo, from_date, to_date, repo_address) # make logfile
-	generate_data_summary(repo, from_date, to_date)
-	generate_data_metrics(repo, from_date, to_date)
-	generate_data_coupling(repo, from_date, to_date)
-	generate_data_age(repo, from_date, to_date)
-	generate_data_hotspots(repo, from_date, to_date)
+	# generate_data_summary(repo, from_date, to_date)
+	# generate_data_metrics(repo, from_date, to_date)
+	# generate_data_coupling(repo, from_date, to_date)
+	# generate_data_age(repo, from_date, to_date)
+	# generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)
 	print("3: " + os.getcwd())
@@ -283,35 +287,57 @@ def parse_csv(uploaded_file):
 	return (data_dict, key_array)
 
 
-# called by generate_data/generate_data_hotspot
-# collects num of revs from metrics.csv & lines from lines.csv
-# merges them together with respective modules into hotspots.csv
-def merge_csv(repo_name):
-	lines_array = []
-	merge_array = []
+# called by merge_csv
+# parses module names/lines of code from lines.csv
+def get_lines_list(repo_name):
+	lines_list = []
 
 	try:
 		with open("lines_" + repo_name + ".csv") as lines_file:
 			lines_reader = csv.DictReader(lines_file)
 			for row in lines_reader:
-				lines_array.append({'entity': row['filename'], 
+				lines_list.append({'entity': row['filename'], 
 									'lines': row['code']})
+	except IOError:
+		print("file not found")
 
+	return lines_list
+
+
+# called by merge_csv
+# combines data from lines.csv with metrics.csv
+def get_merge_list(repo_name, lines_list):
+	merge_list = []
+
+	try:
 		with open("metrics_" + repo_name + ".csv", "rt") as rev_file:
 			revs_reader = csv.DictReader(rev_file)
 			for row in revs_reader:
-				for module in lines_array:
+				for module in lines_list:
 					if row['entity'] in module['entity']:
-						merge_array.append({
+						merge_list.append({
 							'entity': row['entity'], 
 							'n-revs': row['n-revs'], 
 							'lines': module['lines']})
+	except IOError:
+		print("file not found")
 
+	return merge_list
+
+
+# called by generate_data/generate_data_hotspot
+# retrieves combined data from lines.csv & merge.csv
+# writes combined data into new hotspots.csv file
+def merge_csv(repo_name):
+	lines_list = get_lines_list(repo_name)
+	merge_list = get_merge_list(repo_name, lines_list)
+
+	try:
 		with open("hotspots_" + repo_name + ".csv", "wt") as hotspot_file:
 			fieldnames = ['entity', 'n-revs', 'lines']
 			writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames) 
 			writer.writeheader()
-			for row in merge_array:
+			for row in merge_list:
 				writer.writerow(row)
 	except IOError:
 		print("file not found")
@@ -356,10 +382,9 @@ def get_word_frequency(logfile):
 	stemmer = LancasterStemmer()
 
 	for word in log_list:
-		# Remove unwanted leading and trailing characters
+		# remove unwanted leading and trailing characters
 		word = word.strip("\"'/;:?{}[]!.,()").lower()
-		#Stemming
-		stem = stemmer.stem(word)
+		stem = stemmer.stem(word) # stemming
 
 		if redundant_word(word) or len(word) == 1 : continue
 		else:
@@ -385,8 +410,5 @@ for m in range(-2, -1):
 previous_date=((time)[:10])
 
 # if __name__ == '__main__':
-	# print (folder_list)
-	# print (project_list)
-	# print(project_key)
-	# get_word_frequency()
+	# print("hello")
 
