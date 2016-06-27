@@ -12,19 +12,15 @@ from nltk.stem.lancaster import LancasterStemmer
 from datetime import datetime
 
 
-# switches working directory to passed in address
-# NOTE: might be pointless; get rid of it?
-def change_directory(path):
-	if not os.getcwd() == path:
-		os.chdir(path)
-	else: return False
-
+# called by refresh_repos
+# returns a list of directories within the specified path
 def get_list_of_dirs(path):
 	dir_list = [ item for item in os.listdir(path) 
 			if os.path.isdir(os.path.join(path, item)) ]
 		# list of cloned repositories
 
 	return dir_list
+
 
 # called by visualizer at timed intervals
 # updates already cloned repositories
@@ -56,18 +52,21 @@ def set_path(path):
 	print("-" * 60)
 
 
+# called by visualizer index view
+# parses the user given clone url and password; returns combined http url
+def get_clone_command(clone_url, password):
+	char = clone_url.index('@') # string index of '@'
+	command = clone_url[:char] + ':' + password + clone_url[char:]
+		# add password to the string right before the '@'
+	return command
+
+
+# called by visualizer index view
 # calls git clone command with an appropriate url
 def clone_repo(clone_url):
 	os.chdir(settings.repo_dir)
 	os.system('git clone ' + clone_url)
 	os.chdir(settings.v3_dir)
-
-
-# parses the user given clone url and password; returns combined http url
-def get_clone_command(clone_url, password):
-	char = clone_url.index('@')
-	command = clone_url[:char] + ':' + password + clone_url[char:]
-	return command
 
 
 # called by index view to generate message
@@ -99,33 +98,6 @@ def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
 		+ repo_name + "_" + from_date + "_" + to_date 
 		+ ".log -c git -a " + analysis_type + " > " 
 		+ analysis_name + "_" + repo_name + ".csv")
-
-
-# NOTE: currently NOT IN USE
-# called by manage_csv_folder/select_analysis
-# currently only calls run_codemaat on all analyses
-def generate_data(address, repo_name, from_date, to_date):
-	print("Creating csv files from generated log...")
-	# # time.sleep(1)
-	print("Creating repository summary...")
-	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
-	# # Reports an overview of mined data from git's log file
-	print("Creating organizational metrics...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	# # Reports the number of authors/revisions made per module
-	print("Creating coupling history...")
-	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
-	# # Reports correlation of files that often commit together
-	# # degree = % of commits where the two files were changed in the same commit
-	print("Creating code age summary...")
-	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
-	# # Reports how long ago the last change was made in measurement of months
-	print("Creating repository hotspots...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=lines_" + repo_name + ".csv")
-	merge_csv(repo_name)
-	print("Done. Check your current folder for your files.")
-	print("-" * 60)
 
 
 # reports an overview of mined data from git's log file
@@ -170,28 +142,6 @@ def generate_data_hotspots(repo_name, from_date, to_date):
 		+ "lines_" + repo_name + ".csv")
 	merge_csv(repo_name)
 	print("-" * 60)
-
-
-# NOTE: currently NOT IN USE
-# called by manage_csv_folder
-# reads user selection of analyses & calls helper functions that run codemaat 
-# FIX: currently does not read multiple selections
-def select_analysis(address, repo, from_date, to_date):
-	if request.form['checkbox'] == "summary":
-		print ("button: " + request.form['checkbox'])
-		generate_data_summary(address, repo, from_date, to_date)
-	if request.form['checkbox'] == "hotspots":
-		print ("button: " + request.form['checkbox'])
-		generate_data_hotspots(address, repo, from_date, to_date)
-	if request.form['checkbox'] == "metrics":
-		print ("button: " + request.form['checkbox'])
-		generate_data_metrics(address, repo, from_date, to_date)
-	if request.form['checkbox'] == "coupling":
-		print ("button: " + request.form['checkbox'])
-		generate_data_coupling(address, repo, from_date, to_date)
-	if request.form['checkbox'] == "0":
-		print("none selected- button: " + request.form['checkbox'])
-		generate_data(address, repo, from_date, to_date)
 
 
 # called by manage_csv_folder
@@ -245,11 +195,11 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 	os.chdir(csv_path) # switch to csv folder of chosen repo
 	print("2: " + os.getcwd())
 	create_log(repo, from_date, to_date, repo_address) # make logfile
-	# generate_data_summary(repo, from_date, to_date)
-	# generate_data_metrics(repo, from_date, to_date)
-	# generate_data_coupling(repo, from_date, to_date)
-	# generate_data_age(repo, from_date, to_date)
-	# generate_data_hotspots(repo, from_date, to_date)
+	generate_data_summary(repo, from_date, to_date)
+	generate_data_metrics(repo, from_date, to_date)
+	generate_data_coupling(repo, from_date, to_date)
+	generate_data_age(repo, from_date, to_date)
+	generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)
 	print("3: " + os.getcwd())
@@ -271,31 +221,34 @@ def ignore_module(entity):
 # returns a list of the headers, and a dictionary of each row
 def parse_csv(uploaded_file):
 	reader = csv.reader(uploaded_file)
-	data_dict = []
-	key_array = []
+	data_dict = [] # list of dictionaries, one dict for each row
+	key_list = [] # list of row headers / keys
 
 	for i, row in enumerate(reader):
-		row_array = {}
+		temp_dict = {}
 		if i == 0:
-			key_array = row
+			# if first row of file, fill key_list with headers
+			key_list = row
 		else:
+			# fill temp dict with each value in the row
 			if not ignore_module(row[0]):
-				for j, key in enumerate(key_array):
-					row_array[key] = row[j]
-				data_dict.append(row_array)
+				for j, key in enumerate(key_list):
+					temp_dict[key] = row[j] # pair respective header w/ value
+				data_dict.append(temp_dict)
 
-	return (data_dict, key_array)
+	return (data_dict, key_list)
 
 
 # called by merge_csv
 # parses module names/lines of code from lines.csv
 def get_lines_list(repo_name):
-	lines_list = []
+	lines_list = [] # list of dictionaries, one dict for each row
 
 	try:
 		with open("lines_" + repo_name + ".csv") as lines_file:
 			lines_reader = csv.DictReader(lines_file)
 			for row in lines_reader:
+				# create a dict with name and num lines; add it to list
 				lines_list.append({'entity': row['filename'], 
 									'lines': row['code']})
 	except IOError:
@@ -307,14 +260,16 @@ def get_lines_list(repo_name):
 # called by merge_csv
 # combines data from lines.csv with metrics.csv
 def get_merge_list(repo_name, lines_list):
-	merge_list = []
+	merge_list = [] # list of dictionaries, one dict for each row
 
 	try:
-		with open("metrics_" + repo_name + ".csv", "rt") as rev_file:
-			revs_reader = csv.DictReader(rev_file)
+		with open("metrics_" + repo_name + ".csv", "rt") as revs_file:
+			revs_reader = csv.DictReader(revs_file)
 			for row in revs_reader:
+				# for each entity in metrics, look for it in lines_list
 				for module in lines_list:
 					if row['entity'] in module['entity']:
+						# add new dict w/ name, revs, and lines to merge_list
 						merge_list.append({
 							'entity': row['entity'], 
 							'n-revs': row['n-revs'], 
@@ -334,10 +289,12 @@ def merge_csv(repo_name):
 
 	try:
 		with open("hotspots_" + repo_name + ".csv", "wt") as hotspot_file:
-			fieldnames = ['entity', 'n-revs', 'lines']
-			writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames) 
-			writer.writeheader()
+			# create a new csv file
+			fieldnames = ['entity', 'n-revs', 'lines'] # use these as headers
+			writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames)
+			writer.writeheader() # write fieldnames into header row
 			for row in merge_list:
+				# write each row from merge_list into new csv file
 				writer.writerow(row)
 	except IOError:
 		print("file not found")
