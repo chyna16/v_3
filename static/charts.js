@@ -646,7 +646,7 @@ function createWordcloud(data) {
                 })
                 .on('mouseout', function(d,i) {
                     tip.hide(d);
-                    d3.select(this).style("fill", function(d, i) { return color(i); });
+                    d3.select(this).style("fill", color(i));
                 })
                 .transition()
                 .duration(1000)
