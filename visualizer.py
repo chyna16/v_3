@@ -115,28 +115,33 @@ def result():
 	analysis = request.args.get('analysis')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
-	if analysis == "cloud":
-		with open(csv_dir + "csv_files_" + repo_name + "_" 
-			+ from_date + "_" + to_date + "/"
-			+ analysis + "_" + repo_name + "__.log", 'rt') as log_file:
-			word_list = generator.get_word_frequency(log_file)
-		return render_template('result.html', 
-			data=word_list, repo_name=json.dumps(repo_name), 
-			analysis=json.dumps(analysis),
-			from_date=from_date, to_date=to_date, keys=[])
-	else:
-		with open(csv_dir + "csv_files_" + repo_name + "_" 
-			+ from_date + "_" + to_date + "/"
-			+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
-			# opens respective csv file for chosen analysis
-			data, keys = generator.parse_csv(csv_file) 
-				# calls parse_csv to retrieve data from csv file
+	if request.method == 'GET':
+		if analysis == "cloud":
+			with open(csv_dir + "csv_files_" + repo_name + "_" 
+				+ from_date + "_" + to_date + "/"
+				+ analysis + "_" + repo_name + "__.log", 'rt') as log_file:
+				word_list = generator.get_word_frequency(log_file)
 			return render_template('result.html', 
-				repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
-				from_date=from_date, to_date=to_date, 
-				data=json.dumps(data), keys=json.dumps(keys))
-					# json.dumps() converts data into a string format
-
+				data=word_list, repo_name=json.dumps(repo_name), 
+				analysis=json.dumps(analysis),
+				from_date=from_date, to_date=to_date, keys=[])
+		else:
+			with open(csv_dir + "csv_files_" + repo_name + "_" 
+				+ from_date + "_" + to_date + "/"
+				+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
+				# opens respective csv file for chosen analysis
+				data, keys = generator.parse_csv(csv_file) 
+					# calls parse_csv to retrieve data from csv file
+				return render_template('result.html', 
+					repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
+					from_date=from_date, to_date=to_date, 
+					data=json.dumps(data), keys=json.dumps(keys))
+						# json.dumps() converts data into a string format
+	elif request.method == 'POST':
+		analysis = request.form['analysis']
+		return redirect(url_for('result',
+			repo_name=repo_name, analysis=analysis, 
+			from_date=from_date, to_date=to_date))
 
 # this filter allows using '|fromjson' in a jinja template
 # to call json.loads() method
