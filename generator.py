@@ -1,6 +1,7 @@
 import csv
 import os
 import fnmatch
+import glob
 import subprocess
 from flask import request, flash
 from stop_words import get_stop_words
@@ -213,12 +214,60 @@ def create_log(repo_name, from_date, to_date, address):
 	print("-" * 60)
 
 
+#obtains complexity history of entire repository, regardless of date selected
+#can take a long time (up to 3 min)when running on large repositories
+#requires the 'csvcat' python package
+def create_complexity_files(repo, address, from_date, to_date):
+	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
+	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
+	 '.spec', '.md', '.ignore', '.ttf')
+	#files to be ignored
+	file_list = []
+	csv_list = []
+
+	# get the log id of the first and latest commit in the repository
+	first_id = subprocess.getoutput('git --git-dir ' + address 
+		+ ' log --pretty=format:"%h" --no-patch --reverse | head -1')
+	last_id = subprocess.getoutput('git --git-dir ' + address 
+		+ ' log --pretty=format:"%h" --no-patch | head -1')
+
+	for root, dirs, files in os.walk(settings.repo_dir + repo):
+		if '.git' in dirs:
+			dirs.remove('.git')
+		for file in files:
+			if file.endswith(extensions):
+				continue
+			file_list.append(os.path.join(root, file))
+
+	os.chdir(settings.repo_dir + repo)
+
+	#runs complexity analysis script on each file in the repository
+	for file in file_list:
+		split_path = file.split(repo + '/')
+		os.system('python ' + settings.v3_dir + '/git_complexity_trend.py --start ' 
+			+ first_id + ' --end ' + last_id + ' --file ' + split_path[1] + ' > ' 
+			+ settings.csv_dir  + folder_name + '/complexity_' 
+			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv')
+
+	os.chdir(settings.csv_dir + folder_name)
+
+	for file in glob.glob("*.csv"):
+		csv_list.append(file)
+
+	#appends csv files together into one	
+	os.system('csvcat --skip-headers ' + (' '.join(csv_list)) + ' > ' 
+		+ repo + '_complexity.csv')
+
+	for file in glob.glob("complexity_*"):
+		os.remove(file)
+
+
 # called by index view
 # sets the address where csv files are/will be located
 # handles switching between directories
 # calls helper functions that handle folder, logfile, & codemaat
 def manage_csv_folder(repo_dir, repo, from_date, to_date):
-	print("1: " + os.getcwd())
+	# print("1: " + os.getcwd())
 	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
 	csv_path = settings.csv_dir + folder_name
 		# csv_path is the complete address of csv folder for chosen repo
@@ -227,23 +276,28 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		# if that csv folder doesn't exist
 		print("creating folder: " + csv_path)
 		os.system("mkdir " + csv_path)
-	else: print("folder exists: " + csv_path)
+	else:
+		print("folder exists: " + csv_path)
 
 	repo_address = repo_dir + repo + '/.git'
 
 	os.chdir(csv_path) # switch to csv folder of chosen repo
-	print("2: " + os.getcwd())
+	# print("2: " + os.getcwd())
 	create_log(repo, from_date, to_date, repo_address) # make logfile
-	generate_data_summary(repo, from_date, to_date)
-	generate_data_metrics(repo, from_date, to_date)
-	generate_data_coupling(repo, from_date, to_date)
-	generate_data_age(repo, from_date, to_date)
-	generate_data_hotspots(repo, from_date, to_date)
+
+	create_complexity_files(repo, repo_address, from_date, to_date)
+	os.chdir(csv_path)
+
+	# generate_data_summary(repo, from_date, to_date)
+	# generate_data_metrics(repo, from_date, to_date)
+	# generate_data_coupling(repo, from_date, to_date)
+	# generate_data_age(repo, from_date, to_date)
+	# generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)
-	print("3: " + os.getcwd())
+	# print("3: " + os.getcwd())
 	flash('Analysis complete.')
-	# return csv_path
+	return csv_path
 
 
 # called by parse_csv
@@ -252,7 +306,8 @@ def ignore_module(entity):
 	ignore_list = ['bower.json', '.gitignore', 'README.md']
 		# list to be expanded
 	if entity in ignore_list: return True
-	else: return False
+	else:
+		return False
 
 
 # called by result view
