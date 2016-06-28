@@ -65,7 +65,6 @@ def index():
 			project_name = request.form['submit_button']
 			return redirect(url_for('index_repo', project_name=project_name))
 
-
 # page where user can select a repository after selecting a Stash project
 @app.route('/index_repo', methods=['GET', 'POST'])
 def index_repo():
@@ -87,7 +86,6 @@ def index_repo():
 		return redirect(url_for('dashboard',
 			repo_name=repo_name, from_date=from_date, to_date=to_date))
 			# go straight to dashboard after cloning repo and generating files
-
 
 # page where user can select the specific analysis to view
 @app.route('/dashboard', methods=['GET', 'POST'])
@@ -115,6 +113,7 @@ def result():
 	analysis = request.args.get('analysis')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
+	
 	if request.method == 'GET':
 		if analysis == "cloud":
 			with open(csv_dir + "csv_files_" + repo_name + "_" 

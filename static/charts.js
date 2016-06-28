@@ -60,8 +60,9 @@ function createBarGraph(data) {
 
     // the scale for each category of bars (each row)
     var x0Scale = d3.scale.ordinal()
-        .domain(data.map(function(d) { return d[keys[0]]; })) // array of entities
-        .rangeBands([0, width], .05); 
+        .domain(data.map(function(d) { return d.entity.split('/').pop(); })) 
+            // array of entities
+        .rangeBands([0, width], .05);
         
     // the scale for individual bars within each category
     var x1Scale = d3.scale.ordinal()
@@ -106,7 +107,7 @@ function createBarGraph(data) {
         .append("g")
             .attr("class", "category")
             .attr("transform", function(d) { 
-                return "translate(" + x0Scale(d[keys[0]]) + ",0)"; 
+                return "translate(" + x0Scale(d.entity.split('/').pop()) + ",0)"; 
             });
 
     // bars appended to each category depending on how many columns are being displayed
@@ -134,10 +135,10 @@ function createBarGraph(data) {
             .attr("height", function(d) { return height - yScale(d.value); })
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
-            .attr("y", function(d) { return yScale(d.value); })
+            .attr("y", function(d) { return yScale(d.value); });
         //labels dont display with this + transition enabled
         // .append("svg:title")
-            .text(function(d) { return d.value; });
+            // .text(function(d) { return d.value; });
 
         //labels hide all text
         d3.select("button").on("click", function(d) {
@@ -362,11 +363,13 @@ function createBubblePack(inputData) {
     }
 
     function labelFit(nodeElement, textElement) {
+        //TODO Firefox Compatibility
         try {
             return textElement.getBBox().width <= nodeElement.r*2*k;
         } catch(err) {
             console.log('error');
         }
+
     }
 
     d3.select(self.frameElement).style("height", diameter + "px");
