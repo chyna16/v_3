@@ -19,6 +19,48 @@ function createGraph(data) {
     }
 }
 
+function toggleFilter() {
+    var filter = document.getElementById("filter");
+    filter.style.display = filter.style.display == 'none' ? 'block' : 'none';
+}
+
+function createHeader(color) {
+    var header = d3.select("#header").html('').append("p");
+
+    header
+        .selectAll("button")
+            .data(keys.filter(function(key) { 
+                return key != keys[0] && key != 'coupled'; }))
+            .enter()
+        .append("button")
+        .attr('class', 'btn')
+        .text(function(d) { return d; })
+        .style('background-color', function(d) { return color(d); })
+        .style('color', 'white')
+        .style('margin', '10px')
+        .attr('value', function(d) { return d; })
+        .on('click', function() { chooseColumn(this); });
+
+    if (analysis_type != 'coupling') {
+        header.append("button")
+            .attr('class', 'btn')
+            .text('all')
+            .style('background-color', 'black')
+            .style('color', 'white')
+            .style('margin', '10px')
+            .attr('value', 'default')
+            .on('click', function() { chooseColumn(this); });
+    }
+
+    header.append("button")
+        .attr('class', 'btn')
+        .text('add filter')
+        .style('background-color', 'grey')
+        .style('color', 'white')
+        .style('margin', '10px')
+        .on('click', function() { toggleFilter(); });
+}
+
 
 function createBarGraph(data) {
     d3.select("#graph").html('');
@@ -179,48 +221,6 @@ function createBarGraph(data) {
             .attr("fill", "#325a7e");
 
     createHeader(color);
-}
-
-function createHeader(color) {
-    var header = d3.select("#header").html('').append("p");
-
-    header
-        .selectAll("button")
-            .data(keys.filter(function(key) { 
-                return key != keys[0] && key != 'coupled'; }))
-            .enter()
-        .append("button")
-        .attr('class', 'btn')
-        .text(function(d) { return d; })
-        .style('background-color', function(d) { return color(d); })
-        .style('color', 'white')
-        .style('margin', '10px')
-        .attr('value', function(d) { return d; })
-        .on('click', function() { chooseColumn(this); });
-
-    if (analysis_type != 'coupling') {
-        header.append("button")
-            .attr('class', 'btn')
-            .text('all')
-            .style('background-color', 'black')
-            .style('color', 'white')
-            .style('margin', '10px')
-            .attr('value', 'default')
-            .on('click', function() { chooseColumn(this); });
-    }
-
-    header.append("button")
-        .attr('class', 'btn')
-        .text('add filter')
-        .style('background-color', 'grey')
-        .style('color', 'white')
-        .style('margin', '10px')
-        .on('click', function() { toggleFilter(); });
-}
-
-function toggleFilter() {
-    var filter = document.getElementById("filter");
-    filter.style.display = filter.style.display == 'none' ? 'block' : 'none';
 }
 
 function createBubblePack(inputData) {
@@ -451,13 +451,10 @@ function createMeter(data, module) {
         // endAngle determined from data
 
     // the header is appended with name of selected module
-    d3.select("#graph")
-        // .attr('class', 'mCustomScrollbar')
-        .append("text")
-            // .style('position', 'fixed')
-            .attr('text-anchor', 'middle')
-            .text('Coupled with: ' + module);
-            // .attr('transform', 'translate(0, 0)');
+    d3.select("#title")
+        .style('margin-bottom', '15px')
+        .attr('text-anchor', 'middle')
+        .text('Coupled with: ' + module);
 
     // svg and g div appended
     var svg = d3.select("#graph")
@@ -501,30 +498,31 @@ function createMeter(data, module) {
         .attr('y', '95')
         .style('font-size', '13px')
         .text(function(d) { return d.coupled.split('/').pop(); });
-
-    // createHeader(color);
-
-    // $("#graph").mCustomScrollbar({
-    //     // advanced:{ updateOnContentResize: true }
-    //     advanced:{ updateOnSelectorChange: true }
-    // });
-    // $("#graph").mCustomScrollbar();
 }
 
 function createPieChart(data, module) {
     d3.select("#graph").html('');
 
-    d3.select("#header").html('')
-        .append("text")
-            .attr('text-anchor', 'middle')
-            .text('Coupled with: ' + module);
+    d3.select("#title")
+        .style('margin-bottom', '15px')
+        .attr('text-anchor', 'middle')
+        .text('Coupled with: ' + module);
 
     var r = 200,
         w = 400;
 
     var color = d3.scale.category20();
 
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) {
+            return "<strong>" + d.data.coupled + "<br>" + "degree: </strong> " 
+                + "<span style='color:red'>" + d.data['degree'] + "% </span>";
+            });
+
     var arc = d3.svg.arc()
+        .innerRadius(50)
         .outerRadius(r);
 
     var textArc = d3.svg.arc()
@@ -533,6 +531,7 @@ function createPieChart(data, module) {
 
     var pie = d3.layout.pie()
         .sort(null)
+        .padAngle(.02)
         .value(function(d) { return d['average-revs']; });
 
     var svg = d3.select("#graph")
@@ -549,7 +548,10 @@ function createPieChart(data, module) {
 
     slice.append("path")
         .attr('d', arc)
-        .attr('fill', function(d) { return color(d.data.coupled); });
+        .attr('fill', function(d) { return color(d.data.coupled); })
+        .call(tip)
+        .on('mouseover', function(d) { tip.show(d); })
+        .on('mouseout', function(d) { tip.hide(d); });
 
     // following function retrieved from:
     // http://stackoverflow.com/questions/26127849/d3-aligning-text-to-centroid-angle
@@ -565,13 +567,9 @@ function createPieChart(data, module) {
         })
         .attr('dy', '.35em')
         .attr('text-anchor', 'middle')
-        .style('font-size', '10px')
+        .attr('fill', 'white')
+        .style('font-size', '30px')
         .text(function(d) { return d.data['average-revs']; });
-
-    slice.append("title")
-        .text(function(d) { return d.data.coupled; });
-
-
 }
 
 function createWordcloud(data) {

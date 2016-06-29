@@ -150,7 +150,7 @@ function chooseModule(elem) {
         }
     });
 
-    if (chosen_key == "average-revs") { createPie(coupled_data, chosen_module); }
+    if (chosen_key == "average-revs") { createPieChart(coupled_data, chosen_module); }
     else { createMeter(coupled_data, chosen_module); } // meter chart is created
 
     // $("#wrapper").mCustomScrollbar("update");
