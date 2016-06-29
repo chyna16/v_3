@@ -1,8 +1,94 @@
+/* Navbar Styling */
+
+.navbar-fixed-top{
+  width:100% !important;
+  /*left:-15px;*/
+}
+.navbar-inner{
+  background-color: #1a1a1a;
+  font-style: 'interstateregular', Helvetica, sans-serif;
+  border: none;
+  background-image: none;
+  min-height:70px;
+  height:70px;
+}
+
+.navbar-fixed-top,
+.navbar-fixed-bottom {
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: 70px;
+  z-index: 1030;
+  margin-bottom: 0;
+  height: 70px;
+}
+
+.navbar-fixed-top .navbar-inner,
+.navbar-static-top .navbar-inner {
+  border-width: 0 0 1px;
+}
+
+.navbar-inverse .navbar-text {
+  text-align: center;
+  color: #fff;
+  margin-top: 21px;
+  margin-bottom: 21px;
+}
+
+.navbar-fixed-bottom .navbar-inner {
+  border-width: 1px 0 0;
+}
+
+.navbar-fixed-top .navbar-inner,
+.navbar-fixed-bottom .navbar-inner {
+  padding-right: 0;
+  padding-left: 0;
+  -webkit-border-radius: 0;
+     -moz-border-radius: 0;
+          border-radius: 0;
+}
+
+.navbar-static-top .container,
+.navbar-fixed-top .container,
+.navbar-fixed-bottom .container {
+  width: 80%;
+  height: 70px;
+}
+
+.navbar-fixed-top {
+  top: 0;
+  background-color:#1B1B1B;
+}
+
+.navbar-fixed-top .navbar-inner,
+.navbar-static-top .navbar-inner {
+  -webkit-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
+     -moz-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav > li[role="navigation"] > a  {
+  border-radius: 0px;
+  padding-top: 21px;
+  padding-bottom: 21px;
+  color: #fff;
+}
+
+.nav > li[role="navigation"] > a:hover,
+.nav > li[role="navigation"] > a:focus,
+.nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
+  background: #404040;
+}
+/* End Navbar Styling */
+
 body {
-  font-family: 'Roboto Slab', serif;
+  /*font-family: 'Roboto Slab', serif;*/
   font-size: 20px;
-  padding-left: 50px;
-  padding-right: 50px;
+  padding-top: 70px;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .center {
@@ -46,16 +132,6 @@ body {
   /*border-radius: 0 10px 10px 0;*/
 }
 
-.tooltipinfo {
-  background: silver;
-  height: 200px;
-  border: 1px solid #dedede;
-  display: none;
-  position: absolute;
-  max-width: 400px;
-  overflow: hidden;
-}
-
 /* BubblePack Styles */
 .node {
   cursor: pointer;
@@ -85,14 +161,11 @@ body {
 }
 
 /* help Dropdown */
+
+
+/*  Depricated
 .help {
-  font-size: 50px; 
-  color: #337ab7; 
-  float: left; 
-  margin-left: 65px; 
-  position: absolute;
   cursor: pointer;
-  z-index: 5;
 }
 
 .help-drop {
@@ -107,8 +180,16 @@ body {
   border: 2px solid black;
 }
 
-.help:hover .help-drop {
+.help:active .help-drop {
   display: block;
+}
+*/
+
+.help-div {
+  padding: 10px;
+  width: 100% !important;
+  background: #1ab7ea;
+  display: none;
 }
 
 /* tooltip styling from: https://github.com/Caged/d3-tip */

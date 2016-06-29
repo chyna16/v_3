@@ -3,43 +3,40 @@
 <html>
 <head>
     <title>V3 - {% block title %} {% endblock %}</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
     <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
     {% block head %} {% endblock %}
 </head>
 
+<script>
+$(document).ready(function(){
+    $(".help-pill").click(function(){
+        $(".help-div").toggle(1000);
+    });
+});
+</script>
+
 <body>
-
-<style> 
-body {
-  font-family: 'Roboto Slab', serif;
-}
-</style>
-
-<nav class="navbar navbar-inverse" role="navigation">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
         <nav>
             <ul class="nav nav-pills pull-right">
-                <li role="presentation"><a href="/">Home</a></li>
-                <li role="presentation"><a href="#" onclick="goBack()">Back</a></li>
-                <li role="presentation"><a href="about.html">About</a></li>
-                <li role="presentation"><a href="#">Contact</a></li>
+                <li role="navigation"><a href="/">Home</a></li>
+                <li role="navigation" class="help-pill"><a href="#">Help</a></li>
+                {% block nav_injection %} {% endblock %}
+                <li role="navigation"><a href="#">Contact</a></li>
             </ul>
         </nav>
-        <a class="navbar-brand" href="/">V3</a>
+        <a class="navbar-brand" href="/"> <img alt="V3" src="/static/images/V3_logo.svg" height="40px"></a>
+        {% block page_title %} {% endblock %}
     </div>
 </nav>
 
-{% block content %} {% endblock %}
+<div class="help-div">This is the help div<p id="help" class="help-drop"></p></div>
 
-<script>
-// called when user clicks "Back" button
-function goBack() {
-    window.history.back();
-}
-</script>
+{% block content %} {% endblock %}
 
 </body>
 </html>

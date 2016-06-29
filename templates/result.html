@@ -17,16 +17,27 @@
     <script src="../static/interactivity.js"></script>
     <script src="../static/d3.layout.cloud.js"></script>
     <script src="https://d3js.org/d3-hierarchy.v0.3.min.js"></script>
-
 {% endblock %}
 
-{% block content %}
-<div class="help">
-    ?
-    <p id="help" class="help-drop"></p>
-</div>
-<h3 style="padding-bottom:0; font-weight: bold;">Results for: {{ repo_name }}</h3>
-<h3 style="padding-top:0;"> 
+{% block nav_injection %}
+    <li class="dropdown" role="navigation">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Analyses<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <form method="POST" enctype="multipart/form-data">
+                <li><button type="submit" name="analysis" value="metrics">Metrics</button></li>
+                <li><button type="submit" name="analysis" value="hotspots">Hotspots</button></li>
+                <li><button type="submit" name="analysis" value="coupling">Coupling</button></li>
+                <li><button type="submit" name="analysis" value="age">Age</button></li>
+                <li><button type="submit" name="analysis" value="cloud">Word Cloud</button></li>
+            </form>
+          </ul>
+    </li>
+{% endblock %}
+
+
+{% block page_title %}
+<text class="navbar-text">Repository: {{ repo_name }}</text>
+<text class="navbar-text"> 
     From
         {% if from_date != '' %} {{ from_date }}
         {% else %} Beginning 
@@ -35,8 +46,11 @@
         {% if to_date != '' %} {{ to_date }}
         {% else %} Present 
         {% endif %}
-</h3>
+</text>
+{% endblock %}
 
+
+{% block content %}
 <center>
     <div id="header"></div>
     <form id="filter" style="display: none"></form>

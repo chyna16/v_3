@@ -363,7 +363,13 @@ function createBubblePack(inputData) {
     }
 
     function labelFit(nodeElement, textElement) {
-        return textElement.getBBox().width <= nodeElement.r*2*k;
+        //TODO Firefox Compatibility
+        try {
+            return textElement.getBBox().width <= nodeElement.r*2*k;
+        } catch(err) {
+            console.log('error');
+        }
+
     }
 
     d3.select(self.frameElement).style("height", diameter + "px");

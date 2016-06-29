@@ -9,8 +9,11 @@
     <!-- <script src = "../static/bootstrap.js"></script>  -->
 {% endblock %}
 
+{% block page_title %}
+    <p class="navbar-text">Viacom Version Visualizer</p>
+{% endblock %}
+
 {% block content %}
-<h1>Viacom Version Visualizer</h1>
 <h3>Create an analysis by selecting a repository using one of the three options:</h3>
 	<div class="container" style="min-height:100% width:80%">
 	{% with messages = get_flashed_messages() %}
@@ -27,9 +30,9 @@
 
 <!-- <form method="POST" enctype="multipart/form-data"> -->
 <ul id="tabs" class="nav nav-tabs nav-justified"  data-tabs="tabs">
-    <li role="presentation" ><a href="#tab1" data-toggle="tab">Clone a Repository</a></li>
     <li role="presentation" class="active"><a href="#tab2" data-toggle="tab">Available Repositories</a></li>
     <li role="presentation" ><a href="#tab3" data-toggle="tab">Find a Repository</a></li>
+    <li role="presentation" ><a href="#tab1" data-toggle="tab">Clone a Repository</a></li>
 </ul>
 
 <div class="tab-content">
