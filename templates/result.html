@@ -3,66 +3,88 @@
 {% block title %} Result {% endblock %}
 
 {% block head %}
-    <link rel=stylesheet type=text/css href="../static/style.css">
-    <script src="../static/d3.min.js"></script>
-    <script src="../static/table.js"></script>
-    <script src="../static/charts.js"></script>
-    <script src="../static/interactivity.js"></script>
-    <script src="../static/d3-tip.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="../static/d3.min.js"></script>
+    <script src="../static/d3-tip.js"></script>
+    <link rel=stylesheet type=text/css href="../static/style.css">
+    <script src="../static/table.js"></script>
+    <script src="../static/charts.js"></script>
+    <link rel="stylesheet" href="../static/jquery.mCustomScrollbar.css" />
+    <script src="../static/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="../static/interactivity.js"></script>
     <script src="../static/d3.layout.cloud.js"></script>
+    <script src="https://d3js.org/d3-hierarchy.v0.3.min.js"></script>
 {% endblock %}
 
-{% block content %}
-<div class="help">
-    ?
-    <p id="help" class="help-drop"></p>
-</div>
-<h1 style="padding-bottom:0;">Results for: {{ repo_name }}</h1>
-<h2 style="padding-top:0;"> 
-    From
+{% block nav_injection %}
+    <li class="dropdown" role="navigation">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Analyses<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <form method="POST" enctype="multipart/form-data">
+                <li><button class="btn btn-link" type="submit" name="analysis" value="metrics">Metrics</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="hotspots">Hotspots</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="coupling">Coupling</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="age">Age</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="cloud">Word Cloud</button></li>
+            </form>
+          </ul>
+    </li>
+{% endblock %}
+
+
+{% block page_title %}
+<p class="nav navbar-text visible-md-block visible-lg-block">Repository: {{ repo_name }}
+    from
         {% if from_date != '' %} {{ from_date }}
-        {% else %} Beginning 
+        {% else %} beginning 
         {% endif %}
     to
         {% if to_date != '' %} {{ to_date }}
-        {% else %} Present 
+        {% else %} present
         {% endif %}
-</h2>
-    <div class ="tooltipinfo">
-        <h2></h2>
-        <table>
-            <tr id="type">
-                <th></th>
-                <td></td>
-            </tr>
-            <tr id="value">
-                <th></th>
-                <td></td>
-            </tr>
-        </table>
+</p>
+{% endblock %}
+
+
+{% block content %}
+<center>
+<h3 class="visible-sm-block visible-xs-block">Repository: {{ repo_name }}
+    from
+        {% if from_date != '' %} {{ from_date }}
+        {% else %} beginning 
+        {% endif %}
+    to
+        {% if to_date != '' %} {{ to_date }}
+        {% else %} present 
+        {% endif %}
+</h3>
+</div>
+    <form id="filter" style="display: none"></form>
+
+</center>
+
+<center>
+<div id="container">
+    <div id="wrapper">
+        <div id="graph"></div>
     </div>
-<center>
-    <div id="header"></div>
-    <div id="wrapper" style="display: block;"></div>
-    <button id="hideLabels" style="display: none;"> Hide labels</button>
-</center>
+    <!-- <button id="hideLabels" style="display: none;"> Hide labels</button> -->
 
-<center>
-<form id="filter"></form>
-</center>
-
-<center>
-<div class="col-md-10" style="float:none">
+<div id="table" class="col-md-10">
     <table class="table">
         <thead id="thead"></thead>
         <tbody id="tbody"></tbody>
     </table>
 </div>
-</center>
 
+</div>
+</center>
+<style>
+
+</style>
 <script>
     var keys = {{keys|safe}}; // an array of the column headers in original order
     var json_data = {{data|safe}}; // an array of objects for row of data
@@ -72,10 +94,29 @@
     // declared outside so that value can be changed/accessed by other functions
     var filtered_data = json_data; // to be used as a filtered copy of json_data
     var filter_obj = [];
+    var entity_list = {};
+    var temp_elem;
 
     var chosen_key = "default"; // the default key represents all columns
     if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
         // if the analysis is metrics, then revs column should be default
+
+    if (analysis_type == 'coupling') {
+        entity_list = {}
+
+        json_data.forEach(function(d) {
+            if (!entity_list[d.entity]) {
+                entity_list[d.entity] = d.degree;
+            }
+            if (!entity_list[d.coupled]) {
+                entity_list[d.coupled] = d.degree;
+            }
+        })
+
+        // for (var key in entity_list) {
+        //     console.log(key);
+        // }
+    }
 
     var help = document.getElementById("help");
     var help_desc = {
@@ -87,24 +128,18 @@
     };
     help.innerHTML = help_desc[analysis_type]; // text that will appear when ? is hovered
 
+
     // the script waits until all the html content has been loaded
     // before calling the function
     // to create the default table/graph
     document.addEventListener("DOMContentLoaded", function(event) {
-        // adjustSlider();
-        if (analysis_type == "cloud") {
-            createGraph(json_data);
-        }
-
+        if (analysis_type == "cloud") { createGraph(json_data); }
         else {
-            d3.select("#wrapper").style("width","1000px").style("overflow-x","auto");
-            d3.select("#hideLabels").style("display","block");
+            configureDivs();
             createTable(json_data);
-            createSlider(); 
+            createSlider();
         }
-
-
     })
-
+    
 </script>
 {% endblock %}

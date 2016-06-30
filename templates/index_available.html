@@ -3,7 +3,6 @@
 <html>
 <head>
   {% block head %}
-    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
     <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
@@ -16,11 +15,6 @@
 </head>
 
 <body>
-
-<style> body{
-  font-family: 'Roboto Slab', serif;
-}
-</style>
 
 <form method="POST" enctype="multipart/form-data">
 

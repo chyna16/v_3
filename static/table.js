@@ -45,24 +45,48 @@ function setTableRows(row, elem_id, data) {
     return row;
 }
 
+function setListRows(row, elem_id, data) {
+    var col = document.createElement(elem_id);
+    if (elem_id == 'td') { 
+        col.onclick = function() { chooseModule(this); }
+        col.setAttribute('value', data);
+        col.style.cursor = 'pointer';
+        col.style.width = '100%';
+        col.setAttribute('class', 'list-column')
+    }
+    col.appendChild(document.createTextNode(data));
+    row.appendChild(col);
+    return row;
+}
 
+// called upon document load & by filterData
 // parses data from dictionary using keys and fills each row.col with values
 function createTable(data) {
+    d3.select("#table").style("display","block");
     d3.select("#thead").html("");
     d3.select("#tbody").html("");
         // table is emptied before being filled
 
     var table_head = document.getElementById("thead");
-    var h_row = document.createElement("tr");
-    table_head.appendChild(setTableRows(h_row, "th", keys)) 
-        // adds a completed row to table head
-
     var table_body = document.getElementById("tbody");
-    data.forEach(function(d) { 
-        // for each row within the data, a row is created and added to body
-        var b_row = document.createElement("tr");
-        table_body.appendChild(setTableRows(b_row, "td", d));
-    })
-
+    var h_row = document.createElement("tr");
+    if (analysis_type == 'coupling') {
+        table_head.appendChild(setListRows(h_row, "th", "Choose a module:"));
+        for (var key in entity_list) {
+            var b_row = document.createElement("tr");
+            table_body.appendChild(setListRows(b_row, "td", key));
+        }
+    }
+    else {
+        table_head.appendChild(setTableRows(h_row, "th", keys)) 
+            // adds a completed row to table head
+        data.forEach(function(d) { 
+            // for each row within the data, a row is created and added to body
+            var b_row = document.createElement("tr");
+            table_body.appendChild(setTableRows(b_row, "td", d));
+        })
+    }
+    
+    // if (analysis_type == 'coupling') { configureDivs(); }
     createGraph(data);
 }

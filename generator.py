@@ -12,20 +12,20 @@ from nltk.stem.lancaster import LancasterStemmer
 from datetime import datetime
 
 
-# switches working directory to passed in address
-# NOTE: might be pointless; get rid of it?
-def change_directory(path):
-	if not os.getcwd() == path:
-		os.chdir(path)
-	else: return False
+# called by refresh_repos
+# returns a list of directories within the specified path
+def get_list_of_dirs(path):
+	dir_list = [ item for item in os.listdir(path) 
+			if os.path.isdir(os.path.join(path, item)) ]
+		# list of cloned repositories
+
+	return dir_list
 
 
 # called by visualizer at timed intervals
 # updates already cloned repositories
 def refresh_repos(repo_dir):
-	repo_list = [ item for item in os.listdir(repo_dir) 
-			if os.path.isdir(os.path.join(repo_dir, item)) ]
-		# list of cloned repositories
+	repo_list = get_list_of_dirs(repo_dir)
 
 	os.chdir(repo_dir) # cd out of v3 dir into repo dir
 	print(os.getcwd())
@@ -52,18 +52,21 @@ def set_path(path):
 	print("-" * 60)
 
 
+# called by visualizer index view
+# parses the user given clone url and password; returns combined http url
+def get_clone_command(clone_url, password):
+	char = clone_url.index('@') # string index of '@'
+	command = clone_url[:char] + ':' + password + clone_url[char:]
+		# add password to the string right before the '@'
+	return command
+
+
+# called by visualizer index view
 # calls git clone command with an appropriate url
 def clone_repo(clone_url):
 	os.chdir(settings.repo_dir)
 	os.system('git clone ' + clone_url)
 	os.chdir(settings.v3_dir)
-
-
-# parses the user given clone url and password; returns combined http url
-def get_clone_command(clone_url, password):
-	char = clone_url.index('@')
-	command = clone_url[:char] + ':' + password + clone_url[char:]
-	return command
 
 
 # called by index view to generate message
@@ -95,32 +98,6 @@ def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
 		+ repo_name + "_" + from_date + "_" + to_date 
 		+ ".log -c git -a " + analysis_type + " > " 
 		+ analysis_name + "_" + repo_name + ".csv")
-
-
-# NOTE: currently NOT IN USE
-# called by manage_csv_folder/select_analysis
-# currently only calls run_codemaat on all analyses
-def generate_data(address, repo_name, from_date, to_date):
-	print("Creating csv files from generated log...")
-	print("Creating repository summary...")
-	run_codemaat('summary', 'summary', repo_name, date_after, date_before)
-	# # Reports an overview of mined data from git's log file
-	print("Creating organizational metrics...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	# # Reports the number of authors/revisions made per module
-	print("Creating coupling history...")
-	run_codemaat('coupling', 'coupling', repo_name, date_after, date_before)
-	# # Reports correlation of files that often commit together
-	# # degree = % of commits where the two files were changed in the same commit
-	print("Creating code age summary...")
-	run_codemaat('entity-churn', 'age', repo_name, date_after, date_before)
-	# # Reports how long ago the last change was made in measurement of months
-	print("Creating repository hotspots...")
-	run_codemaat('authors', 'metrics', repo_name, date_after, date_before)
-	os.system("cloc ../../" + repo_name + " --unix --by-file --csv --quiet --report-file=lines_" + repo_name + ".csv")
-	merge_csv(repo_name)
-	print("Done. Check your current folder for your files.")
-	print("-" * 60)
 
 
 # reports an overview of mined data from git's log file
@@ -160,28 +137,6 @@ def generate_data_hotspots(repo_name, from_date, to_date):
 		+ "lines_" + repo_name + ".csv")
 	merge_csv(repo_name)
 	print("-" * 60)
-
-
-# NOTE: currently NOT IN USE
-# called by manage_csv_folder
-# reads user selection of analyses & calls helper functions that run codemaat 
-# FIX: currently does not read multiple selections
-def select_analysis(address, repo, from_date, to_date):
-	if request.form['checkbox'] == "summary":
-		print ("button: " + request.form['checkbox'])
-		generate_data_summary(address, repo, from_date, to_date)
-	if request.form['checkbox'] == "hotspots":
-		print ("button: " + request.form['checkbox'])
-		generate_data_hotspots(address, repo, from_date, to_date)
-	if request.form['checkbox'] == "metrics":
-		print ("button: " + request.form['checkbox'])
-		generate_data_metrics(address, repo, from_date, to_date)
-	if request.form['checkbox'] == "coupling":
-		print ("button: " + request.form['checkbox'])
-		generate_data_coupling(address, repo, from_date, to_date)
-	if request.form['checkbox'] == "0":
-		print("none selected- button: " + request.form['checkbox'])
-		generate_data(address, repo, from_date, to_date)
 
 
 # called by manage_csv_folder
@@ -340,83 +295,101 @@ def ignore_module(entity):
 # returns a list of the headers, and a dictionary of each row
 def parse_csv(uploaded_file):
 	reader = csv.reader(uploaded_file)
-	data_dict = []
-	key_array = []
+	data_dict = [] # list of dictionaries, one dict for each row
+	key_list = [] # list of row headers / keys
 
 	for i, row in enumerate(reader):
-		row_array = {}
+		temp_dict = {}
 		if i == 0:
-			key_array = row
+			# if first row of file, fill key_list with headers
+			key_list = row
 		else:
+			# fill temp dict with each value in the row
 			if not ignore_module(row[0]):
-				for j, key in enumerate(key_array):
-					row_array[key] = row[j]
-				data_dict.append(row_array)
+				for j, key in enumerate(key_list):
+					temp_dict[key] = row[j] # pair respective header w/ value
+				data_dict.append(temp_dict)
 
-	return (data_dict, key_array)
+	return (data_dict, key_list)
 
 
-# called by generate_data/generate_data_hotspot
-# collects num of revs from metrics.csv & lines from lines.csv
-# merges them together with respective modules into hotspots.csv
-def merge_csv(repo_name):
-	lines_array = []
-	merge_array = []
+# called by merge_csv
+# parses module names/lines of code from lines.csv
+def get_lines_list(repo_name):
+	lines_list = [] # list of dictionaries, one dict for each row
 
 	try:
 		with open("lines_" + repo_name + ".csv") as lines_file:
 			lines_reader = csv.DictReader(lines_file)
 			for row in lines_reader:
-				lines_array.append({'entity': row['filename'], 
+				# create a dict with name and num lines; add it to list
+				lines_list.append({'entity': row['filename'], 
 									'lines': row['code']})
+	except IOError:
+		print("file not found")
 
-		with open("metrics_" + repo_name + ".csv", "rt") as rev_file:
-			revs_reader = csv.DictReader(rev_file)
+	return lines_list
+
+
+# called by merge_csv
+# combines data from lines.csv with metrics.csv
+def get_merge_list(repo_name, lines_list):
+	merge_list = [] # list of dictionaries, one dict for each row
+
+	try:
+		with open("metrics_" + repo_name + ".csv", "rt") as revs_file:
+			revs_reader = csv.DictReader(revs_file)
 			for row in revs_reader:
-				for module in lines_array:
+				# for each entity in metrics, look for it in lines_list
+				for module in lines_list:
 					if row['entity'] in module['entity']:
-						merge_array.append({
+						# add new dict w/ name, revs, and lines to merge_list
+						merge_list.append({
 							'entity': row['entity'], 
 							'n-revs': row['n-revs'], 
 							'lines': module['lines']})
+	except IOError:
+		print("file not found")
 
+	return merge_list
+
+
+# called by generate_data/generate_data_hotspot
+# retrieves combined data from lines.csv & merge.csv
+# writes combined data into new hotspots.csv file
+def merge_csv(repo_name):
+	lines_list = get_lines_list(repo_name)
+	merge_list = get_merge_list(repo_name, lines_list)
+
+	try:
 		with open("hotspots_" + repo_name + ".csv", "wt") as hotspot_file:
-			fieldnames = ['entity', 'n-revs', 'lines']
-			writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames) 
-			writer.writeheader()
-			for row in merge_array:
+			# create a new csv file
+			fieldnames = ['entity', 'n-revs', 'lines'] # use these as headers
+			writer = csv.DictWriter(hotspot_file, fieldnames=fieldnames)
+			writer.writeheader() # write fieldnames into header row
+			for row in merge_list:
+				# write each row from merge_list into new csv file
 				writer.writerow(row)
 	except IOError:
 		print("file not found")
 		return
 
 
-# called by get_word_frequency
-# filters out non-significant words
+#define stop_words as a global for efficiency
 stop_words = get_stop_words('en')
-def redundant_word(word):
-	if word in stop_words:
-		return True
-	elif word in ('1)', '2)', '3)', '4)', '5)'):
-		return True
-	elif word[:4] in ('http'):
-		return True
-	elif word[:1] in ('1', '2', '3', '4', '5', '=', '~', '*', '&', 
-					  ':', '+', '|', '*/', '/**', '(', ')', 'l', '-'):
-		return True
-	else: 
-		return False
+def parse_word(stem, word, word_list):
+	if word in stop_words or len(word) == 1:
+		return
 
-
-# called by get_word_frequency
-# iterates over word_list & checks for given word within each dict
-def word_exists(stem, word, word_list):
-	for word_pair in word_list:
-		if stem == word_pair['stem']:
-			if len(word) < len(word_pair['text']):
-				word_pair['text'] = word
-			word_pair['freq'] += 1
-			return True
+	entry = [x for x in word_list if x["stem"] == stem]
+	if entry:
+		entry[0]['freq'] += 1
+		if word in entry[0]['text']:
+			entry[0]['text'][word] += 1
+		else:
+			entry[0]['text'][word] = 1
+	else:
+		word_list.append({'stem': stem, 'text':{ word: 1 } , 'freq': 1 })
 
 
 # aqcuires list of all words from commit messages
@@ -429,21 +402,20 @@ def get_word_frequency(logfile):
 	stemmer = LancasterStemmer()
 
 	for word in log_list:
-		# Remove unwanted leading and trailing characters
+		# remove unwanted leading and trailing characters
 		word = word.strip("\"'/;:?{}[]!.,()").lower()
-		#Stemming
-		stem = stemmer.stem(word)
+		stem = stemmer.stem(word) # stemming
 
-		if redundant_word(word) or len(word) == 1 : continue
-		else:
-			if not word_list:
-				word_list.append({'stem': stem, 'text': word, 'freq': 1})
-			else:
-				if word_exists(stem, word, word_list): continue
-				else:
-					word_list.append({'stem': stem, 'text': word, 'freq': 1})
-	# Return the top 50 ocurring words
-	return(sorted(word_list, key = lambda x: x['freq'], reverse = True)[:100])
+		parse_word(stem,word,word_list)
+
+	# Sort and return selection of the word_list
+	sorted_word_list = sorted(word_list, key = lambda x: x['freq'], reverse = True)
+
+	textFreqPairs = []
+	for word in sorted_word_list[:100]:
+		key = max(word['text'].keys(), key=(lambda k: word['text'][k]))
+		textFreqPairs.append({'text': key, 'freq': word['freq']})
+	return textFreqPairs
 
 
 def monthdelta(date, delta):
@@ -458,8 +430,5 @@ for m in range(-2, -1):
 previous_date=((month_string)[:10])
 
 # if __name__ == '__main__':
-	# print (folder_list)
-	# print (project_list)
-	# print(project_key)
-	# get_word_frequency()
+	# print("hello")
 

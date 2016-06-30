@@ -54,12 +54,15 @@ function setFilter() {
     });
 
     filterData();
+    toggleFilter();
 }
+
 
 function resetFilter() {
     filter_obj = [];
 
     filterData();
+    toggleFilter();
 }
 
 
@@ -69,6 +72,7 @@ function createSlider() {
     keys.forEach(function(key) {
         if (key != keys[0] && key != 'coupled') {
             var slider = d3.select("#filter");
+            // slider.style('display', 'hidden')
             var p = slider.append("center").append("p");
             p.append("label")
                 .attr('for', key + '-amount')
@@ -121,6 +125,14 @@ function createSlider() {
 function chooseModule(elem) {
     var chosen_module = elem.getAttribute('value');
 
+    elem.style.backgroundColor = '#6d9af6';
+    elem.style.color = 'white';
+    if (temp_elem) {
+        temp_elem.style.backgroundColor = '';
+        temp_elem.style.color = '';
+    }
+    temp_elem = elem;
+
     coupled_data = [];
 
     filtered_data.forEach(function(d) {
@@ -138,8 +150,10 @@ function chooseModule(elem) {
         }
     });
 
-    if (chosen_key == "average-revs") { createPie(coupled_data, chosen_module); }
+    if (chosen_key == "average-revs") { createPieChart(coupled_data, chosen_module); }
     else { createMeter(coupled_data, chosen_module); } // meter chart is created
+
+    // $("#wrapper").mCustomScrollbar("update");
 }
 
 
@@ -160,4 +174,41 @@ function toggleGraph(elem) {
     if (display_status == "none") 
         { document.getElementById(elem.getAttribute('name')).style.display = "block"; }
     else { document.getElementById(elem.getAttribute('name')).style.display = "none"; }
+}
+
+
+// called by DOMContentLoaded event
+// modifies styling of divs depending on type of analysis
+function configureDivs() {
+    d3.select("#wrapper")
+        .attr('class', 'mCustomScrollbar')
+        .attr('data-mcs-theme', 'dark');
+
+    d3.select("#table")
+        .attr('class', 'mCustomScrollbar')
+        .attr('data-mcs-theme', 'dark');
+
+    if (analysis_type == 'coupling') {
+        d3.select("#container")
+            .style('display', 'flex');
+
+        d3.select("#wrapper")
+            .style('width', '50%')
+            .style('height', '400px');
+
+        d3.select("#table")
+            .style('height', '400px')
+            .style('margin-top', '0');
+    }
+
+    else {
+        d3.select("#table")
+            .style('width', '1000px');
+
+        d3.select("#wrapper")
+            .style('width', '1000px')
+            .style('overflow-x', 'auto');
+
+        $("#wrapper").mCustomScrollbar({ axis: 'x' })
+    }
 }

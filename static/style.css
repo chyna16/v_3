@@ -1,6 +1,107 @@
+/* Navbar Styling */
+
+.navbar-fixed-top{
+  width:100% !important;
+  min-width: 768px;
+  /*left:-15px;*/
+}
+
+.navbar-inner{
+  background-color: #1a1a1a;
+  font-style: Helvetica, sans-serif;
+  border: none;
+  background-image: none;
+  min-height:70px;
+}
+
+.navbar-fixed-top,
+.navbar-fixed-bottom {
+  position: absolute;
+  z-index: 1030;
+  margin-bottom: 0;
+  height: 70px;
+}
+
+.navbar-inverse .container .navbar-text{
+  text-align: left;
+  color: #fff;
+  font-size: 16px;
+  margin: 24px 15px;
+  max-width: 40%;
+}
+
+.navbar-fixed-bottom .navbar-inner {
+  border-width: 1px 0 0;
+}
+
+.navbar-fixed-top .navbar-inner,
+.navbar-fixed-bottom .navbar-inner {
+  padding-right: 0;
+  padding-left: 0;
+  -webkit-border-radius: 0;
+     -moz-border-radius: 0;
+          border-radius: 0;
+}
+
+.navbar-static-top .container,
+.navbar-fixed-top .container,
+.navbar-fixed-bottom .container {
+  width: 80%;
+  height: 70px;
+}
+
+.navbar-fixed-top {
+  top: 0;
+  background-color:#1B1B1B;
+}
+
+.navbar-fixed-top .navbar-inner,
+.navbar-static-top .navbar-inner {
+  -webkit-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
+     -moz-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav > li[role="navigation"] > a  {
+  border-radius: 0px;
+  font-size: 16px;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  color: #fff;
+}
+
+.nav > li[role="navigation"] > a:hover,
+.nav > li[role="navigation"] > a:focus,
+.nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
+  background: #404040;
+}
+
+.navbar-inverse .btn-link {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+    width: 100%;
+    text-align: left;
+  }
+
+.navbar-inverse .btn-link:hover{
+  color: #262626;
+  text-decoration: none;
+  background-color: #f5f5f5
+}
+
+/* End Navbar Styling */
+
 body {
-  font-family: 'Roboto Slab', serif;
   font-size: 20px;
+  padding-top: 70px;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .center {
@@ -10,23 +111,78 @@ body {
 }
 
 /* RESULT PAGE */
-
-.tooltipinfo {
-  background: silver;
-  height: 200px;
-  border: 1px solid #dedede;
-  display: none;
-  position: absolute;
-  max-width: 400px;
-  overflow: hidden;
+#content-div {
+  margin: 20px 50px;
 }
 
+#container {
+  /*display: flex;*/
+}
+
+#wrapper {
+  /*width: 1000px;*/
+  /*height: 400px;*/
+  /*overflow-x: auto;*/
+  overflow-y: auto;
+  order: 2;
+  float: none;
+}
+
+#filter {
+  font-size: 15px;
+  width: 300px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+#table {
+  float: none;
+  order: 1;
+  font-size: .7em;
+  height: 400px;
+  overflow-y: auto;
+  margin-top: 40px;
+  display: none;
+  margin-bottom: 50px;
+}
+
+.list-column {
+  /*border-radius: 0 10px 10px 0;*/
+}
+
+/* BubblePack Styles */
+.node {
+  cursor: pointer;
+}
+
+.node--middle:hover {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node--leaf:hover {
+  stroke: blue;
+  stroke-width: 1.5px;
+}
+
+.label {
+  font: 11px Arial, sans-serif;
+  font-weight: bold;
+  text-anchor: middle;
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+}
+
+.label,
+.node--root,
+.node--leaf {
+  pointer-events: none;
+}
+
+/* help Dropdown */
+
+
+/*  Depricated
 .help {
-  font-size: 50px; 
-  color: #337ab7; 
-  float: left; 
-  margin-left: 65px; 
-  position: absolute;
   cursor: pointer;
 }
 
@@ -42,8 +198,16 @@ body {
   border: 2px solid black;
 }
 
-.help:hover .help-drop {
+.help:active .help-drop {
   display: block;
+}
+*/
+
+.help-div {
+  padding: 10px;
+  width: 100% !important;
+  background: #1ab7ea;
+  display: none;
 }
 
 /* tooltip styling from: https://github.com/Caged/d3-tip */
@@ -86,8 +250,11 @@ body {
  */
 table {
   width: 1000px;
+  /*height: 400px;*/
+  overflow-y: auto;
 }
 thead, tbody, tr, td, th { display: block; }
+
 tr:after {
     content: ' ';
     display: block;
@@ -98,7 +265,7 @@ thead th {
     height: 30px;
 }
 tbody {
-    height: 225px;
+    /*height: 225px;*/
     overflow-y: auto;
 }
 tbody td, thead th {
@@ -121,13 +288,6 @@ tbody td, thead th {
 }
 /* end axes styling */
 
-form#filter {
-  font-size: 15px;
-  width: 300px;
-  margin-top: 25px;
-  margin-bottom: 25px;
-}
-
 label.filter-key {
   margin-right: 10px;
   margin-bottom: 0;
@@ -144,6 +304,15 @@ input.range {
 div.ui-slider {
   margin-top: 0;
   margin-bottom: 10px;
+}
+
+div.ui-slider-horizontal {
+  height: .5em;
+}
+
+.ui-slider .ui-slider-handle {
+  width: .9em;
+  height: .9em;
 }
 
 /* END RESULT PAGE */
