@@ -62,10 +62,10 @@ def index():
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			clone_cmd = generator.get_clone_command(clone_url, password) 
+			# clone_cmd = generator.get_clone_command(clone_url, password) 
 				# get the appropriate url-password combined git command
-			generator.clone_repo(clone_cmd) # go to repo_dir and clone the repo
-			message = generator.get_status_message(clone_cmd)
+			generator.clone_repo(clone_url) # go to repo_dir and clone the repo
+			message = generator.get_status_message(clone_url)
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
 		# elif request.form['submit_button'] == "3":
@@ -79,7 +79,7 @@ def index():
 def index_repo():
 	# retrieves passed in query from index view
 	project_name = request.args.get('project_name') 
-	project_repos = stash_api.get_project_repos(project_name) 
+	project_repos = stash_api.get_project_repos(project_name, 'http') 
 		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
@@ -90,6 +90,7 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
+		# clone_cmd = generator.get_clone_command(repo_url, settings.password)
 		generator.clone_repo(repo_url) # go to repo_dir and clone the repo
 		generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
 		return redirect(url_for('dashboard',

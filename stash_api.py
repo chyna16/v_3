@@ -47,7 +47,7 @@ def get_details():
 
 # called by index_repo view
 # makes new api call using selected project to get list of repos
-def get_project_repos(selected_key):
+def get_project_repos(selected_key, url_type):
 	url_repos = ('https://stash.mtvi.com/rest/api/1.0/projects/'
 		+ selected_key 
 		+ '/repos')
@@ -61,7 +61,7 @@ def get_project_repos(selected_key):
 		for repo_name in json_repos['values']:
 			# traverses api data to find name and clone url for each repo
 			for link in repo_name['links']['clone']:
-				if link['name'] == "ssh":
+				if link['name'] == url_type:
 					repo_list.append(
 						{'name': repo_name['name'], 'url': link['href']}
 					)	# creates a list of dictionaries for every repo

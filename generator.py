@@ -115,7 +115,10 @@ def get_clone_command(clone_url, password):
 # calls git clone command with an appropriate url
 def clone_repo(clone_url):
 	os.chdir(settings.repo_dir)
-	os.system('git clone ' + clone_url)
+	if 'http' in clone_url:
+		clone_cmd = get_clone_command(clone_url, settings.password)
+	else: clone_cmd = clone_url
+	os.system('git clone ' + clone_cmd)
 	os.chdir(settings.v3_dir)
 
 
