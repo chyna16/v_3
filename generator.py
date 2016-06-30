@@ -246,7 +246,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 		split_path = file.split(repo + '/')
 		os.system('python ' + settings.v3_dir + '/git_complexity_trend.py --start ' 
 			+ first_id + ' --end ' + last_id + ' --file ' + split_path[1] + ' > ' 
-			+ settings.csv_dir  + folder_name + '/complexity_' 
+			+ settings.csv_dir  + folder_name + '/complex_' 
 			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv')
 
 	os.chdir(settings.csv_dir + folder_name)
@@ -256,9 +256,9 @@ def create_complexity_files(repo, address, from_date, to_date):
 
 	#appends csv files together into one	
 	os.system('csvcat --skip-headers ' + (' '.join(csv_list)) + ' > ' 
-		+ repo + '_complexity.csv')
+		+ 'complexity_' + repo + '.csv')
 
-	for file in glob.glob("complexity_*"):
+	for file in glob.glob("complex_*"):
 		os.remove(file)
 
 
