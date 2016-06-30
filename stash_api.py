@@ -73,7 +73,7 @@ def get_project_repos(selected_key):
 
 # called by clone_repos in generator
 # makes api call to search for a repo by name
-def get_repo_url(repo_name):
+def get_repo_url(repo_name, url_type):
 	repo_call = ('https://stash.mtvi.com/rest/api/1.0/repos?name=' + repo_name)
 	repo_info = requests.get(
 		url=repo_call, auth=(settings.username, settings.password)
@@ -84,7 +84,7 @@ def get_repo_url(repo_name):
 
 	try:
 		for link in json_repo['values'][0]['links']['clone']:
-			if link['name'] == "ssh":
+			if link['name'] == url_type:
 				repo_url = link['href']
 	except KeyError:
 		print("api call failed")
