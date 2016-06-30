@@ -224,12 +224,19 @@ def create_complexity_files(repo, address, from_date, to_date):
 	#files to be ignored
 	file_list = []
 	csv_list = []
+	git_list = []
 
 	# get the log id of the first and latest commit in the repository
 	first_id = subprocess.getoutput('git --git-dir ' + address 
 		+ ' log --pretty=format:"%h" --no-patch --reverse | head -1')
 	last_id = subprocess.getoutput('git --git-dir ' + address 
 		+ ' log --pretty=format:"%h" --no-patch | head -1')
+	values = subprocess.getoutput('git --git-dir ' + address 
+		+ ' log --pretty=format:"%h %ad" --date=short --no-patch --reverse')
+
+	for item in values.splitlines():
+		git_list.append(item)
+
 
 	for root, dirs, files in os.walk(settings.repo_dir + repo):
 		if '.git' in dirs:
@@ -244,10 +251,11 @@ def create_complexity_files(repo, address, from_date, to_date):
 	#runs complexity analysis script on each file in the repository
 	for file in file_list:
 		split_path = file.split(repo + '/')
-		os.system('python ' + settings.v3_dir + '/git_complexity_trend.py --start ' 
+		os.system('python2 ' + settings.v3_dir + '/git_complexity_trend.py --start ' 
 			+ first_id + ' --end ' + last_id + ' --file ' + split_path[1] + ' > ' 
 			+ settings.csv_dir  + folder_name + '/complex_' 
 			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv')
+
 
 	os.chdir(settings.csv_dir + folder_name)
 
@@ -256,7 +264,24 @@ def create_complexity_files(repo, address, from_date, to_date):
 
 	#appends csv files together into one	
 	os.system('csvcat --skip-headers ' + (' '.join(csv_list)) + ' > ' 
-		+ 'complexity_' + repo + '.csv')
+		+ 'complex_' + repo + '.csv')
+
+	with open('complex_' + repo + '.csv','r') as csvinput:
+		 with open('complexity_' + repo + '.csv', 'w') as csvoutput:
+			 csv_write = csv.writer(csvoutput, lineterminator='\n')
+			 csv_reader = csv.reader(csvinput)
+
+			 all = []
+			 row = next(csv_reader)
+			 row.append('date')
+			 all.append(row)
+
+			 for row in csv_reader:
+				 for item in git_list:
+					 if item.split(' ')[0] in row:
+						 row.append(item.split(' ')[1])
+						 all.append(row)
+			 csv_write.writerows(all)
 
 	for file in glob.glob("complex_*"):
 		os.remove(file)
@@ -429,8 +454,8 @@ def monthdelta(date, delta):
 	return date.replace(day=d,month=m, year=y)
 
 for m in range(-2, -1):
-	time = str (monthdelta(datetime.now(), m))
-previous_date=((time)[:10])
+	month_string = str (monthdelta(datetime.now(), m))
+previous_date=((month_string)[:10])
 
 # if __name__ == '__main__':
 	# print (folder_list)
