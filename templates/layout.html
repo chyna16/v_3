@@ -4,7 +4,6 @@
 <head>
     <title>V3 - {% block title %} {% endblock %}</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
     <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
     {% block head %} {% endblock %}
@@ -22,21 +21,22 @@ $(document).ready(function(){
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
         <nav>
-            <ul class="nav nav-pills pull-right">
+            <ul class="nav nav-pills" style="position: absolute; right: 10%; display: inline;">
                 <li role="navigation"><a href="/">Home</a></li>
                 <li role="navigation" class="help-pill"><a href="#">Help</a></li>
                 {% block nav_injection %} {% endblock %}
-                <li role="navigation"><a href="#">Contact</a></li>
             </ul>
         </nav>
-        <a class="navbar-brand" href="/"> <img alt="V3" src="/static/images/V3_logo.svg" height="40px"></a>
+        <a class="navbar-brand navbar-left" href="/"> <img alt="V3" src="/static/images/V3_logo.svg" height="40px"></a>
         {% block page_title %} {% endblock %}
     </div>
 </nav>
 
-<div class="help-div">This is the help div<p id="help" class="help-drop"></p></div>
+<div class="help-div"><p id="help" class="help-drop"></p></div>
 
+<div id="content-div">
 {% block content %} {% endblock %}
+</div>
 
 </body>
 </html>

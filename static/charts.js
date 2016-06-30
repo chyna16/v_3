@@ -583,9 +583,9 @@ function createPieChart(data, module) {
 function createWordcloud(data) {
     var commit_words = data;
     var padding = 30;
-    var height = window.innerHeight - 2*padding,
-        width = window.innerWidth - 2*padding;
-
+    var height = window.innerHeight - 2*padding - 20 - 70,
+        width = d3.select("#content-div").node().getBoundingClientRect().width - 2*padding;
+    console.log(d3.select("#content-div").node().getBoundingClientRect().width);
     var font = d3.scale.linear()
                     .range([20, 150])
                     .domain(d3.extent(commit_words, function(d) {
