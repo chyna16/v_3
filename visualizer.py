@@ -53,6 +53,11 @@ def index():
 			return redirect(url_for('dashboard',
 				repo_name=repo_name, from_date=from_date, to_date=to_date)) 	
 				# redirects to dashboard view which opens input.html
+		elif request.form['submit_button'] == "4":
+			# if refresh button was click from 'Available Repositories'
+			repo_name = request.form['repo_name'].split('|')[0]
+			generator.refresh_single_repo(repo_dir, repo_name)
+			return redirect(url_for('index'))
 		elif request.form['submit_button'] == "1":
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']

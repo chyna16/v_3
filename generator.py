@@ -47,6 +47,22 @@ def add_datetime(repo):
 	os.chdir('..') # got back to repo_dir
 
 
+def refresh_single_repo(repo_dir, repo):
+	clone_url = stash_api.get_repo_url(repo, 'http') 
+			# api call to get http clone url
+	clone_cmd = get_clone_command(clone_url, settings.password)
+		# currently using http clone url w/ password
+	if not clone_url: return # if function returned false
+	else:
+		# if the repository is not v3
+		shutil.rmtree(repo) # delete repository
+		os.system('git clone ' + clone_cmd) # re-clone the repository
+			# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
+		add_datetime(repo) # make timetag file
+		manage_csv_folder(repo_dir, repo, '', '') # re-run codemaat
+		os.chdir(repo_dir) # go back to repo directory
+
+
 # called by visualizer at timed intervals
 # updates already cloned repositories
 def refresh_repos(repo_dir):
@@ -56,20 +72,22 @@ def refresh_repos(repo_dir):
 	print(os.getcwd())
 
 	for repo in repo_list:
-		clone_url = stash_api.get_repo_url(repo, 'http') 
-			# api call to get http clone url
-		clone_cmd = get_clone_command(clone_url, settings.password)
-			# currently using http clone url w/ password
-		if not clone_url: continue # if function returned false
 		if repo == 'v3': continue
-		else:
-			# if the repository is not v3
-			shutil.rmtree(repo) # delete repository
-			os.system('git clone ' + clone_cmd) # re-clone the repository
-				# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
-			add_datetime(repo) # make timetag file
-			manage_csv_folder(repo_dir, repo, '', '') # re-run codemaat
-			os.chdir(repo_dir) # go back to repo directory
+		refresh_single_repo(repo_dir, repo)
+		# clone_url = stash_api.get_repo_url(repo, 'http') 
+		# 	# api call to get http clone url
+		# clone_cmd = get_clone_command(clone_url, settings.password)
+		# 	# currently using http clone url w/ password
+		# if not clone_url: continue # if function returned false
+		# if repo == 'v3': continue
+		# else:
+		# 	# if the repository is not v3
+		# 	shutil.rmtree(repo) # delete repository
+		# 	os.system('git clone ' + clone_cmd) # re-clone the repository
+		# 		# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
+		# 	add_datetime(repo) # make timetag file
+		# 	manage_csv_folder(repo_dir, repo, '', '') # re-run codemaat
+		# 	os.chdir(repo_dir) # go back to repo directory
 
 	os.chdir(settings.v3_dir) # cd back into v3
 	print(os.getcwd())
