@@ -24,11 +24,11 @@
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Analyses<span class="caret"></span></a>
           <ul class="dropdown-menu">
             <form method="POST" enctype="multipart/form-data">
-                <li><button type="submit" name="analysis" value="metrics">Metrics</button></li>
-                <li><button type="submit" name="analysis" value="hotspots">Hotspots</button></li>
-                <li><button type="submit" name="analysis" value="coupling">Coupling</button></li>
-                <li><button type="submit" name="analysis" value="age">Age</button></li>
-                <li><button type="submit" name="analysis" value="cloud">Word Cloud</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="metrics">Metrics</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="hotspots">Hotspots</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="coupling">Coupling</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="age">Age</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="cloud">Word Cloud</button></li>
             </form>
           </ul>
     </li>
@@ -36,25 +36,34 @@
 
 
 {% block page_title %}
-<text class="navbar-text">Repository: {{ repo_name }}</text>
-<text class="navbar-text"> 
-    From
+<p class="nav navbar-text visible-md-block visible-lg-block">Repository: {{ repo_name }}
+    from
         {% if from_date != '' %} {{ from_date }}
-        {% else %} Beginning 
+        {% else %} beginning 
         {% endif %}
     to
         {% if to_date != '' %} {{ to_date }}
-        {% else %} Present 
+        {% else %} present
         {% endif %}
-</text>
+</p>
 {% endblock %}
 
 
 {% block content %}
 <center>
-    <div id="header"></div>
+<h3 class="visible-sm-block visible-xs-block">Repository: {{ repo_name }}
+    from
+        {% if from_date != '' %} {{ from_date }}
+        {% else %} beginning 
+        {% endif %}
+    to
+        {% if to_date != '' %} {{ to_date }}
+        {% else %} present 
+        {% endif %}
+</h3>
+</div>
     <form id="filter" style="display: none"></form>
-    <div id="title"></div>
+
 </center>
 
 <center>

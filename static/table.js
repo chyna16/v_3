@@ -62,6 +62,7 @@ function setListRows(row, elem_id, data) {
 // called upon document load & by filterData
 // parses data from dictionary using keys and fills each row.col with values
 function createTable(data) {
+    d3.select("#table").style("display","block");
     d3.select("#thead").html("");
     d3.select("#tbody").html("");
         // table is emptied before being filled
