@@ -18,8 +18,10 @@ list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
+# clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
+# 				 'cron', day='0-6', hour='0')
 clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
-				 'cron', day='0-6', hour='0')
+					'interval', hours=2)
 	# lambda passes function as parameter
 	# cron is a configuration for time schedules
 	# configured for everyday of week (0-6), at 12 AM (0)
@@ -31,17 +33,19 @@ clone_sched.start()
 @app.route('/index', methods=['GET', 'POST'])
 def index():
 	if request.method == 'GET':
-		repo_list = [ item for item in os.listdir(repo_dir) 
-			if os.path.isdir(os.path.join(repo_dir, item)) ]
+		# repo_list = [ item for item in os.listdir(repo_dir) 
+		# 	if os.path.isdir(os.path.join(repo_dir, item)) ]
 			# a list of all currently cloned repositories
 			# refreshes everytime user chooses a new repository
+		repo_list = generator.get_repo_list(repo_dir, generator.get_list_of_dirs(repo_dir))
+		# repo_list = ['test1 jskal', 'test2 2016-05-25 06:18:38']
 		return render_template('index.html', 
 			repo_list=repo_list, list_of_projects=list_of_projects, 
 			previous_date=generator.previous_date)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "2":
 			# if a selection was made from 'Available Repositories'
-			repo_name = request.form['repo_name']
+			repo_name = request.form['repo_name'].split('|')[0]
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
 			generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
