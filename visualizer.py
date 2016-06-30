@@ -18,8 +18,10 @@ list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
+# clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
+# 				 'cron', day='0-6', hour='0')
 clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
-				 'cron', day='0-6', hour='0')
+					'interval', hours=2)
 	# lambda passes function as parameter
 	# cron is a configuration for time schedules
 	# configured for everyday of week (0-6), at 12 AM (0)
@@ -31,17 +33,19 @@ clone_sched.start()
 @app.route('/index', methods=['GET', 'POST'])
 def index():
 	if request.method == 'GET':
-		repo_list = [ item for item in os.listdir(repo_dir) 
-			if os.path.isdir(os.path.join(repo_dir, item)) ]
+		# repo_list = [ item for item in os.listdir(repo_dir) 
+		# 	if os.path.isdir(os.path.join(repo_dir, item)) ]
 			# a list of all currently cloned repositories
 			# refreshes everytime user chooses a new repository
+		repo_list = generator.get_repo_list(repo_dir, generator.get_list_of_dirs(repo_dir))
+		# repo_list = ['test1 jskal', 'test2 2016-05-25 06:18:38']
 		return render_template('index.html', 
 			repo_list=repo_list, list_of_projects=list_of_projects, 
 			previous_date=generator.previous_date)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "available":
 			# if a selection was made from 'Available Repositories'
-			repo_name = request.form['repo_name']
+			repo_name = request.form['repo_name'].split('|')[0]
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
 			generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
@@ -49,14 +53,19 @@ def index():
 			return redirect(url_for('dashboard',
 				repo_name=repo_name, from_date=from_date, to_date=to_date)) 	
 				# redirects to dashboard view which opens input.html
+		elif request.form['submit_button'] == "refresh":
+			# if refresh button was click from 'Available Repositories'
+			repo_name = request.form['repo_name'].split('|')[0]
+			generator.refresh_single_repo(repo_dir, repo_name)
+			return redirect(url_for('index'))
 		elif request.form['submit_button'] == "clone":
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			clone_cmd = generator.get_clone_command(clone_url, password) 
+			# clone_cmd = generator.get_clone_command(clone_url, password) 
 				# get the appropriate url-password combined git command
-			generator.clone_repo(clone_cmd) # go to repo_dir and clone the repo
-			message = generator.get_status_message(clone_cmd)
+			generator.clone_repo(clone_url) # go to repo_dir and clone the repo
+			message = generator.get_status_message(clone_url)
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
 		else:
@@ -69,7 +78,7 @@ def index():
 def index_repo():
 	# retrieves passed in query from index view
 	project_name = request.args.get('project_name') 
-	project_repos = stash_api.get_project_repos(project_name) 
+	project_repos = stash_api.get_project_repos(project_name, 'http') 
 		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
@@ -80,6 +89,7 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
+		# clone_cmd = generator.get_clone_command(repo_url, settings.password)
 		generator.clone_repo(repo_url) # go to repo_dir and clone the repo
 		generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
 		return redirect(url_for('dashboard',

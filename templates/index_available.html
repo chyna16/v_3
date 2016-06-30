@@ -20,6 +20,7 @@
 
 <h2>Select a Repository:</h2>
 <br>
+<center><div id="timetag"></div></center>
 <p>
   <div class="col-lg-6">
     <div class="form-group">
@@ -49,8 +50,9 @@
   <div class="list">
     <div class="btn-group btn-group-vertical" data-toggle="buttons">
     {% for repo in repo_list %}
-      <label class="btn active">
-        <input type="radio" name="repo_name" value={{repo}} autocomplete="off">{{repo}}
+      <label class="btn active" onclick="displayTime(this)">
+        <input type="radio" name="repo_name" value="{{repo}}" autocomplete="off">
+        {{repo.split('|')[0]}}
       </label>
     {% endfor %}
     </div>
@@ -66,6 +68,9 @@
 <br>
 <center>
   <p>
+    <button type="submit" name="submit_button" value="refresh" id="nextbutton" class="btn btn-lg btn-primary" role="button">
+      Refresh
+    </button>
     <button type="submit" name="submit_button" value="available" id="nextbutton" class="btn btn-lg btn-primary" role="button">
       Next
     </button>
@@ -103,6 +108,11 @@
 </div> -->
 
 <script>
+function displayTime(elem) {
+  var timetag = elem.children[0].value.split('|');
+  $("#timetag").text(timetag[0] + ' updated as of: ' + timetag[1]);
+}
+
 function test_name() {
   var value = $('input[name=repo_name]:checked').val();
   alert(value);
