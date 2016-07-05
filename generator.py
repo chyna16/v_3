@@ -119,6 +119,8 @@ def clone_repo(clone_url):
 		clone_cmd = get_clone_command(clone_url, settings.password)
 	else: clone_cmd = clone_url
 	os.system('git clone ' + clone_cmd)
+	# repo_name = clone_url.split('/').pop().split('.')[0]
+	add_datetime(clone_url.split('/').pop().split('.')[0])
 	os.chdir(settings.v3_dir)
 
 
@@ -241,22 +243,21 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		# if that csv folder doesn't exist
 		print("creating folder: " + csv_path)
 		os.system("mkdir " + csv_path)
+		os.chdir(csv_path) # switch to csv folder of chosen repo
+		print("2: " + os.getcwd())
+		repo_address = repo_dir + repo + '/.git'
+		create_log(repo, from_date, to_date, repo_address) # make logfile
+
+		generate_data_summary(repo, from_date, to_date)
+		generate_data_metrics(repo, from_date, to_date)
+		generate_data_coupling(repo, from_date, to_date)
+		generate_data_age(repo, from_date, to_date)
+		generate_data_hotspots(repo, from_date, to_date)
+
+		os.chdir(settings.v3_dir)
 	else: print("folder exists: " + csv_path)
-
-	repo_address = repo_dir + repo + '/.git'
-
-	os.chdir(csv_path) # switch to csv folder of chosen repo
-	print("2: " + os.getcwd())
-	create_log(repo, from_date, to_date, repo_address) # make logfile
-	# generate_data_summary(repo, from_date, to_date)
-	# generate_data_metrics(repo, from_date, to_date)
-	# generate_data_coupling(repo, from_date, to_date)
-	# generate_data_age(repo, from_date, to_date)
-	# generate_data_hotspots(repo, from_date, to_date)
-
-	os.chdir(settings.v3_dir)
 	print("3: " + os.getcwd())
-	flash('Analysis complete.')
+	# flash('Analysis complete.')
 	# return csv_path
 
 
