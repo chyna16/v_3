@@ -486,7 +486,6 @@ def get_prev_date():
 
 	return previous_date
 
-previous_date=((month_string)[:10])
 # if __name__ == '__main__':
 	# print("hello")
 
