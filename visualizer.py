@@ -91,7 +91,7 @@ def index_repo():
 			previous_date=previous_date, current_date=current_date)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name'].split('|')
-		repo_name = selected_repo[0]
+		repo_name = selected_repo[0].lower()
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
