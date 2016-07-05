@@ -40,8 +40,8 @@ def index():
 			# refreshes everytime user chooses a new repository
 		repo_list = generator.get_repo_list(repo_dir, 
 						generator.get_list_of_dirs(repo_dir))
-		previous_date = generator.get_prev_date()
-		current_date = str(datetime.now()).split('.')[0].split(' ')[0]
+		# previous_date = generator.get_prev_date()
+		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
 		return render_template('index.html', 
 			repo_list=repo_list, list_of_projects=list_of_projects)
 	elif request.method == 'POST':
