@@ -19,11 +19,6 @@ function createGraph(data) {
     }
 }
 
-function toggleFilter() {
-    var filter = document.getElementById("filter");
-    filter.style.display = filter.style.display == 'none' ? 'block' : 'none';
-}
-
 function createHeader(color) {
     var header = d3.select("#header").html('').append("p");
 

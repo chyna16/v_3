@@ -109,16 +109,12 @@
 
         json_data.forEach(function(d) {
             if (!entity_list[d.entity]) {
-                entity_list[d.entity] = d.degree;
+                entity_list[d.entity] = {degree: d.degree, 'average-revs': d['average-revs']};
             }
             if (!entity_list[d.coupled]) {
-                entity_list[d.coupled] = d.degree;
+                entity_list[d.coupled] = {degree: d.degree, 'average-revs': d['average-revs']};
             }
         })
-
-        // for (var key in entity_list) {
-        //     console.log(key);
-        // }
     }
 
     var help = document.getElementById("help");
@@ -139,8 +135,9 @@
         if (analysis_type == "cloud") { createGraph(json_data); }
         else {
             configureDivs();
-            createTable(json_data);
             createSlider();
+            if (analysis_type == 'coupling') createTable(entity_list);
+            else createTable(json_data);
         }
     })
     

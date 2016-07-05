@@ -67,12 +67,13 @@ function createTable(data) {
     d3.select("#tbody").html("");
         // table is emptied before being filled
 
+
     var table_head = document.getElementById("thead");
     var table_body = document.getElementById("tbody");
     var h_row = document.createElement("tr");
     if (analysis_type == 'coupling') {
         table_head.appendChild(setListRows(h_row, "th", "Choose a module:"));
-        for (var key in entity_list) {
+        for (var key in data) {
             var b_row = document.createElement("tr");
             table_body.appendChild(setListRows(b_row, "td", key));
         }
@@ -87,6 +88,5 @@ function createTable(data) {
         })
     }
     
-    // if (analysis_type == 'coupling') { configureDivs(); }
     createGraph(data);
 }
