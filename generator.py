@@ -467,6 +467,8 @@ def get_word_frequency(logfile):
 	return textFreqPairs
 
 
+# retrieved from: http://stackoverflow.com/questions/3424899/
+# 	+ whats-the-simplest-way-to-subtract-a-month-from-a-date-in-python
 def monthdelta(date, delta):
 	m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
 	if not m: m = 12
@@ -474,9 +476,12 @@ def monthdelta(date, delta):
 		29 if y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
 	return date.replace(day=d,month=m, year=y)
 
-for m in range(-2, -1):
-	month_string = str (monthdelta(datetime.now(), m))
-previous_date=((month_string)[:10])
+def get_prev_date():
+	for m in range(-2, -1):
+		month_string = str(monthdelta(datetime.now(), m))
+	previous_date = ((month_string)[:10])
+
+	return previous_date
 
 # if __name__ == '__main__':
 	# print("hello")
