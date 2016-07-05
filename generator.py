@@ -119,6 +119,8 @@ def clone_repo(clone_url):
 		clone_cmd = get_clone_command(clone_url, settings.password)
 	else: clone_cmd = clone_url
 	os.system('git clone ' + clone_cmd)
+	# repo_name = clone_url.split('/').pop().split('.')[0]
+	add_datetime(clone_url.split('/').pop().split('.')[0])
 	os.chdir(settings.v3_dir)
 
 
@@ -303,7 +305,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 # handles switching between directories
 # calls helper functions that handle folder, logfile, & codemaat
 def manage_csv_folder(repo_dir, repo, from_date, to_date):
-	# print("1: " + os.getcwd())
+	print("1: " + os.getcwd())
 	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
 	csv_path = settings.csv_dir + folder_name
 		# csv_path is the complete address of csv folder for chosen repo
@@ -312,28 +314,22 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		# if that csv folder doesn't exist
 		print("creating folder: " + csv_path)
 		os.system("mkdir " + csv_path)
-	else:
-		print("folder exists: " + csv_path)
+		os.chdir(csv_path) # switch to csv folder of chosen repo
+		print("2: " + os.getcwd())
+		repo_address = repo_dir + repo + '/.git'
+		create_log(repo, from_date, to_date, repo_address) # make logfile
 
-	repo_address = repo_dir + repo + '/.git'
+		generate_data_summary(repo, from_date, to_date)
+		generate_data_metrics(repo, from_date, to_date)
+		generate_data_coupling(repo, from_date, to_date)
+		generate_data_age(repo, from_date, to_date)
+		generate_data_hotspots(repo, from_date, to_date)
 
-	os.chdir(csv_path) # switch to csv folder of chosen repo
-	# print("2: " + os.getcwd())
-	create_log(repo, from_date, to_date, repo_address) # make logfile
-
-	#create_complexity_files(repo, repo_address, from_date, to_date)
-	os.chdir(csv_path)
-
-	generate_data_summary(repo, from_date, to_date)
-	generate_data_metrics(repo, from_date, to_date)
-	generate_data_coupling(repo, from_date, to_date)
-	generate_data_age(repo, from_date, to_date)
-	generate_data_hotspots(repo, from_date, to_date)
-
-	os.chdir(settings.v3_dir)
-	# print("3: " + os.getcwd())
-	flash('Analysis complete.')
-	return csv_path
+		os.chdir(settings.v3_dir)
+	else: print("folder exists: " + csv_path)
+	print("3: " + os.getcwd())
+	# flash('Analysis complete.')
+	# return csv_path
 
 
 # called by parse_csv
@@ -474,6 +470,8 @@ def get_word_frequency(logfile):
 	return textFreqPairs
 
 
+# retrieved from: http://stackoverflow.com/questions/3424899/
+# 	+ whats-the-simplest-way-to-subtract-a-month-from-a-date-in-python
 def monthdelta(date, delta):
 	m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
 	if not m: m = 12
@@ -481,11 +479,13 @@ def monthdelta(date, delta):
 		29 if y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
 	return date.replace(day=d,month=m, year=y)
 
+def get_prev_date():
+	for m in range(-2, -1):
+		month_string = str(monthdelta(datetime.now(), m))
+	previous_date = ((month_string)[:10])
 
-for m in range(-2, -1):
-	month_string = str (monthdelta(datetime.now(), m))
+	return previous_date
 
-previous_date=((month_string)[:10])
 # if __name__ == '__main__':
 	# print("hello")
 

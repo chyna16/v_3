@@ -19,11 +19,6 @@ function createGraph(data) {
     }
 }
 
-function toggleFilter() {
-    var filter = document.getElementById("filter");
-    filter.style.display = filter.style.display == 'none' ? 'block' : 'none';
-}
-
 function createHeader(color) {
     var header = d3.select("#header").html('').append("p");
 
@@ -70,8 +65,8 @@ function createBarGraph(data) {
 
     var w;
     var width;
-    var margin = {top: 20, left: 70, right: 20, bottom: 130};
-    var height = 450 - margin.top - margin.bottom;
+    var margin = {top: 20, left: 70, right: 20, bottom: 150};
+    var height = 480 - margin.top - margin.bottom;
     var color = d3.scale.ordinal().domain(keys).range(["#6d9af6", "#52465f"]);  
     
     if (data.length > 50) { w = data.length * 20; }
@@ -96,14 +91,15 @@ function createBarGraph(data) {
     data.forEach(function(d, i) {
         delete d.values; // delete data from previous renditions of the graph
         d.values = labels.map(function(label) {
-            return {type: label, value: +d[label]};
+            return {entity: d.entity, type: label, value: +d[label]};
         });
     });
 
     // the scale for each category of bars (each row)
     var x0Scale = d3.scale.ordinal()
-        .domain(data.map(function(d) { return d.entity.split('/').pop(); })) 
+        // .domain(data.map(function(d) { return d.entity.split('/').pop(); })) 
             // array of entities
+        .domain(d3.range(0, data.length))
         .rangeBands([0, width], .05);
         
     // the scale for individual bars within each category
@@ -121,6 +117,7 @@ function createBarGraph(data) {
     // axes decleration using d3 axis() method
     var xAxis = d3.svg.axis()
         .scale(x0Scale)
+        .tickFormat(function(d, i) { return data[i].entity.split('/').pop(); })
         .orient("bottom");
     var yAxis = d3.svg.axis()
         .scale(yScale)
@@ -130,7 +127,10 @@ function createBarGraph(data) {
       .attr('class', 'd3-tip')
       .offset([-10, 0])
       .html(function(d) {
-        return "<strong>" + d.type + ":</strong> <span style='color:red'>" + d.value + "</span>";
+        return "<center>" + "<strong>" 
+            + d.entity + "<br>"
+            + d.type + ":</strong> <span style='color:red'>" 
+            + d.value + "</span>" + "</center>";
       });
 
     // appending the general svg as well as the div for the graph itself
@@ -148,8 +148,8 @@ function createBarGraph(data) {
             .enter()
         .append("g")
             .attr("class", "category")
-            .attr("transform", function(d) { 
-                return "translate(" + x0Scale(d.entity.split('/').pop()) + ",0)"; 
+            .attr("transform", function(d, i) { 
+                return "translate(" + x0Scale(i) + ",0)"; 
             });
 
     // bars appended to each category depending on how many columns are being displayed

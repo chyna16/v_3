@@ -6,6 +6,7 @@ import generator # our script
 import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
 
 app = Flask(__name__)
 secret = os.urandom(24)
@@ -37,11 +38,13 @@ def index():
 		# 	if os.path.isdir(os.path.join(repo_dir, item)) ]
 			# a list of all currently cloned repositories
 			# refreshes everytime user chooses a new repository
-		repo_list = generator.get_repo_list(repo_dir, generator.get_list_of_dirs(repo_dir))
-		# repo_list = ['test1 jskal', 'test2 2016-05-25 06:18:38']
+		repo_list = generator.get_repo_list(repo_dir, 
+						generator.get_list_of_dirs(repo_dir))
+		previous_date = generator.get_prev_date()
+		current_date = str(datetime.now()).split('.')[0].split(' ')[0]
 		return render_template('index.html', 
 			repo_list=repo_list, list_of_projects=list_of_projects, 
-			previous_date=generator.previous_date)
+			previous_date=previous_date, current_date=current_date)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "available":
 			# if a selection was made from 'Available Repositories'
@@ -127,7 +130,8 @@ def result():
 		if analysis == "cloud":
 			with open(csv_dir + "csv_files_" + repo_name + "_" 
 				+ from_date + "_" + to_date + "/"
-				+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date+ ".log", 'rt') as log_file:
+				+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
+				+ ".log", 'rt') as log_file:
 				word_list = generator.get_word_frequency(log_file)
 			return render_template('result.html', 
 				data=word_list, repo_name=json.dumps(repo_name), 

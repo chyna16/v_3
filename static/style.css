@@ -212,6 +212,8 @@ body {
 
 /* tooltip styling from: https://github.com/Caged/d3-tip */
 .d3-tip {
+  width: 300px;
+  word-break: break-word;
   line-height: 1;
   font-weight: bold;
   padding: 12px;
@@ -330,16 +332,14 @@ div.ui-slider-horizontal {
 
 
 h1 {
-  padding: 20px;
+
 }
 h2 {
   text-align: center;
-  padding: 20px;
 }
 
 h3 {
   text-align: center;
-  padding: 20px;
 }
 
 label.btn span {
