@@ -18,17 +18,37 @@ function applyFilter(filter_value) {
 // called by setFilter
 // reassigns filtered_data to new set of data meeting filter requirements
 function filterData() {
-    filtered_data = []; // filtered_data is emptied, and updated below
+    if (analysis_type == 'coupling') {
+        filtered_entity_list = {}
 
-    json_data.forEach(function(d) {
-        // if the current value of the filter column chosen by the user
-        // falls within the filter range, then the loop skips the following
-        if (applyFilter(d) != true) {
-            filtered_data.push(d);
+        for (key in entity_list) {
+            console.log(entity_list[key]);
+            if (applyFilter(entity_list[key]) != true) {
+                filtered_entity_list[key] = entity_list[key];
+            }
         }
-    });
+        console.log(filtered_entity_list);
+        createTable(filtered_entity_list);
+    }
+    else {
+        filtered_data = []; // filtered_data is emptied, and updated below
 
-    createTable(filtered_data);
+        json_data.forEach(function(d) {
+            // if the current value of the filter column chosen by the user
+            // falls within the filter range, then the loop skips the following
+            if (applyFilter(d) != true) {
+                filtered_data.push(d);
+            }
+        });
+
+        createTable(filtered_data);
+    }
+}
+
+
+function toggleFilter() {
+    var filter = document.getElementById("filter");
+    filter.style.display = filter.style.display == 'none' ? 'block' : 'none';
 }
 
 
@@ -47,7 +67,6 @@ function setFilter() {
             var values = $("#" + d + "-slider-range").slider( "option", "values" );
             var from_value = values[0];
             var to_value = values[1];
-            console.log(from_value);
             if (from_value > to_value) { return; }
             filter_obj.push({key: filter_key, value: {from: from_value, to: to_value}})
         }
@@ -162,6 +181,7 @@ function chooseModule(elem) {
 // calls function to create graph using the selected data
 function chooseColumn(elem) {
     chosen_key = elem.getAttribute('value'); // chosen_key is reassigned
+    
     createGraph(filtered_data); 
 }
 
@@ -181,11 +201,11 @@ function toggleGraph(elem) {
 // modifies styling of divs depending on type of analysis
 function configureDivs() {
     d3.select("#wrapper")
-        .attr('class', 'mCustomScrollbar')
+        // .attr('class', 'mCustomScrollbar')
         .attr('data-mcs-theme', 'dark');
 
     d3.select("#table")
-        .attr('class', 'mCustomScrollbar')
+        // .attr('class', 'mCustomScrollbar')
         .attr('data-mcs-theme', 'dark');
 
     if (analysis_type == 'coupling') {
@@ -209,6 +229,6 @@ function configureDivs() {
             .style('width', '1000px')
             .style('overflow-x', 'auto');
 
-        $("#wrapper").mCustomScrollbar({ axis: 'x' })
+        // $("#wrapper").mCustomScrollbar({ axis: 'x' })
     }
 }

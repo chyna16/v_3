@@ -6,6 +6,7 @@ import generator # our script
 import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
 
 app = Flask(__name__)
 secret = os.urandom(24)
@@ -37,8 +38,10 @@ def index():
 		# 	if os.path.isdir(os.path.join(repo_dir, item)) ]
 			# a list of all currently cloned repositories
 			# refreshes everytime user chooses a new repository
-		repo_list = generator.get_repo_list(repo_dir, generator.get_list_of_dirs(repo_dir))
-		# repo_list = ['test1 jskal', 'test2 2016-05-25 06:18:38']
+		repo_list = generator.get_repo_list(repo_dir, 
+						generator.get_list_of_dirs(repo_dir))
+		previous_date = generator.get_prev_date()
+		current_date = str(datetime.now()).split('.')[0].split(' ')[0]
 		return render_template('index.html', 
 			repo_list=repo_list, list_of_projects=list_of_projects)
 	elif request.method == 'POST':
@@ -81,10 +84,13 @@ def index_repo():
 		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
-		return render_template('index_repo.html', repo_list=project_repos)
+		previous_date = generator.get_prev_date()
+		current_date = str(datetime.now()).split('.')[0].split(' ')[0]
+		return render_template('index_repo.html', repo_list=project_repos,
+			previous_date=previous_date, current_date=current_date)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name'].split('|')
-		repo_name = selected_repo[0]
+		repo_name = selected_repo[0].lower()
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
@@ -124,26 +130,33 @@ def result():
 	
 	if request.method == 'GET':
 		if analysis == "cloud":
-			with open(csv_dir + "csv_files_" + repo_name + "_" 
-				+ from_date + "_" + to_date + "/"
-				+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date+ ".log", 'rt') as log_file:
-				word_list = generator.get_word_frequency(log_file)
-			return render_template('result.html', 
-				data=word_list, repo_name=json.dumps(repo_name), 
-				analysis=json.dumps(analysis),
-				from_date=from_date, to_date=to_date, keys=[])
-		else:
-			with open(csv_dir + "csv_files_" + repo_name + "_" 
-				+ from_date + "_" + to_date + "/"
-				+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
-				# opens respective csv file for chosen analysis
-				data, keys = generator.parse_csv(csv_file) 
-					# calls parse_csv to retrieve data from csv file
+			try:
+				with open(csv_dir + "csv_files_" + repo_name + "_" 
+					+ from_date + "_" + to_date + "/"
+					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
+					+ ".log", 'rt') as log_file:
+					word_list = generator.get_word_frequency(log_file)
 				return render_template('result.html', 
-					repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
-					from_date=from_date, to_date=to_date, 
-					data=json.dumps(data), keys=json.dumps(keys))
-						# json.dumps() converts data into a string format
+					data=word_list, repo_name=json.dumps(repo_name), 
+					analysis=json.dumps(analysis),
+					from_date=from_date, to_date=to_date, keys=[])
+			except (FileNotFoundError, IOError): 
+				return render_template('404.html')
+		else:
+			try:
+				with open(csv_dir + "csv_files_" + repo_name + "_" 
+					+ from_date + "_" + to_date + "/"
+					+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
+					# opens respective csv file for chosen analysis
+					data, keys = generator.parse_csv(csv_file) 
+						# calls parse_csv to retrieve data from csv file
+					return render_template('result.html', 
+						repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
+						from_date=from_date, to_date=to_date, 
+						data=json.dumps(data), keys=json.dumps(keys))
+							# json.dumps() converts data into a string format
+			except (FileNotFoundError, IOError): 
+				return render_template('404.html')
 	elif request.method == 'POST':
 		analysis = request.form['analysis']
 		return redirect(url_for('result',

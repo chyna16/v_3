@@ -27,14 +27,14 @@
 <p>
   <div class="col-lg-6">
     <div class="form-group">
-      <label for="formInput">Enter Start Date:</label>
-      <p>(Default: Repo creation date)</p>
-      <input type="date" class="form-control" id="formInput" name="from_date">
+      <label for="formInput">Enter Start Date: (yyyy-mm-dd)</label>
+      <p>(Default: 2 months ago)</p>
+      <input type="date" class="form-control" id="formInput" name="from_date" value="{{previous_date}}">
     </div>
-    <div class="form-group">
-      <label for="formInput">Enter End Date:</label>
-      <p>(Default: Present)</p>
-      <input type="date" class="form-control" id="formInput" name="to_date">
+    <div class="form-group">  
+      <label for="formInput">Enter End Date: (yyyy-mm-dd)</label>
+      <p>(Default: Today)</p>
+      <input type="date" class="form-control" id="formInput" name="to_date" value="{{current_date}}">
     </div>
   <!-- <p>
     <label>Select a repository type:</label>
