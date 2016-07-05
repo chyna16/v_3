@@ -103,7 +103,10 @@
 <script>
 function displayTime(elem) {
   var timetag = elem.children[0].value.split('|');
-  $("#timetag").text(timetag[0] + ' updated as of: ' + timetag[1]);
+  if (timetag[1] != undefined) {
+    $("#timetag").text(timetag[0] + ' updated as of: ' + timetag[1]);
+
+  }
 }
 
 function test_name() {
