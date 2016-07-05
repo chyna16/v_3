@@ -356,6 +356,7 @@ def parse_csv(uploaded_file):
 			# if first row of file, fill key_list with headers
 			key_list = row
 		else:
+			if not row: break # if codemaat produces blank csv's
 			# fill temp dict with each value in the row
 			if not ignore_module(row[0]):
 				for j, key in enumerate(key_list):
