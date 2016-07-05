@@ -127,7 +127,7 @@ def result():
 		if analysis == "cloud":
 			with open(csv_dir + "csv_files_" + repo_name + "_" 
 				+ from_date + "_" + to_date + "/"
-				+ analysis + "_" + repo_name + "__.log", 'rt') as log_file:
+				+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date+ ".log", 'rt') as log_file:
 				word_list = generator.get_word_frequency(log_file)
 			return render_template('result.html', 
 				data=word_list, repo_name=json.dumps(repo_name), 

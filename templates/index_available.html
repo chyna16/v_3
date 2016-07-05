@@ -3,13 +3,6 @@
 <html>
 <head>
   {% block head %}
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> 
-    <script src="{{ url_for('static', filename='jquery-1.12.3.js') }}"></script>
-    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
-    <!-- <script src = "../static/jquery-1.12.3.js"></script> -->
-    <!-- <link rel=stylesheet type=text/css href='../static/bootstrap.css'> -->
-    <!-- <script src = "../static/bootstrap.js"></script>  -->
     <title>{% block title %}{% endblock %} - V3</title>
   {% endblock %}
 </head>
@@ -110,7 +103,10 @@
 <script>
 function displayTime(elem) {
   var timetag = elem.children[0].value.split('|');
-  $("#timetag").text(timetag[0] + ' updated as of: ' + timetag[1]);
+  if (timetag[1] != undefined) {
+    $("#timetag").text(timetag[0] + ' updated as of: ' + timetag[1]);
+
+  }
 }
 
 function test_name() {

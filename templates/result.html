@@ -3,20 +3,19 @@
 {% block title %} Result {% endblock %}
 
 {% block head %}
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <link rel="stylesheet" href="../static/jquery-ui.min.css">
+    <link rel="stylesheet" href="../static/jquery.mCustomScrollbar.css" />
+
+    <script src="../static/jquery-ui.min.js"></script>
+    <script src="../static/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="../static/d3.min.js"></script>
     <script src="../static/d3-tip.js"></script>
-    <link rel=stylesheet type=text/css href="../static/style.css">
+    <script src="../static/d3.layout.cloud.js"></script>
+    <script src="../static/d3-hierarchy.v0.3.min.js"></script>
+
+    <script src="../static/interactivity.js"></script>
     <script src="../static/table.js"></script>
     <script src="../static/charts.js"></script>
-    <link rel="stylesheet" href="../static/jquery.mCustomScrollbar.css" />
-    <script src="../static/jquery.mCustomScrollbar.concat.min.js"></script>
-    <script src="../static/interactivity.js"></script>
-    <script src="../static/d3.layout.cloud.js"></script>
-    <script src="https://d3js.org/d3-hierarchy.v0.3.min.js"></script>
 {% endblock %}
 
 {% block nav_injection %}
