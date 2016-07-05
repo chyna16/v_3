@@ -444,6 +444,15 @@ function createMeter(data, module) {
 
     var color = d3.scale.category20();
 
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) {
+            return "<center>" + "<strong>" + d.coupled 
+                + "<br>" + "avg revisions: </strong> " + "<span style='color:red'>" 
+                + d['average-revs'] + "</span>" + "</center>";
+            });
+
     // scale for location of meter
     // var xScale = d3.scale.linear()
     //     .domain([0, data.length - 1])
@@ -477,7 +486,10 @@ function createMeter(data, module) {
         .append("g")
             .attr('transform', function(d, i) { 
                 return 'translate(' + (width / 2) + ',' +  (20 + (i * 200 + r)) + ')';
-            });
+            })
+        .call(tip)
+        .on('mouseover', function(d) { tip.show(d); })
+        .on('mouseout', function(d) { tip.hide(d); });
 
     // an svg path is appended to each meter div
     // path settings determined by arc & applied using 'd' attribute
@@ -523,8 +535,9 @@ function createPieChart(data, module) {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function(d) {
-            return "<strong>" + d.data.coupled + "<br>" + "degree: </strong> " 
-                + "<span style='color:red'>" + d.data['degree'] + "% </span>";
+            return "<center>" + "<strong>" + d.data.coupled 
+                + "<br>" + "degree: </strong> " + "<span style='color:red'>" 
+                + d.data['degree'] + "% </span>" + "</center>";
             });
 
     var arc = d3.svg.arc()
