@@ -219,7 +219,7 @@ def create_log(repo_name, from_date, to_date, address):
 	sys_command_cloud += (' > cloud_' 
 		+ repo_name + '_' + from_date + '_' + to_date + '.log')
 	os.system(sys_command) # command line call using the updated string
-	os.system(sys_command_cloud) 
+	os.system(sys_command_cloud)
 	print("Done.")
 	print("-" * 60)
 
@@ -229,9 +229,10 @@ def create_log(repo_name, from_date, to_date, address):
 #requires the 'csvcat' python package
 def create_complexity_files(repo, address, from_date, to_date):
 	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
-	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
-	 '.spec', '.md', '.ignore', '.ttf')
 	#files to be ignored
+	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
+	 '.spec', '.md', '.ignore', '.ttf', '.min')
+
 	file_list = []
 	csv_list = []
 	git_list = []
@@ -241,6 +242,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 		+ ' log --pretty=format:"%h" --no-patch --reverse | head -1')
 	last_id = subprocess.getoutput('git --git-dir ' + address 
 		+ ' log --pretty=format:"%h" --no-patch | head -1')
+	# gets the list of commit IDs and their dates
 	values = subprocess.getoutput('git --git-dir ' + address 
 		+ ' log --pretty=format:"%h %ad" --date=short --no-patch --reverse')
 
@@ -276,6 +278,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 	os.system('csvcat --skip-headers ' + (' '.join(csv_list)) + ' > ' 
 		+ 'complex_' + repo + '.csv')
 
+	#adds date column to csv file
 	with open('complex_' + repo + '.csv','r') as csvinput:
 		 with open('complexity_' + repo + '.csv', 'w') as csvoutput:
 			 csv_write = csv.writer(csvoutput, lineterminator='\n')
@@ -483,6 +486,7 @@ def get_prev_date():
 
 	return previous_date
 
+previous_date=((month_string)[:10])
 # if __name__ == '__main__':
 	# print("hello")
 

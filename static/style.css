@@ -288,6 +288,17 @@ tbody td, thead th {
   font-family: sans-serif;
   font-size: 11px;
 }
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
 /* end axes styling */
 
 label.filter-key {
