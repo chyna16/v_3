@@ -13,7 +13,7 @@ app.secret_key = secret
 
 maat_dir = settings.maat_dir # address of codemaat
 repo_dir = settings.repo_dir # address of cloned repositories
-csv_dir = settings.csv_dir # address of csv fodlers
+csv_dir = settings.csv_dir # address of csv folders
 list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 
@@ -43,7 +43,7 @@ def index():
 			repo_list=repo_list, list_of_projects=list_of_projects, 
 			previous_date=generator.previous_date)
 	elif request.method == 'POST':
-		if request.form['submit_button'] == "2":
+		if request.form['submit_button'] == "available":
 			# if a selection was made from 'Available Repositories'
 			repo_name = request.form['repo_name'].split('|')[0]
 			from_date = request.form['from_date']
@@ -53,12 +53,12 @@ def index():
 			return redirect(url_for('dashboard',
 				repo_name=repo_name, from_date=from_date, to_date=to_date)) 	
 				# redirects to dashboard view which opens input.html
-		elif request.form['submit_button'] == "4":
+		elif request.form['submit_button'] == "refresh":
 			# if refresh button was click from 'Available Repositories'
 			repo_name = request.form['repo_name'].split('|')[0]
 			generator.refresh_single_repo(repo_dir, repo_name)
 			return redirect(url_for('index'))
-		elif request.form['submit_button'] == "1":
+		elif request.form['submit_button'] == "clone":
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
@@ -68,7 +68,6 @@ def index():
 			message = generator.get_status_message(clone_url)
 			flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
-		# elif request.form['submit_button'] == "3":
 		else:
 			# if a selection was made from 'Stash Repositories'
 			project_name = request.form['submit_button']
@@ -128,7 +127,7 @@ def result():
 		if analysis == "cloud":
 			with open(csv_dir + "csv_files_" + repo_name + "_" 
 				+ from_date + "_" + to_date + "/"
-				+ analysis + "_" + repo_name + "__.log", 'rt') as log_file:
+				+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date+ ".log", 'rt') as log_file:
 				word_list = generator.get_word_frequency(log_file)
 			return render_template('result.html', 
 				data=word_list, repo_name=json.dumps(repo_name), 

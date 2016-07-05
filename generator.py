@@ -1,7 +1,7 @@
 import csv
 import os
-import time
 import fnmatch
+import glob
 import subprocess
 from flask import request, flash
 from stop_words import get_stop_words
@@ -157,14 +157,12 @@ def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
 
 # reports an overview of mined data from git's log file
 def generate_data_summary(repo_name, from_date, to_date):
-	# time.sleep(1)
 	print("Creating repository summary...")
 	run_codemaat('summary', 'summary', repo_name, from_date, to_date)
 	print("-" * 60)
 
 # reports the number of authors/revisions made per module
 def generate_data_metrics(repo_name, from_date, to_date):
-	# time.sleep(1)
 	print("Creating organizational metrics...")
 	run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
 		# Reports the number of authors/revisions made per module
@@ -172,14 +170,12 @@ def generate_data_metrics(repo_name, from_date, to_date):
 
 # reports correlation of files that often commit together
 def generate_data_coupling(repo_name, from_date, to_date):
-	# time.sleep(1)
 	print("Creating coupling history...")
 	run_codemaat('coupling', 'coupling', repo_name, from_date, to_date)
 	print("-" * 60)
 
 # reports number of lines added vs deleted over the chosen date range
 def generate_data_age(repo_name, from_date, to_date):
-	# time.sleep(1)
 	print("Creating code age summary")
 	run_codemaat('entity-churn', 'age', repo_name, from_date, to_date)
 	print("-" * 60)
@@ -187,7 +183,6 @@ def generate_data_age(repo_name, from_date, to_date):
 # runs cloc to retrieve number of lines of code
 # merges with metrics data to show hotspots
 def generate_data_hotspots(repo_name, from_date, to_date):
-	# time.sleep(1)
 	print("Creating repository hotspots...")
 	if not os.path.isfile("metrics_" + repo_name + ".csv"):
 		print("Creating metrics...")
@@ -229,6 +224,79 @@ def create_log(repo_name, from_date, to_date, address):
 	print("-" * 60)
 
 
+#obtains complexity history of entire repository, regardless of date selected
+#can take a long time (up to 3 min)when running on large repositories
+#requires the 'csvcat' python package
+def create_complexity_files(repo, address, from_date, to_date):
+	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
+	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
+	 '.spec', '.md', '.ignore', '.ttf')
+	#files to be ignored
+	file_list = []
+	csv_list = []
+	git_list = []
+
+	# get the log id of the first and latest commit in the repository
+	first_id = subprocess.getoutput('git --git-dir ' + address 
+		+ ' log --pretty=format:"%h" --no-patch --reverse | head -1')
+	last_id = subprocess.getoutput('git --git-dir ' + address 
+		+ ' log --pretty=format:"%h" --no-patch | head -1')
+	values = subprocess.getoutput('git --git-dir ' + address 
+		+ ' log --pretty=format:"%h %ad" --date=short --no-patch --reverse')
+
+	for item in values.splitlines():
+		git_list.append(item)
+
+
+	for root, dirs, files in os.walk(settings.repo_dir + repo):
+		if '.git' in dirs:
+			dirs.remove('.git')
+		for file in files:
+			if file.endswith(extensions):
+				continue
+			file_list.append(os.path.join(root, file))
+
+	os.chdir(settings.repo_dir + repo)
+
+	#runs complexity analysis script on each file in the repository
+	for file in file_list:
+		split_path = file.split(repo + '/')
+		os.system('python2 ' + settings.v3_dir + '/git_complexity_trend.py --start ' 
+			+ first_id + ' --end ' + last_id + ' --file ' + split_path[1] + ' > ' 
+			+ settings.csv_dir  + folder_name + '/complex_' 
+			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv')
+
+
+	os.chdir(settings.csv_dir + folder_name)
+
+	for file in glob.glob("*.csv"):
+		csv_list.append(file)
+
+	#appends csv files together into one	
+	os.system('csvcat --skip-headers ' + (' '.join(csv_list)) + ' > ' 
+		+ 'complex_' + repo + '.csv')
+
+	with open('complex_' + repo + '.csv','r') as csvinput:
+		 with open('complexity_' + repo + '.csv', 'w') as csvoutput:
+			 csv_write = csv.writer(csvoutput, lineterminator='\n')
+			 csv_reader = csv.reader(csvinput)
+
+			 all = []
+			 row = next(csv_reader)
+			 row.append('date')
+			 all.append(row)
+
+			 for row in csv_reader:
+				 for item in git_list:
+					 if item.split(' ')[0] in row:
+						 row.append(item.split(' ')[1])
+						 all.append(row)
+			 csv_write.writerows(all)
+
+	for file in glob.glob("complex_*"):
+		os.remove(file)
+
+
 # called by index view
 # sets the address where csv files are/will be located
 # handles switching between directories
@@ -267,7 +335,8 @@ def ignore_module(entity):
 	ignore_list = ['bower.json', '.gitignore', 'README.md']
 		# list to be expanded
 	if entity in ignore_list: return True
-	else: return False
+	else:
+		return False
 
 
 # called by result view
@@ -406,8 +475,8 @@ def monthdelta(date, delta):
 	return date.replace(day=d,month=m, year=y)
 
 for m in range(-2, -1):
-	time = str (monthdelta(datetime.now(), m))
-previous_date=((time)[:10])
+	month_string = str (monthdelta(datetime.now(), m))
+previous_date=((month_string)[:10])
 
 # if __name__ == '__main__':
 	# print("hello")
