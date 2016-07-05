@@ -162,6 +162,7 @@ function chooseModule(elem) {
 // calls function to create graph using the selected data
 function chooseColumn(elem) {
     chosen_key = elem.getAttribute('value'); // chosen_key is reassigned
+    
     createGraph(filtered_data); 
 }
 
@@ -181,11 +182,11 @@ function toggleGraph(elem) {
 // modifies styling of divs depending on type of analysis
 function configureDivs() {
     d3.select("#wrapper")
-        .attr('class', 'mCustomScrollbar')
+        // .attr('class', 'mCustomScrollbar')
         .attr('data-mcs-theme', 'dark');
 
     d3.select("#table")
-        .attr('class', 'mCustomScrollbar')
+        // .attr('class', 'mCustomScrollbar')
         .attr('data-mcs-theme', 'dark');
 
     if (analysis_type == 'coupling') {
@@ -209,6 +210,6 @@ function configureDivs() {
             .style('width', '1000px')
             .style('overflow-x', 'auto');
 
-        $("#wrapper").mCustomScrollbar({ axis: 'x' })
+        // $("#wrapper").mCustomScrollbar({ axis: 'x' })
     }
 }
