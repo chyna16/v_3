@@ -40,8 +40,7 @@ def index():
 		repo_list = generator.get_repo_list(repo_dir, generator.get_list_of_dirs(repo_dir))
 		# repo_list = ['test1 jskal', 'test2 2016-05-25 06:18:38']
 		return render_template('index.html', 
-			repo_list=repo_list, list_of_projects=list_of_projects, 
-			previous_date=generator.previous_date)
+			repo_list=repo_list, list_of_projects=list_of_projects)
 	elif request.method == 'POST':
 		if request.form['submit_button'] == "available":
 			# if a selection was made from 'Available Repositories'
