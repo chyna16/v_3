@@ -19,10 +19,10 @@ list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
-# clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
-# 				 'cron', day='0-6', hour='0')
 clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
-					'interval', hours=2)
+				 'cron', day='0-6', hour='1')
+# clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
+					# 'interval', hours=2)
 	# lambda passes function as parameter
 	# cron is a configuration for time schedules
 	# configured for everyday of week (0-6), at 12 AM (0)

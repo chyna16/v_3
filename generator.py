@@ -21,27 +21,32 @@ def get_list_of_dirs(path):
 
 	return dir_list
 
+def get_commit_dates(repo):
+	first_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
+		+ repo
+		+ '/.git' 
+		+ ' log --pretty=format:"%ad" --no-patch --date=short --reverse | head -1')
+
+	last_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
+		+ repo
+		+ '/.git' 
+		+ ' log --pretty=format:"%ad" --date=short --no-patch | head -1')
+	# for each repo, go into it & get timetag; append name and tag to list
+
+	return (first_date, last_date)
+
 
 def get_repo_list(repo_dir, dir_list):
 	repo_list = []
 	os.chdir(repo_dir) 
 	for repo in dir_list:
 		os.chdir(repo)
-
-		first_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
-			+ repo
-			+ '/.git' 
-			+ ' log --pretty=format:"%ad" --no-patch --date=short --reverse | head -1')
-
-		last_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
-			+ repo
-			+ '/.git' 
-			+ ' log --pretty=format:"%ad" --date=short --no-patch | head -1')
-		# for each repo, go into it & get timetag; append name and tag to list
+		first_date, last_date = get_commit_dates(repo)
 		try:
 			with open('timetag.txt', 'rt') as timetag:
 				current_datetime = timetag.read()
-				repo_list.append(repo + '|' + current_datetime + '|' + first_date + '|' + last_date)
+				repo_list.append(repo + '|' + current_datetime + '|' 
+					+ first_date + '|' + last_date)
 		except IOError:
 			repo_list.append(repo)
 
@@ -70,7 +75,8 @@ def refresh_single_repo(repo_dir, repo):
 		os.system('git clone ' + clone_cmd) # re-clone the repository
 			# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
 		add_datetime(repo) # make timetag file
-		manage_csv_folder(repo_dir, repo, '', '') # re-run codemaat
+		from_date, to_date = get_commit_dates(repo)
+		manage_csv_folder(repo_dir, repo, from_date, to_date) # re-run codemaat
 		os.chdir(repo_dir) # go back to repo directory
 
 
@@ -85,20 +91,6 @@ def refresh_repos(repo_dir):
 	for repo in repo_list:
 		if repo == 'v3': continue
 		refresh_single_repo(repo_dir, repo)
-		# clone_url = stash_api.get_repo_url(repo, 'http') 
-		# 	# api call to get http clone url
-		# clone_cmd = get_clone_command(clone_url, settings.password)
-		# 	# currently using http clone url w/ password
-		# if not clone_url: continue # if function returned false
-		# if repo == 'v3': continue
-		# else:
-		# 	# if the repository is not v3
-		# 	shutil.rmtree(repo) # delete repository
-		# 	os.system('git clone ' + clone_cmd) # re-clone the repository
-		# 		# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
-		# 	add_datetime(repo) # make timetag file
-		# 	manage_csv_folder(repo_dir, repo, '', '') # re-run codemaat
-		# 	os.chdir(repo_dir) # go back to repo directory
 
 	os.chdir(settings.v3_dir) # cd back into v3
 	print(os.getcwd())
