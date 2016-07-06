@@ -84,10 +84,9 @@ def index_repo():
 		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
-		previous_date = generator.get_prev_date()
-		current_date = str(datetime.now()).split('.')[0].split(' ')[0]
-		return render_template('index_repo.html', repo_list=project_repos,
-			previous_date=previous_date, current_date=current_date)
+		# previous_date = generator.get_prev_date()
+		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
+		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name'].split('|')
 		repo_name = selected_repo[0].lower()
