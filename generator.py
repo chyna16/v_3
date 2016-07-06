@@ -21,19 +21,35 @@ def get_list_of_dirs(path):
 
 	return dir_list
 
+def get_commit_dates(repo):
+	first_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
+		+ repo
+		+ '/.git' 
+		+ ' log --pretty=format:"%ad" --no-patch --date=short --reverse | head -1')
+
+	last_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
+		+ repo
+		+ '/.git' 
+		+ ' log --pretty=format:"%ad" --date=short --no-patch | head -1')
+	# for each repo, go into it & get timetag; append name and tag to list
+
+	return (first_date, last_date)
+
 
 def get_repo_list(repo_dir, dir_list):
 	repo_list = []
 	os.chdir(repo_dir) 
 	for repo in dir_list:
 		os.chdir(repo)
-		# for each repo, go into it & get timetag; append name and tag to list
+		first_date, last_date = get_commit_dates(repo)
 		try:
 			with open('timetag.txt', 'rt') as timetag:
 				current_datetime = timetag.read()
-				repo_list.append(repo + '|' + current_datetime)
+				repo_list.append(repo + '|' + current_datetime + '|' 
+					+ first_date + '|' + last_date)
 		except IOError:
 			repo_list.append(repo)
+
 		os.chdir('..') # go back to repo_dir
 
 	return repo_list
@@ -59,7 +75,8 @@ def refresh_single_repo(repo_dir, repo):
 		os.system('git clone ' + clone_cmd) # re-clone the repository
 			# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
 		add_datetime(repo) # make timetag file
-		manage_csv_folder(repo_dir, repo, '', '') # re-run codemaat
+		from_date, to_date = get_commit_dates(repo)
+		manage_csv_folder(repo_dir, repo, from_date, to_date) # re-run codemaat
 		os.chdir(repo_dir) # go back to repo directory
 
 
@@ -74,20 +91,6 @@ def refresh_repos(repo_dir):
 	for repo in repo_list:
 		if repo == 'v3': continue
 		refresh_single_repo(repo_dir, repo)
-		# clone_url = stash_api.get_repo_url(repo, 'http') 
-		# 	# api call to get http clone url
-		# clone_cmd = get_clone_command(clone_url, settings.password)
-		# 	# currently using http clone url w/ password
-		# if not clone_url: continue # if function returned false
-		# if repo == 'v3': continue
-		# else:
-		# 	# if the repository is not v3
-		# 	shutil.rmtree(repo) # delete repository
-		# 	os.system('git clone ' + clone_cmd) # re-clone the repository
-		# 		# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
-		# 	add_datetime(repo) # make timetag file
-		# 	manage_csv_folder(repo_dir, repo, '', '') # re-run codemaat
-		# 	os.chdir(repo_dir) # go back to repo directory
 
 	os.chdir(settings.v3_dir) # cd back into v3
 	print(os.getcwd())
@@ -231,7 +234,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
 	#files to be ignored
 	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
-	 '.spec', '.md', '.ignore', '.ttf', '.min')
+	 '.spec', '.md', '.ignore', '.ttf', '.min', '.css')
 
 	file_list = []
 	csv_list = []
@@ -243,10 +246,10 @@ def create_complexity_files(repo, address, from_date, to_date):
 	last_id = subprocess.getoutput('git --git-dir ' + address 
 		+ ' log --pretty=format:"%h" --no-patch | head -1')
 	# gets the list of commit IDs and their dates
-	values = subprocess.getoutput('git --git-dir ' + address 
+	git_values = subprocess.getoutput('git --git-dir ' + address 
 		+ ' log --pretty=format:"%h %ad" --date=short --no-patch --reverse')
 
-	for item in values.splitlines():
+	for item in git_values.splitlines():
 		git_list.append(item)
 
 
@@ -314,20 +317,26 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		# if that csv folder doesn't exist
 		print("creating folder: " + csv_path)
 		os.system("mkdir " + csv_path)
-		os.chdir(csv_path) # switch to csv folder of chosen repo
-		print("2: " + os.getcwd())
-		repo_address = repo_dir + repo + '/.git'
-		create_log(repo, from_date, to_date, repo_address) # make logfile
+	else: 
+		print("folder exists: " + csv_path)
+	
+	repo_address = repo_dir + repo + '/.git'
+	
+	os.chdir(csv_path) # switch to csv folder of chosen repo
+	print("2: " + os.getcwd())
+	# create_log(repo, from_date, to_date, repo_address) # make logfile
+	
+	# create_complexity_files(repo, repo_address, from_date, to_date)
+	# os.chdir(csv_path)
+	
+	# generate_data_summary(repo, from_date, to_date)
+	# generate_data_metrics(repo, from_date, to_date)
+	# generate_data_coupling(repo, from_date, to_date)
+	# generate_data_age(repo, from_date, to_date)
+	# generate_data_hotspots(repo, from_date, to_date)
 
-		generate_data_summary(repo, from_date, to_date)
-		generate_data_metrics(repo, from_date, to_date)
-		generate_data_coupling(repo, from_date, to_date)
-		generate_data_age(repo, from_date, to_date)
-		generate_data_hotspots(repo, from_date, to_date)
-
-		os.chdir(settings.v3_dir)
-	else: print("folder exists: " + csv_path)
-	print("3: " + os.getcwd())
+	os.chdir(settings.v3_dir)
+	# print("3: " + os.getcwd())
 	# flash('Analysis complete.')
 	# return csv_path
 
@@ -473,19 +482,19 @@ def get_word_frequency(logfile):
 
 # retrieved from: http://stackoverflow.com/questions/3424899/
 # 	+ whats-the-simplest-way-to-subtract-a-month-from-a-date-in-python
-def monthdelta(date, delta):
-	m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
-	if not m: m = 12
-	d = min(date.day, [31,
-		29 if y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
-	return date.replace(day=d,month=m, year=y)
+# def monthdelta(date, delta):
+# 	m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
+# 	if not m: m = 12
+# 	d = min(date.day, [31,
+# 		29 if y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
+# 	return date.replace(day=d,month=m, year=y)
 
-def get_prev_date():
-	for m in range(-2, -1):
-		month_string = str(monthdelta(datetime.now(), m))
-	previous_date = ((month_string)[:10])
+# def get_prev_date():
+# 	for m in range(-2, -1):
+# 		month_string = str(monthdelta(datetime.now(), m))
+# 	previous_date = ((month_string)[:10])
 
-	return previous_date
+# 	return previous_date
 
 # if __name__ == '__main__':
 	# print("hello")

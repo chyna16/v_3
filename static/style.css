@@ -138,13 +138,60 @@ body {
 #table {
   float: none;
   order: 1;
-  font-size: .7em;
-  height: 400px;
-  overflow-y: auto;
   margin-top: 40px;
   display: none;
   margin-bottom: 50px;
 }
+
+.table {
+  font-size: .7em;
+}
+
+#thead {
+  /*display: block;*/
+}
+
+#tbody {
+  /*display: block;*/
+  height: 400px;
+  overflow: auto;
+}
+
+/* scroll feature acquired from:
+ * http://stackoverflow.com/questions/21168521/scrollable-table-with-fixed-header-in-bootstrap
+ */
+table {
+  width: 100%;
+}
+
+thead, tbody, tr, td, th { display: block; }
+
+tr:after {
+  content: ' ';
+  display: block;
+  visibility: hidden;
+  clear: both;
+}
+
+thead th {
+  height: 30px;
+  /*text-align: left;*/
+}
+
+tbody {
+  /*height: 120px;*/
+  overflow-y: auto;
+}
+
+thead {
+  /* fallback */
+}
+
+tbody td, thead th {
+  /*width: 19.2%;*/
+  float: left;
+}
+/* end scroll feature */
 
 .list-column {
   /*border-radius: 0 10px 10px 0;*/
@@ -272,34 +319,6 @@ body {
   content: "\25B2";
   display: none;
 }
-
-/* scroll feature acquired from:
- * http://stackoverflow.com/questions/21168521/scrollable-table-with-fixed-header-in-bootstrap
- */
-table {
-  width: 1000px;
-  /*height: 400px;*/
-  overflow-y: auto;
-}
-thead, tbody, tr, td, th { display: block; }
-
-tr:after {
-    content: ' ';
-    display: block;
-    visibility: hidden;
-    clear: both;
-}
-thead th {
-    height: 30px;
-}
-tbody {
-    /*height: 225px;*/
-    overflow-y: auto;
-}
-tbody td, thead th {
-    float: left;
-} 
-/* end scroll feature */
 
 /* axes styling retrieved from:
  * http://alignedleft.com/tutorials/d3/axes
