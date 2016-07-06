@@ -6,36 +6,24 @@ function setTableRows(row, elem_id, data) {
     for (i = 0; i < keys.length; i++) {
         var col = document.createElement(elem_id); // a th / td element
 
-        if (i == 0) { col.style.width = "40%"; } // first column width
-        else { col.style.width = (60 / (keys.length - 1)) + "%"; } 
+        if (i == 0) { col.style.width = "65%"; } // first column width
+        else { col.style.width = (35 / (keys.length - 1)) + "%"; } 
             // remaining column widths
 
         // column styling
-        col.style.overflow = "hidden";
-        col.style.fontSize = "15px";
-        col.onmouseover = function() { this.style.overflow = "visible"; }
-        col.onmouseout = function() { this.style.overflow = "hidden"; }
+        // col.style.overflow = "hidden";
+        // col.style.fontSize = "15px";
+        // col.onmouseover = function() { this.style.overflow = "visible"; }
+        // col.onmouseout = function() { this.style.overflow = "hidden"; }
         // col.style.backgroundColor = "white"; // INTERFERES W/ OVERFLOW
 
         if (data == keys) {
             // if table head is being created
-            if (i != 0 && keys[i] != "coupled") {
-                // if column is has a numerical value
-                col.onclick = function() { chooseColumn(this); }
-                    // allow user to click to specify column
-                col.style.cursor = 'pointer';
-            }
             col.setAttribute('value', data[i]);
             col.appendChild(document.createTextNode(data[i])); 
         } 
-        else { 
+        else {
             // if table body is being created
-            if ((i == 0 || i == 1) && analysis_type == "coupling") { 
-                // if coupling analysis and col is 'entity' or 'coupled'
-                col.onclick = function() { chooseModule(this); }
-                    // allow user to click to specify entity for coupling
-                col.style.cursor = 'pointer';
-            }
             col.setAttribute('value', data[keys[i]]);
             col.appendChild(document.createTextNode(data[keys[i]])); 
         }
@@ -79,6 +67,8 @@ function createTable(data) {
         }
     }
     else {
+        // h_row.style.width = '1000px';
+        // h_row.style.float = 'none';
         table_head.appendChild(setTableRows(h_row, "th", keys)) 
             // adds a completed row to table head
         data.forEach(function(d) { 

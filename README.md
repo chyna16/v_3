@@ -34,7 +34,7 @@ When using this application, please understand that some modules may be intentio
 
 ### Hotspots
 
-When anaylzing hotspots, the graph is shown as a bubble chart. The size of the bubble depends on the amount of lines of code added, while the hue is related to the amount of revisions made. A combination of a small bubble with a dark hue of red are the modules that you should bring to your attention.
+When anaylzing hotspots, the graph is shown as a bubble chart. The size of the bubble depends on the number of lines of code, while the hue is related to the amount of revisions made. A combination of a small bubble with a dark hue of red are the modules that you should bring to your attention.
 
 ### Word Cloud
 

@@ -200,13 +200,13 @@ function toggleGraph(elem) {
 // called by DOMContentLoaded event
 // modifies styling of divs depending on type of analysis
 function configureDivs() {
-    d3.select("#wrapper")
+    // d3.select("#wrapper")
         // .attr('class', 'mCustomScrollbar')
-        .attr('data-mcs-theme', 'dark');
+        // .attr('data-mcs-theme', 'dark');
 
-    d3.select("#table")
+    // d3.select("#table")
         // .attr('class', 'mCustomScrollbar')
-        .attr('data-mcs-theme', 'dark');
+        // .attr('data-mcs-theme', 'dark');
 
     if (analysis_type == 'coupling') {
         d3.select("#container")
@@ -214,16 +214,20 @@ function configureDivs() {
 
         d3.select("#wrapper")
             .style('width', '50%')
-            .style('height', '400px');
+            .style('height', '400px')
+            .style('margin-top', '30px');
 
         d3.select("#table")
-            .style('height', '400px')
+            // .style('height', '400px')
             .style('margin-top', '0');
     }
 
     else {
         d3.select("#table")
             .style('width', '1000px');
+
+        d3.select("#thead")
+            .style('width', '955px');
 
         d3.select("#wrapper")
             .style('width', '1000px')
