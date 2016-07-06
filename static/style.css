@@ -204,15 +204,41 @@ body {
 */
 
 .help-div {
-  padding: 10px;
+  padding: 10px 10%;
   width: 100% !important;
   background: #1ab7ea;
   display: none;
+  overflow: auto;
+  font-size: 16px;
+}
+
+.help-div > :first-child {
+  width: 50%;
+  float: left;
+  color: white;
+  margin-top: 10px;
+  padding-right: 10px;
+  text-align: justify;
+}
+
+.help-div > :first-child > h2{
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.help-div > :nth-child(2) {
+  width: 50%;
+  float: right;
+  color: black;
+  margin-top: 10px;
+  padding-left: 10px;
+  text-align: justify;
 }
 
 /* tooltip styling from: https://github.com/Caged/d3-tip */
 .d3-tip {
-  width: 300px;
+  max-width: 300px;
   word-break: break-word;
   line-height: 1;
   font-weight: bold;

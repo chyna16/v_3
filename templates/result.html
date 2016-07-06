@@ -125,20 +125,20 @@
         "cloud": "Word Cloud"
     };
     var help_desc = {
-        "metrics": "<h2>Author and Revision Metrics</h2><ul><li>View raw data for each module.</li><li>Select a column to use for filtering, and enter the range (blank equals min / max respectively).</li><li>Click on a column header to see data only for that column.</li><li>Place your mouse over a bar to see exact value.</li></ul>",
+        "metrics": "Orginazational Metrics are for predicting possible issues regarding quality of your code. Each module shows the number of unique authors that worked on it, and the number of revisions made to that module. Modules with a high number of authors and revisions together may be a sign of quality issues.",
+        "age": "Compare lines added vs lines deleted. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Click on a column header to see data only for that column. Place your mouse over a bar to see exact value.",
+        "hotspots": "When anaylzing hotspots, the graph is shown as a bubble chart. The size of the bubble depends on the amount of lines of code added, while the hue is related to the amount of revisions made. A combination of a small bubble with a dark hue of red are the modules that you should bring to your attention.",
+        "coupling": "Coupling analyzes the connections between modules made in the current repository. The degree, which is the average amount of times the two modules are changed together, is shown as a percentage. The higher the percent, the greater amount of times those modules were committed together. Average revisions shows the average number of times those two modules were revised.",
+        "cloud": "When using the word cloud, The size of words are related to the amount of times they were used in commit messages. Bigger and lighter red means more frequent, while smaller and darker red means less frequent. Mouse over each word to see how many times that word was used. Use the more common words to gauge you or your team's progress on their work."
+    };
+    var help_lst = {
+        "metrics": "<ul><li>View raw data for each module.</li><li>Select a column to use for filtering, and enter the range (blank equals min / max respectively).</li><li>Click on a column header to see data only for that column.</li><li>Place your mouse over a bar to see exact value.</li></ul>",
         "age": "Compare lines added vs lines deleted. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Click on a column header to see data only for that column. Place your mouse over a bar to see exact value.",
         "hotspots": "Hotspots indicate which modules you may need to take a closer look at. The size of the module is determined by complexity (n-lines) and the shade of red determined by effort (n-revs), proportional to the repository. Look out for the big and bright red ones. These are the ones which may need refactoring. Select a column to use for filtering, and enter the range (blank equals min / max respectively). Place your mouse over the bubbles to see module name.",
         "coupling": "Coupling shows relational data between modules based on how often they were committed together. Click on a module name to see what other modules it is coupled with and to what extent. Degree shows percentage of times that module was committed with the selected entity. Paired modules with high degree of coupling implies dependency; if one is changed, the other is likely to be affected.",
         "cloud": "View the patterns within commit messages. See which words are used the most while committing to get an understanding of things that are commonly worked on. The size of the word is proportional to frequency."
     };
-    var help_lst = {
-        "metrics": "Author and Revision Metrics",
-        "age": "Line Churn",
-        "hotspots": "Hotspots",
-        "coupling": "Coupling",
-        "cloud": "Word Cloud"
-    };
-    help.innerHTML = '<div style="width:80%; margin:auto;"><h2>'+help_ttl[analysis_type]+'</h2><p>'+help_desc[analysis_type]+'</p>'+'</div>'; // text that will appear in help drop-down
+    help.innerHTML = '<div><h2>'+help_ttl[analysis_type]+'</h2><p>'+help_desc[analysis_type]+'</p></div><div>'+help_lst[analysis_type]+'</div>'; // text that will appear in help drop-down
 
 
     // the script waits until all the html content has been loaded
