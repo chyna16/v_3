@@ -326,8 +326,8 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 	print("2: " + os.getcwd())
 	create_log(repo, from_date, to_date, repo_address) # make logfile
 	
-	create_complexity_files(repo, repo_address, from_date, to_date)
-	os.chdir(csv_path)
+	#create_complexity_files(repo, repo_address, from_date, to_date)
+	#os.chdir(csv_path)
 	
 	generate_data_summary(repo, from_date, to_date)
 	generate_data_metrics(repo, from_date, to_date)
