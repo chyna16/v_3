@@ -1,14 +1,14 @@
-# Viacom Value Visualizer
+# Viacom Version Visualizer
 
-![V3 Logo](V3/static/images/V3_Logo.svg)
+![V3 Logo](https://stash.mtvi.com/projects/ME/repos/v3/browse/static/images/V3_Logo.svg)
 
 This web based application is for obtaining more insight towards you/your team's work by analyzing your repositories and highlighting any deficiences and potential problems in your code. With this app, you are able to view your repository from a developmental and technical standpoint, allowing you to easily find areas to improve on.
 
 Upon reaching the home page, there are three tabs to navigate though:
 
-*Available Reposorties
-*Stash Repositories
-*Clone A Repository
+* Available Reposorties
+* Stash Repositories
+* Clone A Repository
 
 ### Available Repositories
 
