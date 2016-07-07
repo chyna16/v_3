@@ -286,7 +286,14 @@ tbody td, thead th {
 /* tooltip styling from: https://github.com/Caged/d3-tip */
 .d3-tip {
   max-width: 300px;
-  word-break: break-word;
+  text-overflow: auto;
+  
+  /* For Firefox */
+  white-space: pre-wrap;
+  word-break: break-all;
+  /* For Chrome and IE */
+  word-wrap: break-word;
+
   line-height: 1;
   font-weight: bold;
   padding: 12px;
