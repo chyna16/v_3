@@ -1,6 +1,7 @@
 import os
 import fnmatch
 import json
+import io
 from flask import Flask, request, render_template, redirect, url_for, flash
 import generator # our script
 import stash_api # our script
@@ -84,10 +85,9 @@ def index_repo():
 		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
-		previous_date = generator.get_prev_date()
-		current_date = str(datetime.now()).split('.')[0].split(' ')[0]
-		return render_template('index_repo.html', repo_list=project_repos,
-			previous_date=previous_date, current_date=current_date)
+		# previous_date = generator.get_prev_date()
+		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
+		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name'].split('|')
 		repo_name = selected_repo[0].lower()
@@ -135,6 +135,16 @@ def result():
 					+ from_date + "_" + to_date + "/"
 					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
 					+ ".log", 'rt') as log_file:
+					word_list = generator.get_word_frequency(log_file)
+				return render_template('result.html', 
+					data=word_list, repo_name=json.dumps(repo_name), 
+					analysis=json.dumps(analysis),
+					from_date=from_date, to_date=to_date, keys=[])
+			except UnicodeError:
+				with io.open(csv_dir + "csv_files_" + repo_name + "_" 
+					+ from_date + "_" + to_date + "/"
+					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
+					+ ".log", 'rt', encoding='utf-8') as log_file:
 					word_list = generator.get_word_frequency(log_file)
 				return render_template('result.html', 
 					data=word_list, repo_name=json.dumps(repo_name), 
