@@ -337,9 +337,7 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		# print("3: " + os.getcwd())
 	else: 
 		print("folder exists: " + csv_path)
-		flash('You are in luck someone already ran the analysis!')
 	
-	# flash('Analysis complete.')
 	return csv_path
 
 
