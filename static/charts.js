@@ -224,14 +224,18 @@ function createBarGraph(data) {
 }
 
 function createBubblePack(inputData) {
+    // Clear wrapper html
     d3.select("#wrapper").html('');
 
+    // Create deep copy of inputData
     var data = inputData.slice(0);
 
     var margin = 20,
         diameter = 610,
+        // Variable k is needed as a global scaling factor for textfit
         k=1;
 
+    // Establish color scales
     var color = d3.scale.linear()
         .domain([-1, 5])
         .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
@@ -241,6 +245,7 @@ function createBubblePack(inputData) {
         .domain([0, d3.max(data, function(d) { return +d['n-revs']; })])
         .range(["#ffb3b3", "#e60000"]);
 
+    // Create Tooltip
     var tip = d3.tip()
         .attr('class', "d3-tip")
         .direction('e')
@@ -251,6 +256,7 @@ function createBubblePack(inputData) {
                 +"<p>Lines: " + d.data["lines"] + "</p>";
         });
 
+    // Set Pack settings
     var pack = d3.layout.pack()
         .padding(2)
         .size([diameter - margin, diameter - margin])
@@ -261,8 +267,11 @@ function createBubblePack(inputData) {
         .append("g")
         .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
     
+    // Process data in order to create tree structure out of file structure
     data.forEach(function(d){
+        // Add repo name to path to create parent node
         d["full-path"] = repo + "/" + d["entity"];
+        // Split off file name and create internal nodes
         var splitItem =  d["full-path"].substring(0, d["full-path"].lastIndexOf("/"));
         if (data.filter(function(a){ return a["full-path"] == splitItem })[0] == undefined) {
             var pieces = splitItem.split('/');
@@ -286,18 +295,21 @@ function createBubblePack(inputData) {
 
     data.sort(function(a,b){
         var nameA=a["full-path"], nameB=b["full-path"];
-        if (nameA < nameB) //sort string ascending
+        //sort string ascending
+        if (nameA < nameB) 
             return -1;
         if (nameA > nameB)
             return 1;
-        return 0; //default return value (no sorting)
+        //default return value (no sort)
+        return 0; 
     });
 
+    // Create tree structure
     var root = stratify(data)
         .sum(function(d) { return d.lines; })
         .sort(function(a, b) { return b.lines - a.lines; });
 
-
+    // Create visualization
     var focus = root,
     nodes = pack.nodes(root),
     view;
@@ -317,7 +329,7 @@ function createBubblePack(inputData) {
         .attr("class", "label")
         .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
         .text(function(d) { return d.id.substring(d.id.lastIndexOf("/") + 1).split(/(?=[A-Z][^A-Z])/g); })
-        .style("display", function(d) { return (d.parent === root && labelFit(d,this)) ? "inline" : "none"; });
+        .style("visibility", function(d) { return (d.parent === root && labelFit(d,this)) ? "visible" : "hidden"; });
 
     var node = svg.selectAll("circle,text");
 
@@ -333,8 +345,14 @@ function createBubblePack(inputData) {
     zoomTo([root.x, root.y, root.r * 2 + margin]);
 
     function zoom(d) {
-        var focus0 = focus; focus = d;
+        var focus0 = focus; 
+        focus = d;
 
+        // Auto-skip folders with one child
+        while(focus.children !== undefined && focus.children.children !== undefined && focus.children.length == 1) {
+            focus = focus.children[0];
+        }
+        
         if (d.children !== undefined) {
             var transition = d3.transition()
                 .duration(d3.event.altKey ? 7500 : 750)
@@ -346,12 +364,12 @@ function createBubblePack(inputData) {
             transition.selectAll("text")
                 .filter(function(d) { 
                     if(d == undefined) return false;
-                    return (d.parent === focus || this.style.display === "inline"); 
+                    return (d.parent === focus || this.style.visibility === "visible"); 
                 })
                 .style("fill-opacity", function(d) { return (d.parent === focus) ? 1 : 0; })
                 .each("end", function(a) { 
-                    if (a.parent === focus && labelFit(a,this)) this.style.display = "inline";
-                    if (a.parent !== focus || !labelFit(a,this)) this.style.display = "none"; });
+                    if (a.parent === focus && labelFit(a,this)) this.style.visibility = "visible";
+                    if (a.parent !== focus || !labelFit(a,this)) this.style.visibility = "hidden"; });
         }
     }
 
@@ -364,11 +382,9 @@ function createBubblePack(inputData) {
 
     function labelFit(nodeElement, textElement) {
         //TODO Firefox Compatibility
-        try {
-            return textElement.getBBox().width <= nodeElement.r*2*k;
-        } catch(err) {
-            console.log('error');
-        }
+            var widthBBox = textElement.getBBox().width;
+            var widthNodeE = nodeElement.r*2*k
+            return (widthBBox <= widthNodeE);
 
     }
 
