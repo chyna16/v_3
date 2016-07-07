@@ -7,7 +7,7 @@ import generator # our script
 import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
+# from datetime import datetime
 
 app = Flask(__name__)
 secret = os.urandom(24)
@@ -51,11 +51,13 @@ def index():
 			repo_name = request.form['repo_name'].split('|')[0]
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
-			generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
+			if generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date) == None:
 				# called to handle directory/file creation/accessing
-			return redirect(url_for('dashboard',
-				repo_name=repo_name, from_date=from_date, to_date=to_date)) 	
-				# redirects to dashboard view which opens input.html
+				return redirect(url_for('index'))
+			else:
+				return redirect(url_for('dashboard',
+					repo_name=repo_name, from_date=from_date, to_date=to_date)) 	
+					# redirects to dashboard view which opens input.html
 		elif request.form['submit_button'] == "refresh":
 			# if refresh button was click from 'Available Repositories'
 			repo_name = request.form['repo_name'].split('|')[0]

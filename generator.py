@@ -324,6 +324,11 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		print("2: " + os.getcwd())
 		create_log(repo, from_date, to_date, repo_address) # make logfile
 		
+		if os.stat(settings.csv_dir + folder_name + "/logfile_" + repo + '_' + from_date 
+			+ '_' + to_date + '.log').st_size == 0:
+			flash('No data for selected date range found.')
+			return None
+
 		#create_complexity_files(repo, repo_address, from_date, to_date)
 		#os.chdir(csv_path)
 		
