@@ -1,6 +1,7 @@
 import os
 import fnmatch
 import json
+import io
 from flask import Flask, request, render_template, redirect, url_for, flash
 import generator # our script
 import stash_api # our script
@@ -134,6 +135,16 @@ def result():
 					+ from_date + "_" + to_date + "/"
 					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
 					+ ".log", 'rt') as log_file:
+					word_list = generator.get_word_frequency(log_file)
+				return render_template('result.html', 
+					data=word_list, repo_name=json.dumps(repo_name), 
+					analysis=json.dumps(analysis),
+					from_date=from_date, to_date=to_date, keys=[])
+			except UnicodeError:
+				with io.open(csv_dir + "csv_files_" + repo_name + "_" 
+					+ from_date + "_" + to_date + "/"
+					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
+					+ ".log", 'rt', encoding='utf-8') as log_file:
 					word_list = generator.get_word_frequency(log_file)
 				return render_template('result.html', 
 					data=word_list, repo_name=json.dumps(repo_name), 
