@@ -182,7 +182,7 @@ function createBarGraph(data) {
         // .append("svg:title")
             // .text(function(d) { return d.value; });
 
-        //labels hide all text
+        /*labels hide all text
         d3.select("button").on("click", function(d) {
             var current_display = d3.select("text").style("display");
             if (current_display == "block") {
@@ -192,8 +192,8 @@ function createBarGraph(data) {
                 d3.select(this).text("Hide Labels");
             d3.selectAll("text").style("display","block");
         }
-
         });
+        */
 
     // appending and styling of x-axis to graph
     canvas.append("g")

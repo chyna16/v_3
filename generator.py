@@ -317,26 +317,28 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		# if that csv folder doesn't exist
 		print("creating folder: " + csv_path)
 		os.system("mkdir " + csv_path)
+
+		repo_address = repo_dir + repo + '/.git'
+		
+		os.chdir(csv_path) # switch to csv folder of chosen repo
+		print("2: " + os.getcwd())
+		create_log(repo, from_date, to_date, repo_address) # make logfile
+		
+		#create_complexity_files(repo, repo_address, from_date, to_date)
+		#os.chdir(csv_path)
+		
+		generate_data_summary(repo, from_date, to_date)
+		generate_data_metrics(repo, from_date, to_date)
+		generate_data_coupling(repo, from_date, to_date)
+		generate_data_age(repo, from_date, to_date)
+		generate_data_hotspots(repo, from_date, to_date)
+
+		os.chdir(settings.v3_dir)
+		# print("3: " + os.getcwd())
 	else: 
 		print("folder exists: " + csv_path)
+		flash('You are in luck someone already ran the analysis!')
 	
-	repo_address = repo_dir + repo + '/.git'
-	
-	os.chdir(csv_path) # switch to csv folder of chosen repo
-	print("2: " + os.getcwd())
-	create_log(repo, from_date, to_date, repo_address) # make logfile
-	
-	#create_complexity_files(repo, repo_address, from_date, to_date)
-	#os.chdir(csv_path)
-	
-	generate_data_summary(repo, from_date, to_date)
-	generate_data_metrics(repo, from_date, to_date)
-	generate_data_coupling(repo, from_date, to_date)
-	generate_data_age(repo, from_date, to_date)
-	generate_data_hotspots(repo, from_date, to_date)
-
-	os.chdir(settings.v3_dir)
-	# print("3: " + os.getcwd())
 	# flash('Analysis complete.')
 	return csv_path
 
@@ -436,13 +438,14 @@ def merge_csv(repo_name):
 		print("file not found")
 		return
 
-
-#define stop_words as a global for efficiency
-stop_words = get_stop_words('en')
-def parse_word(stem, word, word_list):
+# called by get_word_frequency to handle adding / incrementing 
+# words to the frequency word_list
+def parse_word(stem, word, word_list, stop_words):
+	# skip adding if word is in stop_words
 	if word in stop_words or len(word) == 1:
 		return
 
+	#add the word into the word_list
 	entry = [x for x in word_list if x["stem"] == stem]
 	if entry:
 		entry[0]['freq'] += 1
@@ -463,12 +466,14 @@ def get_word_frequency(logfile):
 	word_list = []
 	stemmer = LancasterStemmer()
 
-	for word in log_list:
-		# remove unwanted leading and trailing characters
-		word = word.strip("\"'/;:?{}[]!.,()").lower()
-		stem = stemmer.stem(word) # stemming
+	#define stop_words here rather than in a loop
+	stop_words = get_stop_words('en')
 
-		parse_word(stem,word,word_list)
+	for word in log_list:
+		# Strip, Stem, and then parse word into word_list
+		word = word.strip("\"'/;:?{}[]!.,()").lower()
+		stem = stemmer.stem(word)
+		parse_word(stem,word,word_list,stop_words)
 
 	# Sort and return selection of the word_list
 	sorted_word_list = sorted(word_list, key = lambda x: x['freq'], reverse = True)
