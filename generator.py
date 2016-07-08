@@ -26,13 +26,11 @@ def get_commit_dates(repo):
 		+ repo
 		+ '/.git' 
 		+ ' log --pretty=format:"%ad" --no-patch --date=short --reverse | head -1')
-
 	last_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
 		+ repo
 		+ '/.git' 
 		+ ' log --pretty=format:"%ad" --date=short --no-patch | head -1')
 	# for each repo, go into it & get timetag; append name and tag to list
-
 	return (first_date, last_date)
 
 
@@ -68,6 +66,7 @@ def refresh_single_repo(repo_dir, repo):
 			# api call to get http clone url
 	clone_cmd = get_clone_command(clone_url, settings.password)
 		# currently using http clone url w/ password
+	repo_address = repo_dir + repo + '/.git'
 	if not clone_url: return # if function returned false
 	else:
 		# if the repository is not v3
@@ -76,8 +75,10 @@ def refresh_single_repo(repo_dir, repo):
 			# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
 		add_datetime(repo) # make timetag file
 		from_date, to_date = get_commit_dates(repo)
-		manage_csv_folder(repo_dir, repo, from_date, to_date) # re-run codemaat
-		os.chdir(repo_dir) # go back to repo directory
+		os.chdir(settings.csv_dir + 'csv_files_' 
+			+ repo + '_' + from_date + '_' + to_date) # go to correct csv folder
+		process_log(repo, from_date, to_date, repo_address) # run codemaat
+		os.chdir(settings.v3_dir)
 
 
 # called by visualizer at timed intervals
@@ -89,8 +90,8 @@ def refresh_repos(repo_dir):
 	print(os.getcwd())
 
 	for repo in repo_list:
-		if repo == 'v3': continue
 		refresh_single_repo(repo_dir, repo)
+		os.chdir(repo_dir) # go back to repo directory
 
 	os.chdir(settings.v3_dir) # cd back into v3
 	print(os.getcwd())
@@ -303,6 +304,21 @@ def create_complexity_files(repo, address, from_date, to_date):
 		os.remove(file)
 
 
+# called by manage_csv_folder and refresh_repos
+# generates log file and runs codemaat
+def process_log(repo, from_date, to_date, repo_address):
+	create_log(repo, from_date, to_date, repo_address) # make logfile
+		
+	#create_complexity_files(repo, repo_address, from_date, to_date)
+	#os.chdir(csv_path)
+	
+	generate_data_summary(repo, from_date, to_date)
+	# generate_data_metrics(repo, from_date, to_date)
+	# generate_data_coupling(repo, from_date, to_date)
+	# generate_data_age(repo, from_date, to_date)
+	# generate_data_hotspots(repo, from_date, to_date)
+
+
 # called by index view
 # sets the address where csv files are/will be located
 # handles switching between directories
@@ -317,24 +333,12 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		# if that csv folder doesn't exist
 		print("creating folder: " + csv_path)
 		os.system("mkdir " + csv_path)
-
-		repo_address = repo_dir + repo + '/.git'
-		
 		os.chdir(csv_path) # switch to csv folder of chosen repo
 		print("2: " + os.getcwd())
-		create_log(repo, from_date, to_date, repo_address) # make logfile
-		
-		#create_complexity_files(repo, repo_address, from_date, to_date)
-		#os.chdir(csv_path)
-		
-		generate_data_summary(repo, from_date, to_date)
-		generate_data_metrics(repo, from_date, to_date)
-		generate_data_coupling(repo, from_date, to_date)
-		generate_data_age(repo, from_date, to_date)
-		generate_data_hotspots(repo, from_date, to_date)
-
+		repo_address = repo_dir + repo + '/.git'
+		process_log(repo, from_date, to_date, repo_address)
 		os.chdir(settings.v3_dir)
-		# print("3: " + os.getcwd())
+		print("3: " + os.getcwd())
 	else: 
 		print("folder exists: " + csv_path)
 		flash('You are in luck someone already ran the analysis!')
