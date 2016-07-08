@@ -313,10 +313,10 @@ def process_log(repo, from_date, to_date, repo_address):
 	#os.chdir(csv_path)
 	
 	generate_data_summary(repo, from_date, to_date)
-	# generate_data_metrics(repo, from_date, to_date)
-	# generate_data_coupling(repo, from_date, to_date)
-	# generate_data_age(repo, from_date, to_date)
-	# generate_data_hotspots(repo, from_date, to_date)
+	generate_data_metrics(repo, from_date, to_date)
+	generate_data_coupling(repo, from_date, to_date)
+	generate_data_age(repo, from_date, to_date)
+	generate_data_hotspots(repo, from_date, to_date)
 
 
 # called by index view
@@ -335,15 +335,20 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 		os.system("mkdir " + csv_path)
 		os.chdir(csv_path) # switch to csv folder of chosen repo
 		print("2: " + os.getcwd())
+
 		repo_address = repo_dir + repo + '/.git'
 		process_log(repo, from_date, to_date, repo_address)
+		
+		if os.stat(settings.csv_dir + folder_name + "/logfile_" + repo + '_' + from_date 
+			+ '_' + to_date + '.log').st_size == 0:
+			flash('No data for selected date range found.')
+			return None
+
 		os.chdir(settings.v3_dir)
 		print("3: " + os.getcwd())
 	else: 
 		print("folder exists: " + csv_path)
-		flash('You are in luck someone already ran the analysis!')
 	
-	# flash('Analysis complete.')
 	return csv_path
 
 
