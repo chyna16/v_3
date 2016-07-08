@@ -22,7 +22,7 @@ def get_projects():
 	project_keys_list = []
 	try:
 		for project in json_projects['values']:
-			project_keys_list.append(project['key'])
+			project_keys_list.append(project['key']+" "+project['name'])
 	except KeyError:
 		print("api call failed")
 	return project_keys_list
