@@ -2,7 +2,7 @@ import os
 import fnmatch
 import json
 import io
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 import generator # our script
 import stash_api # our script
 import settings # our script
@@ -78,6 +78,15 @@ def index():
 			# if a selection was made from 'Stash Repositories'
 			project_name = request.form['submit_button']
 			return redirect(url_for('index_repo', project_name=project_name))
+
+@app.route('/_return_repos')
+def return_repos():
+	return_val = ''
+	key = request.args.get('key', '', type=str)
+	repos = stash_api.get_project_repos(key,'http')
+	for repo in repos:
+		return_val += '<option value="'+repo['url']+'">'+repo['name']+'</option>'
+	return jsonify(result=return_val)
 
 # page where user can select a repository after selecting a Stash project
 @app.route('/index_repo', methods=['GET', 'POST'])

@@ -4,22 +4,37 @@
 <head>
   {% block head %}
     <title>{% block title %}{% endblock %} - V3</title>
+
+  <script type="text/javascript">
+  $(function() {
+    $('select#project').bind('change', function() {
+      $.getJSON($SCRIPT_ROOT + '/_return_repos', {
+        key: $("#project").find(":selected").val()
+      }, function(data) {
+        $("#repo").empty();
+        $("#repo").append(data.result);
+      });
+      return false;
+    });
+  });
+  </script>
   {% endblock %}
 </head>
 
 <body>
+
 <div class="">
   <label>Select a Project: </label>
-  <select id="">
-    <option value="">Select one...</option>
+  <select id="project">
+    <option value="">Available Projects</option>
     {% for project in list_of_projects %}
-     <option value="{{project}}">{{project.split(" ")[1:]}}</option>
+     <option value="{{project[0]}}">{{project[1]}}</option>
     {% endfor %}
   </select>
 </div>
 <div class="">
-  <label>Select a Repository: </label>
-  <select id="">
+  <label>Available Repositories:</label>
+  <select id="repo">
     <option value="">Select one...</option>
     {% for repo in repo_list %}
      <option value="{{repo}}">{{repo.split("|")[0]}}</option>

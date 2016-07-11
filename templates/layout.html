@@ -11,11 +11,12 @@
 
     <script src="{{ url_for('static', filename='jquery-2.0.0.min.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
-
+    <script type="text/javascript">$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
     {% block head %} {% endblock %}
 </head>
 
 <script>
+
 $(document).ready(function(){
     $(".help-pill").click(function(){
         $(".help-div").toggle(250);
