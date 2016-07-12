@@ -3,6 +3,7 @@ from requests.auth import HTTPBasicAuth
 from json import load 
 import json
 import codecs
+import datetime
 import settings # our script
 
 
@@ -70,7 +71,29 @@ def get_project_repos(selected_key, url_type):
 
 	return repo_list
 
+def get_repo_timestamp(selected_key, selected_repo, url_type):
+	url_repos = ('https://stash.mtvi.com/rest/api/1.0/projects/'
+		+ selected_key + '/repos/' + selected_repo + '/commits?limit=15000')
+	repos = requests.get(
+		url=url_repos, auth=(settings.username, settings.password)
+	)
+	json_repos = json.loads(repos.text)
+	time_list = []
+	converted_time_list = []
 
+	try:
+		for timestamp in json_repos['values']:
+					time_list.append(
+						timestamp['authorTimestamp']
+					)	# creates a list of dictionaries for every repo
+	except KeyError:
+		print("api call failed")
+	for timestamp in time_list:
+		converted_time_list.append(str(datetime.datetime.fromtimestamp
+			(timestamp/1000.0)).split(' ')[0])
+	
+	return converted_time_list
+	
 # called by clone_repos in generator
 # makes api call to search for a repo by name
 def get_repo_url(repo_name, url_type):
@@ -93,5 +116,6 @@ def get_repo_url(repo_name, url_type):
 
 
 if __name__ == '__main__':
-	get_repo_url()
+	get_repo_timestamp()
+
 
