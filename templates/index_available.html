@@ -40,8 +40,9 @@
           console.log("boo")
         }
         else {
-          $("#previousDate").val(data.result[data.result.length-1].timestamp);
-          $("#currentDate").val(data.result[0].timestamp);
+          console.log(data)
+          $("#previousDate").val(data.result[data.result.length-1]);
+          $("#currentDate").val(data.result[0]);
         }
       });
       return false;

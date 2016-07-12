@@ -92,8 +92,7 @@ def return_repos():
 def return_repo():
 	key = request.args.get('key', '', type=str)
 	name = request.args.get('name', '', type=str)
-	#dates = stash_api.get_dates(key,name)
-	dates = [{'timestamp':'2016-07-11'}, {'timestamp':'2015-07-07'}, {'timestamp':'2013-12-01'}]
+	dates = stash_api.get_repo_timestamp(key, name, 'http')
 	return jsonify(result=dates)
 
 # page where user can select a repository after selecting a Stash project
