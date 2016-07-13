@@ -79,6 +79,21 @@ def index():
 			project_name = request.form['submit_button']
 			return redirect(url_for('index_repo', project_name=project_name))
 
+@app.route('/clone_repo')
+def clone_repo():
+	# selected_repo = request.form['repo_name'].split('|')
+	# repo_name = selected_repo[0].lower()
+	# repo_url = selected_repo[1] # string: clone url
+	# from_date = request.form['from_date']
+	# to_date = request.form['to_date']
+	# # clone_cmd = generator.get_clone_command(repo_url, settings.password)
+	# generator.clone_repo(repo_url) # go to repo_dir and clone the repo
+	# generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
+	print('button works!!!')
+	print(request.form['remote_repo'])
+	response = "Cloning..."
+	return response, 200
+
 @app.route('/_return_repos')
 def return_repos():
 	return_val = ''
@@ -192,22 +207,29 @@ def result():
 			repo_name=repo_name, analysis=analysis,
 			from_date=from_date, to_date=to_date))
 
+
 # this filter allows using '|fromjson' in a jinja template
 # to call json.loads() method
 @app.template_filter('fromjson')
 def convert_json(s):
 	return json.loads(s)
 
-# customized error page
-@app.errorhandler(404)
-def not_found(e):
-	return render_template ('404.html')
 
 # customized error page
 @app.errorhandler(400)
 def bad_request(e):
 	return render_template ('400.html')
 
+
+# customized error page
+@app.errorhandler(404)
+def not_found(e):
+	return render_template ('404.html')
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+	return render_template ('500.html')
 
 if __name__ == '__main__':
 	app.run(debug=True)
