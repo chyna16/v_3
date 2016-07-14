@@ -7,11 +7,14 @@ import generator # our script
 import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
+from werkzeug.contrib.cache import SimpleCache
 # from datetime import datetime
 
 app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
+
+cache = SimpleCache()
 
 maat_dir = settings.maat_dir # address of codemaat
 repo_dir = settings.repo_dir # address of cloned repositories
@@ -158,24 +161,31 @@ def result():
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
 
+	repo_details = repo_name + "_" + from_date + "_" + to_date
+
 	if request.method == 'GET':
 		if analysis == "cloud":
 			try:
-				with open(csv_dir + repo_name + "_" 
-					+ from_date + "_" + to_date + "/"
-					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date
-					+ ".log", 'rt') as log_file:
-					word_list = generator.get_word_frequency(log_file)
+				with open(csv_dir + repo_details + "/" 
+					+ analysis + "_" + repo_details + ".log", 'rt') as log_file:
+					word_list = cache.get('cloud_' + repo_details)
+					if word_list is None:
+						word_list = generator.get_word_frequency(log_file)
+						cache.set('cloud_' + repo_details, 
+							word_list, timeout=60 * 60)
 				return render_template('result.html',
 					data=word_list, repo_name=json.dumps(repo_name),
 					analysis=json.dumps(analysis),
 					from_date=from_date, to_date=to_date, keys=[])
 			except UnicodeError:
-				with io.open(csv_dir + repo_name + "_" 
-					+ from_date + "_" + to_date + "/"
-					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date
+				with io.open(csv_dir + repo_details + "/"
+					+ analysis + "_" + repo_details
 					+ ".log", 'rt', encoding='utf-8') as log_file:
-					word_list = generator.get_word_frequency(log_file)
+					word_list = cache.get('cloud_' + repo_details)
+					if word_list is None:
+						word_list = generator.get_word_frequency(log_file)
+						cache.set('cloud_' + repo_details, 
+							word_list, timeout=60 * 60)
 				return render_template('result.html',
 					data=word_list, repo_name=json.dumps(repo_name),
 					analysis=json.dumps(analysis),
@@ -184,12 +194,16 @@ def result():
 				return render_template('404.html')
 		else:
 			try:
-				with open(csv_dir + repo_name + "_" 
-					+ from_date + "_" + to_date + "/"
+				with open(csv_dir + repo_details + "/"
 					+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
-					# opens respective csv file for chosen analysis
-					data, keys = generator.parse_csv(csv_file)
-						# calls parse_csv to retrieve data from csv file
+					data = cache.get('data_' + analysis + '_' + repo_details)
+					keys = cache.get('keys_' + analysis + '_' + repo_details)
+					if data is None:
+						data, keys = generator.parse_csv(csv_file)
+						cache.set('data_' + analysis + '_' + repo_details, 
+							data, timeout=60 * 60)
+						cache.set('keys_' + analysis + '_' + repo_details, 
+							keys, timeout=60 * 60)
 					return render_template('result.html',
 						repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
 						from_date=from_date, to_date=to_date,
