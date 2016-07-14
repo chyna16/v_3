@@ -56,7 +56,6 @@ def index():
 			available_repo = [repo for repo in repo_list if repo.split('|')[0]==repo_name]
 
 			remote_last_commit = stash_api.get_repo_timestamp(proj_key, repo_name, 'http', '1')
-			print(available_repo[0].split('|')[1], to_date, remote_last_commit)
 			if available_repo == []:
 				print("Repo doesnt exist in local")
 				generator.clone_repo(repo_url)
