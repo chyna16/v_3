@@ -282,11 +282,11 @@ def process_log(repo, from_date, to_date, repo_dir, csv_path):
 	create_log('logfile', repo, from_date, to_date, repo_address)	
 	create_log('cloud', repo, from_date, to_date, repo_address)
 
-	# generate_data_summary(repo, from_date, to_date)
-	# generate_data_metrics(repo, from_date, to_date)
-	# generate_data_coupling(repo, from_date, to_date)
-	# generate_data_age(repo, from_date, to_date)
-	# generate_data_hotspots(repo, from_date, to_date)
+	generate_data_summary(repo, from_date, to_date)
+	generate_data_metrics(repo, from_date, to_date)
+	generate_data_coupling(repo, from_date, to_date)
+	generate_data_age(repo, from_date, to_date)
+	generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)
 
@@ -318,7 +318,7 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 def ignore_module(entity):
 	ignore_list = {'bower.json': ' ', '.gitignore': ' ', 'README.md': ' '}
 		# list to be expanded
-	if ignore_list[entity]: return True
+	if entity in ignore_list: return True
 	else: return False
 
 
