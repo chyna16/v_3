@@ -188,7 +188,6 @@ def create_log(log_type, repo_name, from_date, to_date, address):
 	if to_date: sys_command += ' --before=' + to_date
 	sys_command += (' > ' 
 		+ log_type + '_' + repo_name + '_' + from_date + '_' + to_date + '.log')
-	print(sys_command)
 	os.system(sys_command)
 	print("Done.")
 	print("-" * 60)
@@ -283,11 +282,11 @@ def process_log(repo, from_date, to_date, repo_dir, csv_path):
 	create_log('logfile', repo, from_date, to_date, repo_address)	
 	create_log('cloud', repo, from_date, to_date, repo_address)
 
-	generate_data_summary(repo, from_date, to_date)
-	generate_data_metrics(repo, from_date, to_date)
-	generate_data_coupling(repo, from_date, to_date)
-	generate_data_age(repo, from_date, to_date)
-	generate_data_hotspots(repo, from_date, to_date)
+	# generate_data_summary(repo, from_date, to_date)
+	# generate_data_metrics(repo, from_date, to_date)
+	# generate_data_coupling(repo, from_date, to_date)
+	# generate_data_age(repo, from_date, to_date)
+	# generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)
 
@@ -311,6 +310,7 @@ def manage_csv_folder(repo_dir, repo, from_date, to_date):
 			return False
 	else: 
 		print("folder exists: " + csv_path)
+	return True
 
 
 # called by parse_csv
@@ -471,4 +471,3 @@ def get_word_frequency(logfile):
 # 	return previous_date
 
 # if __name__ == '__main__':
-

@@ -34,10 +34,9 @@ clone_sched.start()
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
-	repo_list = generator.get_repo_list(repo_dir,
-		generator.get_list_of_dirs(repo_dir))
+	repo_list = generator.get_repo_list(repo_dir, 
+		generator.get_dir_list(repo_dir))
 	if request.method == 'GET':
-		repo_list = generator.get_repo_list(generator.get_dir_list(repo_dir))
 		# previous_date = generator.get_prev_date()
 		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
 		return render_template('index.html',
@@ -51,14 +50,18 @@ def index():
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
 
-			available_repo = [repo for repo in repo_list if repo.split('|')[0]==repo_name]
-
-			remote_last_commit = stash_api.get_repo_timestamp(proj_key, repo_name, 'http', '1')
+			available_repo = [ repo for repo in repo_list 
+				if repo.split('|')[0] == repo_name ]
+			remote_last_commit = stash_api.get_repo_timestamp(proj_key, 
+				repo_name, 'http', '1')
 			print(available_repo[0].split('|')[1], to_date, remote_last_commit)
+
 			if available_repo == []:
 				print("Repo doesnt exist in local")
-				generator.clone_repo(repo_url)
-			elif (available_repo[0].split('|')[1].split(" ")[0] < to_date and remote_last_commit[0] > available_repo[0].split('|')[1].split(" ")[0]):
+				generator.clone_repo(repo_url, repo_dir, settings.password)
+			elif (remote_last_commit[0] 
+					> available_repo[0].split('|')[1].split(" ")[0] 
+					< to_date):
 				print("Local Copy old")
 				generator.refresh_single_repo(repo_dir, repo_name)
 
