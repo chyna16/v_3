@@ -37,7 +37,7 @@ clone_sched.start()
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
-	repo_list = generator.get_repo_list(repo_dir, 
+	repo_list = generator.get_repo_list(repo_dir,
 		generator.get_dir_list(repo_dir))
 	if request.method == 'GET':
 		# previous_date = generator.get_prev_date()
@@ -53,22 +53,20 @@ def index():
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
 
-			available_repo = [ repo for repo in repo_list 
+			available_repo = [ repo for repo in repo_list
 				if repo.split('|')[0] == repo_name ]
-			remote_last_commit = stash_api.get_repo_timestamp(proj_key, 
+			remote_last_commit = stash_api.get_repo_timestamp(proj_key,
 				repo_name, 'http', '1')
-			print(available_repo[0].split('|')[1], to_date, remote_last_commit)
 
 			if available_repo == []:
 				print("Repo doesnt exist in local")
 				generator.clone_repo(repo_url, repo_dir, settings.password)
-			elif (remote_last_commit[0] 
-					> available_repo[0].split('|')[1].split(" ")[0] 
-					< to_date):
+			elif (remote_last_commit[0]
+					> available_repo[0].split('|')[1].split(" ")[0] < to_date):
 				print("Local Copy old")
 				generator.refresh_single_repo(repo_dir, repo_name)
 
-			if not generator.manage_csv_folder(repo_dir, 
+			if not generator.manage_csv_folder(repo_dir,
 					repo_name, from_date, to_date):
 				flash('No data for selected date range found.')
 				return redirect(url_for('index'))
@@ -166,12 +164,12 @@ def result():
 	if request.method == 'GET':
 		if analysis == "cloud":
 			try:
-				with open(csv_dir + repo_details + "/" 
+				with open(csv_dir + repo_details + "/"
 					+ analysis + "_" + repo_details + ".log", 'rt') as log_file:
 					word_list = cache.get('cloud_' + repo_details)
 					if word_list is None:
 						word_list = generator.get_word_frequency(log_file)
-						cache.set('cloud_' + repo_details, 
+						cache.set('cloud_' + repo_details,
 							word_list, timeout=60 * 60)
 				return render_template('result.html',
 					data=word_list, repo_name=json.dumps(repo_name),
@@ -184,7 +182,7 @@ def result():
 					word_list = cache.get('cloud_' + repo_details)
 					if word_list is None:
 						word_list = generator.get_word_frequency(log_file)
-						cache.set('cloud_' + repo_details, 
+						cache.set('cloud_' + repo_details,
 							word_list, timeout=60 * 60)
 				return render_template('result.html',
 					data=word_list, repo_name=json.dumps(repo_name),
@@ -200,9 +198,9 @@ def result():
 					keys = cache.get('keys_' + analysis + '_' + repo_details)
 					if data is None:
 						data, keys = generator.parse_csv(csv_file)
-						cache.set('data_' + analysis + '_' + repo_details, 
+						cache.set('data_' + analysis + '_' + repo_details,
 							data, timeout=60 * 60)
-						cache.set('keys_' + analysis + '_' + repo_details, 
+						cache.set('keys_' + analysis + '_' + repo_details,
 							keys, timeout=60 * 60)
 					return render_template('result.html',
 						repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
