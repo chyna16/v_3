@@ -45,7 +45,7 @@ def get_repo_list(repo_dir, dir_list):
 				repo_list.append(repo + '|' 
 					+ latest_datetime + '|' + first_date + '|' + last_date)
 		except IOError:
-			repo_list.append(repo + '|' + ' ' + '|' + ' ' + '|' + ' ')
+			repo_list.append(repo + '|' + ' ' + '|' + first_date + '|' + last_date)
 	return repo_list
 
 
