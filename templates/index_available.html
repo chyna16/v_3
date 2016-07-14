@@ -8,105 +8,93 @@
   <script type="text/javascript">
   $(function() {
     $('select#project').bind('change', function() {
+      $("#repo").empty()
+                .prop("disabled", true)
+                .append("<option>Loading Repos...</option>");
       $.getJSON($SCRIPT_ROOT + '/_return_repos', {
         key: $("#project").find(":selected").val()
       }, function(data) {
-        $("#repo").empty();
-        $("#repo").append(data.result);
+        if (data.result === ""){
+          $("#repo").empty()
+                    .prop("disabled", true)
+                    .append("<option>No Repos Available</option>");
+        }
+        else {
+          $('#repo').prop( "disabled", false )
+                    .empty()
+                    .append("<option value='' disabled selected>Select a Repo</option>")
+                    .append(data.result);
+        }
       });
       return false;
     });
   });
-  </script>
+  $(function() {
+    $('#repo').bind('change', function() {
+      $("#spinner").show();
+      $.getJSON($SCRIPT_ROOT + '/_return_repo_dates', {
+        key: $("#project").find(":selected").val(),
+        name: $("#repo").find(":selected").text()
+      }, function(data) {
+        if (data.result === ""){
+          //TODO error handling
+          console.log("boo")
+        }
+        else {
+          $("#previousDate").val(data.result[data.result.length-1])
+              .prop("disabled",false);
+          $("#currentDate").val(data.result[0])
+              .prop("disabled",false);
+          $("#nextbutton").prop("disabled",false);
+          $("#spinner").hide();
+        }
+      });
+      return false;
+    });
+  });
+</script>
   {% endblock %}
 </head>
 
 <body>
+  <center><div id="timetag"></div></center>
+  <div id="spinner" class="spinner" style="display:none;">
+    <img id="img-spinner" src="../static/images/spinner.gif" alt="Loading"/>
+  </div>
 
-<div class="">
-  <label>Select a Project: </label>
-  <select id="project">
-    <option value="">Available Projects</option>
+<form class="form-inline" method="POST" enctype="multipart/form-data">
+<center>
+<div id="repo-select" class="form-group">
+  <label for="project">Select a Project: </label><br>
+  <select id="project" name='proj_key' class="form-control">
+    <option value="" disabled selected>Select a Project</option>
     {% for project in list_of_projects %}
      <option value="{{project[0]}}">{{project[1]}}</option>
     {% endfor %}
   </select>
-</div>
-<div class="">
-  <label>Available Repositories:</label>
-  <select id="repo">
-    <option value="">Select one...</option>
-    {% for repo in repo_list %}
-     <option value="{{repo}}">{{repo.split("|")[0]}}</option>
-    {% endfor %}
+  <select id="repo" disabled="true" name='repo_name' class="form-control">
+    <option value="" disabled selected>Select a project first</option>
   </select>
 </div>
-
-<form method="POST" enctype="multipart/form-data">
-
-<h2>Select a Repository:</h2>
 <br>
-<center><div id="timetag"></div></center>
-<p>
-  <div class="col-lg-6">
-    <div class="form-group">
-      <label for="formInput">Enter Start Date: (yyyy-mm-dd)</label>
-      <p>(Default: First commit date)</p>
-      <input type="date" class="form-control" id="previousDate" name="from_date" value="">
-    </div>
-    <div class="form-group">  
-      <label for="formInput">Enter End Date: (yyyy-mm-dd)</label>
-      <p>(Default: Latest commit date)</p>
-      <input type="date" class="form-control" id="currentDate" name="to_date" value="">
-    </div>
-  <!-- <p>
-    <label>Select a repository type:</label>
-    <br>
-    <input type="checkbox" name='checkbox' value="summary"> Summary
-    <input type="checkbox" name='checkbox' value="metrics"> Metrics
-    <input type="checkbox" name='checkbox' value="coupling"> Coupling
-    <input type="checkbox" name='checkbox' value="hotspots"> Hotspots
-    <input type="hidden" name='checkbox' value="0">
-  </p> -->
-  </div>
-</p>
+<div id="date-select" class="form-group">
+    <label for="formInput">Enter Start Date (Default First -> Last Commit):</label><br>
+    <input type="date" class="form-control" id="previousDate" name="from_date" value="" placeholder='YYYY-MM-DD' disabled="true">
+    <label for="formInput"> -> </label>
+    <input type="date" class="form-control" id="currentDate" name="to_date" value="" placeholder='YYYY-MM-DD' disabled="true">
+</div>
+<br>
+<div id="submit-form" class="form-group">
+    <button type="submit" name="submit_button" value="run_analysis" id="nextbutton" class="btn btn-lg btn-primary" role="button" disabled="true">
+      Run analysis
+    </button>
+</div>
+</center>
 
-<div class="col-lg-6">
-  <center>
-  <div class="list">
-    <div class="btn-group btn-group-vertical" data-toggle="buttons">
-    {% for repo in repo_list %}
-      <label class="btn active" onclick="displayTime(this)">
-        <input type="radio" name="repo_name" value="{{repo}}" autocomplete="off">
-        {{repo.split('|')[0]}}
-      </label>
-    {% endfor %}
-    </div>
-  </div>
-  </center>
-  <!-- <p>
-    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" href="#">
-      View details &raquo;
-    </button>
-  </p> -->
-</div>   
-<br>
-<br>
-<center>
-  <p>
-    <button type="submit" name="submit_button" value="refresh" id="nextbutton" class="btn btn-lg btn-primary" role="button">
-      Refresh
-    </button>
-    <button type="submit" name="submit_button" value="available" id="nextbutton" class="btn btn-lg btn-primary" role="button">
-      Next
-    </button>
-  </p>
-</center>   
-      
 </form>
 
 <!-- <button onclick="test_name()">Check name</button> -->
-  
+
 <!-- modal for viewing repository details
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -143,15 +131,10 @@ function displayTime(elem) {
   }
 }
 
-function test_name() {
-  var value = $('input[name=repo_name]:checked').val();
-  alert(value);
-}
-
-// $btn.button('reset')
 $("#nextbutton").click(function() {
   var $btn = $(this);
   $btn.button('loading');
+  $("#spinner").show();
 });
 </script>
 </body>

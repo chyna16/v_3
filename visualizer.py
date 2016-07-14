@@ -34,25 +34,41 @@ clone_sched.start()
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
+	repo_list = generator.get_repo_list(repo_dir,
+		generator.get_list_of_dirs(repo_dir))
 	if request.method == 'GET':
 		repo_list = generator.get_repo_list(generator.get_dir_list(repo_dir))
 		# previous_date = generator.get_prev_date()
 		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
-		return render_template('index.html', 
+		return render_template('index.html',
 			repo_list=repo_list, list_of_projects=list_of_projects)
 	elif request.method == 'POST':
-		if request.form['submit_button'] == "available":
+		if request.form['submit_button'] == "run_analysis":
 			# if a selection was made from 'Available Repositories'
-			repo_name = request.form['repo_name'].split('|')[0]
+			proj_key = request.form['proj_key']
+			repo_name = request.form['repo_name'].split('|')[0].lower()
+			repo_url = request.form['repo_name'].split('|')[1]
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
+
+			available_repo = [repo for repo in repo_list if repo.split('|')[0]==repo_name]
+
+			remote_last_commit = stash_api.get_repo_timestamp(proj_key, repo_name, 'http', '1')
+			print(available_repo[0].split('|')[1], to_date, remote_last_commit)
+			if available_repo == []:
+				print("Repo doesnt exist in local")
+				generator.clone_repo(repo_url)
+			elif (available_repo[0].split('|')[1].split(" ")[0] < to_date and remote_last_commit[0] > available_repo[0].split('|')[1].split(" ")[0]):
+				print("Local Copy old")
+				generator.refresh_single_repo(repo_dir, repo_name)
+
 			if not generator.manage_csv_folder(repo_dir, 
 					repo_name, from_date, to_date):
 				flash('No data for selected date range found.')
 				return redirect(url_for('index'))
 			else:
 				return redirect(url_for('dashboard',
-					repo_name=repo_name, from_date=from_date, to_date=to_date)) 	
+					repo_name=repo_name, from_date=from_date, to_date=to_date))
 					# redirects to dashboard view which opens input.html
 		elif request.form['submit_button'] == "refresh":
 			# if refresh button was click from 'Available Repositories'
@@ -78,15 +94,22 @@ def return_repos():
 	key = request.args.get('key', '', type=str)
 	repos = stash_api.get_project_repos(key,'http')
 	for repo in repos:
-		return_val += '<option value="'+repo['url']+'">'+repo['name']+'</option>'
+		return_val += '<option value="'+repo['name']+'|'+repo['url']+'">'+repo['name']+'</option>'
 	return jsonify(result=return_val)
+
+@app.route('/_return_repo_dates')
+def return_repo():
+	key = request.args.get('key', '', type=str)
+	name = request.args.get('name', '', type=str)
+	dates = stash_api.get_repo_timestamp(key, name, 'http', '15000')
+	return jsonify(result=dates)
 
 # page where user can select a repository after selecting a Stash project
 @app.route('/index_repo', methods=['GET', 'POST'])
 def index_repo():
 	# retrieves passed in query from index view
-	project_name = request.args.get('project_name') 
-	project_repos = stash_api.get_project_repos(project_name, 'http') 
+	project_name = request.args.get('project_name')
+	project_repos = stash_api.get_project_repos(project_name, 'http')
 		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
@@ -115,11 +138,11 @@ def dashboard():
 
 	if request.method == 'GET':
 		# buttons to all analyses available; assumed all have been run
-		return render_template('input.html') 
+		return render_template('input.html')
 	elif request.method == 'POST':
 		analysis = request.form['analysis']
 		return redirect(url_for('result',
-			repo_name=repo_name, analysis=analysis, 
+			repo_name=repo_name, analysis=analysis,
 			from_date=from_date, to_date=to_date))
 
 
@@ -131,30 +154,30 @@ def result():
 	analysis = request.args.get('analysis')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
-	
+
 	if request.method == 'GET':
 		if analysis == "cloud":
 			try:
 				with open(csv_dir + repo_name + "_" 
 					+ from_date + "_" + to_date + "/"
-					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
+					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date
 					+ ".log", 'rt') as log_file:
 					word_list = generator.get_word_frequency(log_file)
-				return render_template('result.html', 
-					data=word_list, repo_name=json.dumps(repo_name), 
+				return render_template('result.html',
+					data=word_list, repo_name=json.dumps(repo_name),
 					analysis=json.dumps(analysis),
 					from_date=from_date, to_date=to_date, keys=[])
 			except UnicodeError:
 				with io.open(csv_dir + repo_name + "_" 
 					+ from_date + "_" + to_date + "/"
-					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
+					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date
 					+ ".log", 'rt', encoding='utf-8') as log_file:
 					word_list = generator.get_word_frequency(log_file)
-				return render_template('result.html', 
-					data=word_list, repo_name=json.dumps(repo_name), 
+				return render_template('result.html',
+					data=word_list, repo_name=json.dumps(repo_name),
 					analysis=json.dumps(analysis),
 					from_date=from_date, to_date=to_date, keys=[])
-			except (FileNotFoundError, IOError): 
+			except (FileNotFoundError, IOError):
 				return render_template('404.html')
 		else:
 			try:
@@ -162,19 +185,19 @@ def result():
 					+ from_date + "_" + to_date + "/"
 					+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
 					# opens respective csv file for chosen analysis
-					data, keys = generator.parse_csv(csv_file) 
+					data, keys = generator.parse_csv(csv_file)
 						# calls parse_csv to retrieve data from csv file
-					return render_template('result.html', 
+					return render_template('result.html',
 						repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
-						from_date=from_date, to_date=to_date, 
+						from_date=from_date, to_date=to_date,
 						data=json.dumps(data), keys=json.dumps(keys))
 							# json.dumps() converts data into a string format
-			except (FileNotFoundError, IOError): 
+			except (FileNotFoundError, IOError):
 				return render_template('404.html')
 	elif request.method == 'POST':
 		analysis = request.form['analysis']
 		return redirect(url_for('result',
-			repo_name=repo_name, analysis=analysis, 
+			repo_name=repo_name, analysis=analysis,
 			from_date=from_date, to_date=to_date))
 
 # this filter allows using '|fromjson' in a jinja template
