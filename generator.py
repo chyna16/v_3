@@ -13,88 +13,68 @@ from datetime import datetime
 
 
 # called by refresh_repos
-# returns a list of directories within the specified path
-def get_list_of_dirs(path):
+def get_dir_list(path):
 	dir_list = [ item for item in os.listdir(path) 
 			if os.path.isdir(os.path.join(path, item)) ]
-		# list of cloned repositories
-
+		# if 'path/item' is valid address, add item to list
 	return dir_list
 
-def get_commit_dates(repo):
-	first_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
-		+ repo
-		+ '/.git' 
+
+# called by get_repo_list, refresh_single_repo
+# uses git log to get first & last commit dates
+def get_commit_dates(repo_dir, repo):
+	first_date = subprocess.getoutput('git --git-dir ' 
+		+ os.path.join(repo_dir, repo, '.git')
 		+ ' log --pretty=format:"%ad" --no-patch --date=short --reverse | head -1')
-	last_date = subprocess.getoutput('git --git-dir ' + settings.repo_dir 
-		+ repo
-		+ '/.git' 
+	last_date = subprocess.getoutput('git --git-dir '  
+		+ os.path.join(repo_dir, repo, '.git')
 		+ ' log --pretty=format:"%ad" --date=short --no-patch | head -1')
-	# for each repo, go into it & get timetag; append name and tag to list
 	return (first_date, last_date)
 
 
+# called by: index view
+# params: path of repo directory, list of repo folders
 def get_repo_list(repo_dir, dir_list):
 	repo_list = []
-	os.chdir(repo_dir) 
 	for repo in dir_list:
-		os.chdir(repo)
-		first_date, last_date = get_commit_dates(repo)
+		first_date, last_date = get_commit_dates(repo_dir, repo)
 		try:
-			with open('timetag.txt', 'rt') as timetag:
-				current_datetime = timetag.read()
-				repo_list.append(repo + '|' + current_datetime + '|' 
-					+ first_date + '|' + last_date)
+			filename = os.path.join(repo_dir, repo, 'timetag.txt')
+			with open(filename, 'rt') as timetag:
+				latest_datetime = timetag.read()
+				repo_list.append(repo + '|' 
+					+ latest_datetime + '|' + first_date + '|' + last_date)
 		except IOError:
-			repo_list.append(repo)
-
-		os.chdir('..') # go back to repo_dir
-
+			repo_list.append(repo + '|' + ' ' + '|' + ' ' + '|' + ' ')
 	return repo_list
 
 
-def add_datetime(repo):
-	os.chdir(repo) # assuming in repo_dir, cd into repo
-	with open('timetag.txt', 'wt') as timetag:
+# called by: refresh_single_repo, clone_repo
+def add_datetime(folder_path):
+	with open(os.path.join(folder_path, 'timetag.txt'), 'wt') as timetag:
 		d = str(datetime.now()).split('.') # date/time in string
 		timetag.write(d[0]) # add a textfile with current date/time w/out ms
-	os.chdir('..') # got back to repo_dir
 
 
+# called by: refresh_repos, index view
 def refresh_single_repo(repo_dir, repo):
 	clone_url = stash_api.get_repo_url(repo, 'http') 
-			# api call to get http clone url
-	clone_cmd = get_clone_command(clone_url, settings.password)
-		# currently using http clone url w/ password
-	repo_address = repo_dir + repo + '/.git'
 	if not clone_url: return # if function returned false
 	else:
-		# if the repository is not v3
-		shutil.rmtree(repo) # delete repository
-		os.system('git clone ' + clone_cmd) # re-clone the repository
-			# CHANGE CLONE_CMD TO CLONE_URL ONCE SSH WORKS
-		add_datetime(repo) # make timetag file
-		from_date, to_date = get_commit_dates(repo)
-		os.chdir(settings.csv_dir + 'csv_files_' 
-			+ repo + '_' + from_date + '_' + to_date) # go to correct csv folder
-		process_log(repo, from_date, to_date, repo_address) # run codemaat
-		os.chdir(settings.v3_dir)
+		shutil.rmtree(os.path.join(repo_dir, repo)) # delete repository
+		clone_repo(clone_url, repo_dir, settings.password)
+		from_date, to_date = get_commit_dates(repo_dir, repo)
+		csv_path = os.path.join(settings.csv_dir, 
+			repo + "_" + from_date + "_" + to_date)
+		process_log(repo, from_date, to_date, repo_dir, csv_path)
 
 
-# called by visualizer at timed intervals
+# called by: visualizer at timed intervals
 # updates already cloned repositories
 def refresh_repos(repo_dir):
-	repo_list = get_list_of_dirs(repo_dir)
-
-	os.chdir(repo_dir) # cd out of v3 dir into repo dir
-	print(os.getcwd())
-
+	repo_list = get_dir_list(repo_dir)
 	for repo in repo_list:
 		refresh_single_repo(repo_dir, repo)
-		os.chdir(repo_dir) # go back to repo directory
-
-	os.chdir(settings.v3_dir) # cd back into v3
-	print(os.getcwd())
 
 
 # called by index view to set path for codemaat
@@ -117,15 +97,14 @@ def get_clone_command(clone_url, password):
 
 # called by visualizer index view
 # calls git clone command with an appropriate url
-def clone_repo(clone_url):
-	os.chdir(settings.repo_dir)
+def clone_repo(clone_url, location, password):
 	if 'http' in clone_url:
-		clone_cmd = get_clone_command(clone_url, settings.password)
+		# if using http url, apply password to url
+		clone_cmd = get_clone_command(clone_url, password)
 	else: clone_cmd = clone_url
-	os.system('git clone ' + clone_cmd)
-	# repo_name = clone_url.split('/').pop().split('.')[0]
-	add_datetime(clone_url.split('/').pop().split('.')[0])
-	os.chdir(settings.v3_dir)
+	repo = clone_url.split('/').pop().split('.')[0]
+	os.system('git clone ' + clone_cmd + ' ' + os.path.join(location, repo))
+	add_datetime(os.path.join(settings.repo_dir, repo))
 
 
 # called by index view to generate message
@@ -198,32 +177,19 @@ def generate_data_hotspots(repo_name, from_date, to_date):
 	print("-" * 60)
 
 
-# called by manage_csv_folder
-# handles command line inputs for creating a logfile
-def create_log(repo_name, from_date, to_date, address):
+# called by: process_log
+# handles command line inputs for creating a logfile / wordlog
+def create_log(log_type, repo_name, from_date, to_date, address):
 	print("Obtaining repository logs...")
-	sys_command = "" # resets to blank
-	# first part of command same for any date specification
-	sys_command = ('git --git-dir ' + address 
-		+ ' log --pretty=format:"[%h] %aN %ad %s" --date=short --numstat')
-	sys_command_cloud = 'git --git-dir ' + address + ' log --pretty=format:"%s"'
-	#the following commands change depending on date specification
-	if not from_date == "" and to_date == "":
-		sys_command += ' --after=' + from_date
-		sys_command_cloud += ' --after=' + from_date 	
-	elif from_date == "" and not to_date == "":
-		sys_command += ' --before=' + to_date
-		sys_command_cloud += ' --before=' + to_date 	
-	elif not from_date == "" and not to_date == "":
-		sys_command += ' --after=' + from_date + ' --before=' + to_date
-		sys_command_cloud += ' --after=' + from_date + ' --before=' + to_date 	
-	# last part of command same for any date specification			
-	sys_command += (' > logfile_' 
-		+ repo_name + '_' + from_date + '_' + to_date + '.log')
-	sys_command_cloud += (' > cloud_' 
-		+ repo_name + '_' + from_date + '_' + to_date + '.log')
-	os.system(sys_command) # command line call using the updated string
-	os.system(sys_command_cloud)
+	sys_command = 'git --git-dir ' + address + ' log --pretty=format:'
+	if log_type == 'cloud': sys_command += '"%s"'
+	else: sys_command += '"[%h] %aN %ad %s" --date=short --numstat'
+	if from_date: sys_command += ' --after=' + from_date
+	if to_date: sys_command += ' --before=' + to_date
+	sys_command += (' > ' 
+		+ log_type + '_' + repo_name + '_' + from_date + '_' + to_date + '.log')
+	print(sys_command)
+	os.system(sys_command)
 	print("Done.")
 	print("-" * 60)
 
@@ -232,7 +198,7 @@ def create_log(repo_name, from_date, to_date, address):
 #can take a long time (up to 3 min)when running on large repositories
 #requires the 'csvcat' python package
 def create_complexity_files(repo, address, from_date, to_date):
-	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
+	folder_name = repo + "_" + from_date + "_" + to_date
 	#files to be ignored
 	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
 	 '.spec', '.md', '.ignore', '.ttf', '.min', '.css')
@@ -262,7 +228,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 				continue
 			file_list.append(os.path.join(root, file))
 
-	os.chdir(settings.repo_dir + repo)
+	os.chdir(os.path.join(settings.repo_dir, repo))
 
 	#runs complexity analysis script on each file in the repository
 	for file in file_list:
@@ -273,7 +239,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv')
 
 
-	os.chdir(settings.csv_dir + folder_name)
+	os.chdir(os.path.join(settings.csv_dir, folder_name))
 
 	for file in glob.glob("*.csv"):
 		csv_list.append(file)
@@ -303,63 +269,57 @@ def create_complexity_files(repo, address, from_date, to_date):
 	for file in glob.glob("complex_*"):
 		os.remove(file)
 
+	os.chdir(setting.v3_dir)
 
-# called by manage_csv_folder and refresh_repos
+
+# called by: manage_csv_folder, refresh_repos
 # generates log file and runs codemaat
-def process_log(repo, from_date, to_date, repo_address):
-	create_log(repo, from_date, to_date, repo_address) # make logfile
-		
-	#create_complexity_files(repo, repo_address, from_date, to_date)
-	#os.chdir(csv_path)
-	
+def process_log(repo, from_date, to_date, repo_dir, csv_path):
+	if not os.path.isdir(csv_path): os.system("mkdir " + csv_path)
+		# if the csv_folder doesn't exist, make it
+	os.chdir(csv_path) 
+	# cd into the folder and create logs and csv files
+	repo_address = os.path.join(repo_dir, repo, '.git')
+	create_log('logfile', repo, from_date, to_date, repo_address)	
+	create_log('cloud', repo, from_date, to_date, repo_address)
+
 	generate_data_summary(repo, from_date, to_date)
 	generate_data_metrics(repo, from_date, to_date)
 	generate_data_coupling(repo, from_date, to_date)
 	generate_data_age(repo, from_date, to_date)
 	generate_data_hotspots(repo, from_date, to_date)
 
+	os.chdir(settings.v3_dir)
 
-# called by index view
+
+# called by: index view
 # sets the address where csv files are/will be located
-# handles switching between directories
 # calls helper functions that handle folder, logfile, & codemaat
 def manage_csv_folder(repo_dir, repo, from_date, to_date):
-	print("1: " + os.getcwd())
-	folder_name = "csv_files_" + repo + "_" + from_date + "_" + to_date
-	csv_path = settings.csv_dir + folder_name
-		# csv_path is the complete address of csv folder for chosen repo
-
+	folder_name = repo + "_" + from_date + "_" + to_date
+	csv_path = os.path.join(settings.csv_dir, folder_name)
+		# complete address of csv folder for chosen repo
 	if not os.path.exists(csv_path):
-		# if that csv folder doesn't exist
 		print("creating folder: " + csv_path)
 		os.system("mkdir " + csv_path)
-		os.chdir(csv_path) # switch to csv folder of chosen repo
-		print("2: " + os.getcwd())
-
-		repo_address = repo_dir + repo + '/.git'
-		process_log(repo, from_date, to_date, repo_address)
+		process_log(repo, from_date, to_date, repo_dir, csv_path)
 		
-		if os.stat(settings.csv_dir + folder_name + "/logfile_" + repo + '_' + from_date 
-			+ '_' + to_date + '.log').st_size == 0:
-			flash('No data for selected date range found.')
-			return None
-
-		os.chdir(settings.v3_dir)
-		print("3: " + os.getcwd())
+		if os.stat(os.path.join(
+			csv_path, "logfile_" + repo + '_' + from_date + '_' + to_date + '.log')
+		).st_size == 0: 
+			# if the generated logfile does not have data
+			return False
 	else: 
 		print("folder exists: " + csv_path)
-	
-	return csv_path
 
 
 # called by parse_csv
 # checks is passed in string is in list of modules to be ignored
 def ignore_module(entity):
-	ignore_list = ['bower.json', '.gitignore', 'README.md']
+	ignore_list = {'bower.json': ' ', '.gitignore': ' ', 'README.md': ' '}
 		# list to be expanded
-	if entity in ignore_list: return True
-	else:
-		return False
+	if ignore_list[entity]: return True
+	else: return False
 
 
 # called by result view
@@ -511,5 +471,4 @@ def get_word_frequency(logfile):
 # 	return previous_date
 
 # if __name__ == '__main__':
-	# print("hello")
 

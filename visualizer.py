@@ -35,12 +35,7 @@ clone_sched.start()
 @app.route('/index', methods=['GET', 'POST'])
 def index():
 	if request.method == 'GET':
-		# repo_list = [ item for item in os.listdir(repo_dir) 
-		# 	if os.path.isdir(os.path.join(repo_dir, item)) ]
-			# a list of all currently cloned repositories
-			# refreshes everytime user chooses a new repository
-		repo_list = generator.get_repo_list(repo_dir, 
-						generator.get_list_of_dirs(repo_dir))
+		repo_list = generator.get_repo_list(generator.get_dir_list(repo_dir))
 		# previous_date = generator.get_prev_date()
 		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
 		return render_template('index.html', 
@@ -51,9 +46,9 @@ def index():
 			repo_name = request.form['repo_name'].split('|')[0]
 			from_date = request.form['from_date']
 			to_date = request.form['to_date']
-			if generator.manage_csv_folder(repo_dir, 
-				repo_name, from_date, to_date) == None:
-				# called to handle directory/file creation/accessing
+			if not generator.manage_csv_folder(repo_dir, 
+					repo_name, from_date, to_date):
+				flash('No data for selected date range found.')
 				return redirect(url_for('index'))
 			else:
 				return redirect(url_for('dashboard',
@@ -68,11 +63,9 @@ def index():
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			# clone_cmd = generator.get_clone_command(clone_url, password) 
-				# get the appropriate url-password combined git command
-			generator.clone_repo(clone_url) # go to repo_dir and clone the repo
-			message = generator.get_status_message(clone_url)
-			flash(message) # displays a confirmation message on the screen
+			generator.clone_repo(clone_url, repo_dir, password) # go to repo_dir and clone the repo
+			# message = generator.get_status_message(clone_url)
+			# flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
 		else:
 			# if a selection was made from 'Stash Repositories'
@@ -106,8 +99,7 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
-		# clone_cmd = generator.get_clone_command(repo_url, settings.password)
-		generator.clone_repo(repo_url) # go to repo_dir and clone the repo
+		generator.clone_repo(repo_url, repo_dir, settings.password) # go to repo_dir and clone the repo
 		generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
 		return redirect(url_for('dashboard',
 			repo_name=repo_name, from_date=from_date, to_date=to_date))
@@ -143,7 +135,7 @@ def result():
 	if request.method == 'GET':
 		if analysis == "cloud":
 			try:
-				with open(csv_dir + "csv_files_" + repo_name + "_" 
+				with open(csv_dir + repo_name + "_" 
 					+ from_date + "_" + to_date + "/"
 					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
 					+ ".log", 'rt') as log_file:
@@ -153,7 +145,7 @@ def result():
 					analysis=json.dumps(analysis),
 					from_date=from_date, to_date=to_date, keys=[])
 			except UnicodeError:
-				with io.open(csv_dir + "csv_files_" + repo_name + "_" 
+				with io.open(csv_dir + repo_name + "_" 
 					+ from_date + "_" + to_date + "/"
 					+ analysis + "_" + repo_name + "_" + from_date + "_" + to_date 
 					+ ".log", 'rt', encoding='utf-8') as log_file:
@@ -166,7 +158,7 @@ def result():
 				return render_template('404.html')
 		else:
 			try:
-				with open(csv_dir + "csv_files_" + repo_name + "_" 
+				with open(csv_dir + repo_name + "_" 
 					+ from_date + "_" + to_date + "/"
 					+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
 					# opens respective csv file for chosen analysis
