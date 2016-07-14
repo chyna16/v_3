@@ -9,6 +9,7 @@ import tempfile
 import shutil
 from nltk.stem.lancaster import LancasterStemmer
 from stop_words import get_stop_words
+from datetime import datetime
 import generator
 
 
@@ -47,7 +48,7 @@ class FileParserTests(unittest.TestCase):
 		with open('testfile.csv') as uploaded_file:
 			dict_test, array_test = generator.parse_csv(uploaded_file)
 
-		self.assertEqual(dict_test, 
+		self.assertEqual(dict_test,
 			[{'stat': 'commits', 'value': '26'}, {'stat': 'entities', 'value': '24'}]
 		)
 		self.assertEqual(array_test, ['stat', 'value'])
@@ -64,7 +65,7 @@ class FileParserTests(unittest.TestCase):
 	def test_merge_csv_error(self):
 		generator.merge_csv('sdndks')
 		self.assertRaises(IOError)
-	
+
 	def test_merge_csv_success(self):
 		generator.merge_csv('test')
 		assert os.path.exists(os.path.join(self.temp_dir, 'hotspots_test.csv'))
@@ -123,9 +124,10 @@ class FileManagingTests(unittest.TestCase):
 class RepoManagingTests(unittest.TestCase):
 	def setUp(self):
 		self.temp_dir = tempfile.mkdtemp()
+		generator.repo_dir = self.temp_dir
 		os.chdir(self.temp_dir)
 
-		self.repo_url = 'https://naderf@stash.mtvi.com/scm/bot/mcshake.git'
+		self.repo_url = 'https://'+settings.username+'@stash.mtvi.com/scm/bot/mcshake.git'
 
 		# sample_repo_url = stash_api.get_repo_url('mcshake', 'http')
 		# generator.clone_repo(self.repo_url, os.pathself.temp_dir, settings.password)
@@ -139,7 +141,8 @@ class RepoManagingTests(unittest.TestCase):
 		os.system("mkdir test_dir_1")
 		os.system("mkdir test_dir_2")
 		dir_list = generator.get_dir_list(self.temp_dir)
-		self.assertEqual(dir_list, ['test_dir_2', 'test_dir_1'])
+		self.assertIn('test_dir_1', dir_list)
+		self.assertIn('test_dir_2', dir_list)
 		shutil.rmtree('test_dir_1')
 		shutil.rmtree('test_dir_2')
 
@@ -149,8 +152,8 @@ class RepoManagingTests(unittest.TestCase):
 		shutil.rmtree('mcshake')
 
 	def test_clone_command(self):
-		clone_cmd = generator.get_clone_command('https://naderf@stash.mtvi.com', 'qwerty')
-		self.assertEqual(clone_cmd, 'https://naderf:qwerty@stash.mtvi.com')
+		clone_cmd = generator.get_clone_command('https://test_name@stash.mtvi.com', 'qwerty')
+		self.assertEqual(clone_cmd, 'https://test_name:qwerty@stash.mtvi.com')
 
 	def test_add_datetime(self):
 		generator.add_datetime(self.temp_dir)
@@ -158,28 +161,20 @@ class RepoManagingTests(unittest.TestCase):
 		os.remove('timetag.txt')
 
 	def test_get_commit_dates(self):
-		if not os.path.isdir('mcshake'): 
+		if not os.path.isdir('mcshake'):
 			generator.clone_repo(self.repo_url, self.temp_dir, settings.password)
-		f_date, l_date = generator.get_commit_dates(self.temp_dir, 'mcshake')
+		f_date, l_date = generator.get_commit_dates('mcshake')
 		date_length = len(f_date.split('-'))
 		self.assertEqual(date_length, 3)
 		shutil.rmtree('mcshake')
 
 	def test_get_repo_list(self):
-		if not os.path.isdir('mcshake'): 
+		if not os.path.isdir('mcshake'):
 			generator.clone_repo(self.repo_url, self.temp_dir, settings.password)
-		repo_list = generator.get_repo_list(self.temp_dir, ['mcshake'])
-		first, last = generator.get_commit_dates(self.temp_dir, 'mcshake')
-		self.assertEqual(repo_list, ['mcshake| |' + first + '|' + last])
-
-
-
-
-
-
-
-
-
+		repo_list = generator.get_repo_list(['mcshake'])
+		first, last = generator.get_commit_dates('mcshake')
+		current = str(datetime.now()).split('.')[0].split(' ')[0]
+		self.assertEqual(repo_list, ['mcshake|' + current + '|' + first + '|' + last])
 
 
 if __name__ == '__main__':
