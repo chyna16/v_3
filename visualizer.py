@@ -56,7 +56,6 @@ def index():
 			available_repo = [repo for repo in repo_list if repo.split('|')[0]==repo_name]
 
 			remote_last_commit = stash_api.get_repo_timestamp(proj_key, repo_name, 'http', '1')
-			print(available_repo[0].split('|')[1], to_date, remote_last_commit)
 			if available_repo == []:
 				print("Repo doesnt exist in local")
 				generator.clone_repo(repo_url)
@@ -92,20 +91,6 @@ def index():
 			project_name = request.form['submit_button']
 			return redirect(url_for('index_repo', project_name=project_name))
 
-@app.route('/clone_repo')
-def clone_repo():
-	# selected_repo = request.form['repo_name'].split('|')
-	# repo_name = selected_repo[0].lower()
-	# repo_url = selected_repo[1] # string: clone url
-	# from_date = request.form['from_date']
-	# to_date = request.form['to_date']
-	# # clone_cmd = generator.get_clone_command(repo_url, settings.password)
-	# generator.clone_repo(repo_url) # go to repo_dir and clone the repo
-	# generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
-	print('button works!!!')
-	print(request.form['remote_repo'])
-	response = "Cloning..."
-	return response, 200
 
 @app.route('/_return_repos')
 def return_repos():
