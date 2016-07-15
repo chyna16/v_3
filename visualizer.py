@@ -8,7 +8,6 @@ import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
 from werkzeug.contrib.cache import SimpleCache
-# from datetime import datetime
 
 app = Flask(__name__)
 secret = os.urandom(24)
@@ -68,6 +67,7 @@ def index():
 			project_name = request.form['submit_button']
 			return redirect(url_for('index_repo', project_name=project_name))
 
+
 @app.route('/_return_repos')
 def return_repos():
 	return_val = ''
@@ -93,8 +93,6 @@ def index_repo():
 		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
-		# previous_date = generator.get_prev_date()
-		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
 		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name'].split('|')
@@ -191,22 +189,29 @@ def result():
 			repo_name=repo_name, analysis=analysis,
 			from_date=from_date, to_date=to_date))
 
+
 # this filter allows using '|fromjson' in a jinja template
 # to call json.loads() method
 @app.template_filter('fromjson')
 def convert_json(s):
 	return json.loads(s)
 
-# customized error page
-@app.errorhandler(404)
-def not_found(e):
-	return render_template ('404.html')
 
 # customized error page
 @app.errorhandler(400)
 def bad_request(e):
 	return render_template ('400.html')
 
+
+# customized error page
+@app.errorhandler(404)
+def not_found(e):
+	return render_template ('404.html')
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+	return render_template ('500.html')
 
 if __name__ == '__main__':
 	app.run(debug=True)
