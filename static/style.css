@@ -96,6 +96,22 @@
 
 /* End Navbar Styling */
 
+/* commitSelector styling */
+.axis--grid .domain {
+  fill: #1ab7ea;
+  stroke: none;
+}
+
+.axis--x .domain,
+.axis--grid .tick line {
+  stroke: #fff;
+}
+
+.axis--grid .tick--minor line {
+  stroke-opacity: .5;
+}
+/* Ene commitSelector styling */
+
 .spinner {
     position: fixed;
     top: 50%;

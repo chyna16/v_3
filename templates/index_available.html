@@ -4,7 +4,8 @@
 <head>
   {% block head %}
     <title>{% block title %}{% endblock %} - V3</title>
-
+  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="../static/charts.js"></script>
   <script type="text/javascript">
   $(function() {
     $('select#project').bind('change', function() {
@@ -47,6 +48,7 @@
               .prop("disabled",false);
           $("#nextbutton").prop("disabled",false);
           $("#spinner").hide();
+          commitSelector(data.result);
         }
       });
       return false;
@@ -82,6 +84,7 @@
     <input type="date" class="form-control" id="previousDate" name="from_date" value="" placeholder='YYYY-MM-DD' disabled="true">
     <label for="formInput"> -> </label>
     <input type="date" class="form-control" id="currentDate" name="to_date" value="" placeholder='YYYY-MM-DD' disabled="true">
+    <div id="commitSelector"></div>
 </div>
 <br>
 <div id="submit-form" class="form-group">
@@ -122,6 +125,7 @@
 </div> -->
 
 <script>
+
 function displayTime(elem) {
   var timetag = elem.children[0].value.split('|');
   if (timetag[1] != undefined) {
