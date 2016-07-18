@@ -141,6 +141,7 @@ def result():
 			else:
 				data, keys = generator.parse_csv(repo_details, 
 					analysis + "_" + repo_name + ".csv")
+			if data == []: return render_template('404.html')
 			cache.set('data_' + analysis + '_' + repo_details,
 					data, timeout=60*60)
 			cache.set('keys_' + analysis + '_' + repo_details,

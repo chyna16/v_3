@@ -699,7 +699,7 @@ function commitSelector(dates) {
 
     var datum = []
     dates.forEach(function(d){
-      datum.push(new Date(d))
+    datum.push(new Date(d.split(' ')[0]))
     })
     datum.reverse()
 

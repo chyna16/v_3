@@ -31,19 +31,17 @@ def get_projects():
 
 # CURRENTLY NOT IN USE
 # traverses api data and reads details for each project
-def get_details():
-	try:
-		for project in json_projects['values']:
-			project_key = project['key']
-			project_name = project['name']
-			print ("Project Name: " + project_name)
-			print ("Key: " + project_key)
-			if 'description' in project:
-				project_description = project['description']
-				print ("Description: " + project_description)
-			print ("-" * 60)
-	except KeyError:
-		print("api call failed")
+def get_repo_detail(repo_name, value):
+	repo_call = ('https://stash.mtvi.com/rest/api/1.0/repos?name=' + repo_name)
+	repo_info = requests.get(
+		url=repo_call, auth=(settings.username, settings.password)
+	)
+	json_repo = json.loads(repo_info.text)
+
+	try: 
+		data = json_repo['values'][0]['project'][value]
+		return data
+	except KeyError: return ''
 
 
 # called by index_repo view
@@ -70,6 +68,7 @@ def get_project_repos(selected_key, url_type):
 		print("api call failed")
 
 	return repo_list
+	
 
 def get_repo_timestamp(selected_key, selected_repo, url_type, limit):
 	selected_repo = selected_repo.replace(' ','-')
@@ -91,7 +90,7 @@ def get_repo_timestamp(selected_key, selected_repo, url_type, limit):
 		print("api call failed")
 	for timestamp in time_list:
 		converted_time_list.append(str(datetime.datetime.fromtimestamp
-			(timestamp/1000.0)).split(' ')[0])
+			(timestamp/1000.0)))
 
 	return converted_time_list
 
@@ -117,4 +116,4 @@ def get_repo_url(repo_name, url_type):
 
 
 if __name__ == '__main__':
-	get_repo_timestamp()
+	get_repo_detail('arc-ui', 'key')
