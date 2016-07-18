@@ -91,7 +91,7 @@ def get_repo_timestamp(selected_key, selected_repo, url_type, limit):
 		print("api call failed")
 	for timestamp in time_list:
 		converted_time_list.append(str(datetime.datetime.fromtimestamp
-			(timestamp/1000.0)).split(' ')[0])
+			(timestamp/1000.0)))
 
 	return converted_time_list
 
@@ -116,5 +116,4 @@ def get_repo_url(repo_name, url_type):
 	return repo_url
 
 
-if __name__ == '__main__':
-	get_repo_timestamp()
+# if __name__ == '__main__':

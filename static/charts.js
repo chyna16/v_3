@@ -696,10 +696,10 @@ function createWordcloud(data) {
 // Dependant on have D3 V4
 function commitSelector(dates) {
     d3.select("#commitSelector").html('');
-    
+
     var datum = []
     dates.forEach(function(d){
-    datum.push(new Date(d))
+    datum.push(new Date(d.split(' ')[0]))
     })
     datum.reverse()
 

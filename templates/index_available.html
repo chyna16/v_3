@@ -42,9 +42,9 @@
           console.log("boo")
         }
         else {
-          $("#previousDate").val(data.result[data.result.length-1])
+          $("#previousDate").val(data.result[data.result.length-1].split(' ')[0])
               .prop("disabled",false);
-          $("#currentDate").val(data.result[0])
+          $("#currentDate").val(data.result[0].split(' ')[0])
               .prop("disabled",false);
           $("#nextbutton").prop("disabled",false);
           $("#spinner").hide();
