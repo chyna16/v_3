@@ -696,15 +696,15 @@ function createWordcloud(data) {
 // Dependant on have D3 V4
 function commitSelector(dates) {
     d3.select("#commitSelector").html('');
-    
+
     var datum = []
     dates.forEach(function(d){
-    datum.push(new Date(d))
+      datum.push(new Date(d))
     })
     datum.reverse()
 
-    var margin = {top: 10, right: 40, bottom: 30, left: 40},
-      width = 960 - margin.left - margin.right,
+    var margin = {top: 10, right: 40, bottom: 40, left: 20},
+      width = 900 - margin.left - margin.right,
       height = 140 - margin.top - margin.bottom;
 
     var x = d3.scaleTime()
@@ -730,7 +730,14 @@ function commitSelector(dates) {
           .tickFormat(function() { return null; }))
 
     tickVals = [datum[0]]
-    tickVals = tickVals.concat(d3.timeMonth.range(datum[0],datum[datum.length-1]))
+    var endDate = d3.timeDay(datum[datum.length-1])-5
+    if (d3.timeMonth.count(datum[0],datum[datum.length-1]) < 10)
+      tickVals = tickVals.concat(d3.timeMonth.range(datum[0],endDate));
+    else if (d3.timeMonth.count(datum[0],datum[datum.length-1]) < 30)
+      tickVals = tickVals.concat(d3.timeMonth.every(3).range(datum[0],endDate));
+    else
+      tickVals = tickVals.concat(d3.timeMonth.every(6).range(datum[0],endDate));
+
     tickVals.push(datum[datum.length-1])
 
     var formatDay = d3.timeFormat("%b %d"),
@@ -751,12 +758,27 @@ function commitSelector(dates) {
           .tickPadding(0))
       .attr("text-anchor", null)
     .selectAll("text")
+      .style("text-anchor", "start")
+      //.attr("dx", ".8em")
+      //.attr("dy", "-.15em")
+      .attr("transform", function(d) {
+          return "rotate(45)"
+          })
       .attr("x", 6);
 
     svg.append("g")
       .attr("class", "brush")
-
       .call(brush);
+
+    var borderPath = svg.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("height", height)
+      .attr("width", width)
+      .style("stroke", 'black')
+      .style("fill", "none")
+      .style("stroke-width", '1px');
+
     // Maps the selected range to snap to commit dates
     function mapDateRange(date1, date2, dates) {
         var returnVal = [dates[0],dates[dates.length-1]]

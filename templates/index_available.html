@@ -7,6 +7,7 @@
   <script src="https://d3js.org/d3.v4.js"></script>
   <script src="../static/charts.js"></script>
   <script type="text/javascript">
+  // Ajax Repo List Call
   $(function() {
     $('select#project').bind('change', function() {
       $("#repo").empty()
@@ -30,6 +31,7 @@
       return false;
     });
   });
+  // Ajax repo date call
   $(function() {
     $('#repo').bind('change', function() {
       $("#spinner").show();
@@ -64,65 +66,50 @@
     <img id="img-spinner" src="../static/images/spinner.gif" alt="Loading"/>
   </div>
 
-<form class="form-inline" method="POST" enctype="multipart/form-data">
-<center>
+<form class="form-horizontal" method="POST" enctype="multipart/form-data">
+<div class="col-sm-2"></div>
+<center class="col-sm-8">
 <div id="repo-select" class="form-group">
-  <label for="project">Select a Project: </label><br>
-  <select id="project" name='proj_key' class="form-control">
-    <option value="" disabled selected>Select a Project</option>
-    {% for project in list_of_projects %}
-     <option value="{{project[0]}}">{{project[1]}}</option>
-    {% endfor %}
-  </select>
-  <select id="repo" disabled="true" name='repo_name' class="form-control">
-    <option value="" disabled selected>Select a project first</option>
-  </select>
+  <label for="project" class="sr-only control-label" >Select a Project: </label>
+  <div class="col-sm-6">
+    <select id="project" name='proj_key' class="form-control">
+      <option value="" disabled selected>Select a Project</option>
+      {% for project in list_of_projects %}
+       <option value="{{project[0]}}">{{project[1]}}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-6">
+    <select id="repo" disabled="true" name='repo_name' class="form-control">
+      <option value="" disabled selected>Select a project first</option>
+    </select>
+  </div>
 </div>
 <br>
 <div id="date-select" class="form-group">
-    <label for="formInput">Enter Start Date (Default First -> Last Commit):</label><br>
-    <input type="date" class="form-control" id="previousDate" name="from_date" value="" placeholder='YYYY-MM-DD' disabled="true">
-    <label for="formInput"> -> </label>
-    <input type="date" class="form-control" id="currentDate" name="to_date" value="" placeholder='YYYY-MM-DD' disabled="true">
+    <label for="formInput">Date Range (Default: First -> Last Commit):</label><br>
+    <div class="col-sm-6">
+      <div class="input-group">
+        <div class="input-group-addon">Start Date:</div>
+        <input type="date" class="form-control" id="previousDate" name="from_date" value="" placeholder='YYYY-MM-DD' disabled="true">
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="input-group">
+      <div class="input-group-addon">End Date:</div>
+      <input type="date" class="form-control" id="currentDate" name="to_date" value="" placeholder='End Date: YYYY-MM-DD' disabled="true">
+      </div>
+    </div>
     <div id="commitSelector"></div>
 </div>
-<br>
 <div id="submit-form" class="form-group">
     <button type="submit" name="submit_button" value="run_analysis" id="nextbutton" class="btn btn-lg btn-primary" role="button" disabled="true">
       Run analysis
     </button>
 </div>
 </center>
-
+<div class="col-sm-2"></div>
 </form>
-
-<!-- <button onclick="test_name()">Check name</button> -->
-
-<!-- modal for viewing repository details
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <h4 class="modal-title" id="myModalLabel">Repository Details</h4>
-      </div>
-      <div class="modal-body">
-        {# not used yet
-        {% for repo in repo_list %}
-          {% if repo == project_name %}
-              {{project_description}}
-          {% endif %}
-        {% endfor %}
-          #}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div> -->
 
 <script>
 
