@@ -58,7 +58,7 @@ def index():
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			generator.clone_repo(clone_url, password) # go to repo_dir and clone the repo
+			generator.clone_repo(clone_url, password)
 			# message = generator.get_status_message(clone_url)
 			# flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
@@ -84,15 +84,14 @@ def return_repo():
 	dates = stash_api.get_repo_timestamp(key, name, 'http', '15000')
 	return jsonify(result=dates)
 
+
+# NOTE: CURRENTLY NOT IN USE; SHOULD BE REMOVED SOON
 # page where user can select a repository after selecting a Stash project
 @app.route('/index_repo', methods=['GET', 'POST'])
 def index_repo():
-	# retrieves passed in query from index view
-	project_name = request.args.get('project_name')
-	project_repos = stash_api.get_project_repos(project_name, 'http')
-		# dictionary of repos in Stash belong to selected project
-
 	if request.method == 'GET':
+		project_name = request.args.get('project_name')
+		project_repos = stash_api.get_project_repos(project_name, 'http')
 		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name'].split('|')
@@ -100,25 +99,24 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
-		generator.clone_repo(repo_url, settings.password) # go to repo_dir and clone the repo
+		generator.clone_repo(repo_url, settings.password)
 		generator.manage_csv_folder(repo_name, from_date, to_date)
 		return redirect(url_for('dashboard',
 			repo_name=repo_name, from_date=from_date, to_date=to_date))
 			# go straight to dashboard after cloning repo and generating files
 
+
 # page where user can select the specific analysis to view
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-	# retrieves passed in queries from index view
 	repo_name = request.args.get('repo_name')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
-
 	if request.method == 'GET':
 		# buttons to all analyses available; assumed all have been run
 		return render_template('input.html')
 	elif request.method == 'POST':
-		analysis = request.form['analysis']
+		analysis = request.form.get('analysis', '', type=str)
 		return redirect(url_for('result',
 			repo_name=repo_name, analysis=analysis,
 			from_date=from_date, to_date=to_date))
@@ -127,64 +125,32 @@ def dashboard():
 # page where user can view the visualized data
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	# retrieves passed in queries from dashboard view
 	repo_name = request.args.get('repo_name')
-	analysis = request.args.get('analysis')
 	from_date = request.args.get('from_date')
 	to_date = request.args.get('to_date')
 
-	repo_details = repo_name + "_" + from_date + "_" + to_date
-
 	if request.method == 'GET':
-		if analysis == "cloud":
-			try:
-				with open(csv_dir + repo_details + "/"
-					+ analysis + "_" + repo_details + ".log", 'rt') as log_file:
-					word_list = cache.get('cloud_' + repo_details)
-					if word_list is None:
-						word_list = generator.get_word_frequency(log_file)
-						cache.set('cloud_' + repo_details,
-							word_list, timeout=60 * 60)
-				return render_template('result.html',
-					data=word_list, repo_name=json.dumps(repo_name),
-					analysis=json.dumps(analysis),
-					from_date=from_date, to_date=to_date, keys=[])
-			except UnicodeError:
-				with io.open(csv_dir + repo_details + "/"
-					+ analysis + "_" + repo_details
-					+ ".log", 'rt', encoding='utf-8') as log_file:
-					word_list = cache.get('cloud_' + repo_details)
-					if word_list is None:
-						word_list = generator.get_word_frequency(log_file)
-						cache.set('cloud_' + repo_details,
-							word_list, timeout=60 * 60)
-				return render_template('result.html',
-					data=word_list, repo_name=json.dumps(repo_name),
-					analysis=json.dumps(analysis),
-					from_date=from_date, to_date=to_date, keys=[])
-			except (FileNotFoundError, IOError):
-				return render_template('404.html')
-		else:
-			try:
-				with open(csv_dir + repo_details + "/"
-					+ analysis + "_" + repo_name + ".csv", 'rt') as csv_file:
-					data = cache.get('data_' + analysis + '_' + repo_details)
-					keys = cache.get('keys_' + analysis + '_' + repo_details)
-					if data is None:
-						data, keys = generator.parse_csv(csv_file)
-						cache.set('data_' + analysis + '_' + repo_details,
-							data, timeout=60 * 60)
-						cache.set('keys_' + analysis + '_' + repo_details,
-							keys, timeout=60 * 60)
-					return render_template('result.html',
-						repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
-						from_date=from_date, to_date=to_date,
-						data=json.dumps(data), keys=json.dumps(keys))
-							# json.dumps() converts data into a string format
-			except (FileNotFoundError, IOError):
-				return render_template('404.html')
+		analysis = request.args.get('analysis')
+		repo_details = repo_name + "_" + from_date + "_" + to_date
+		data = cache.get('data_' + analysis + '_' + repo_details)
+		keys = cache.get('keys_' + analysis + '_' + repo_details)
+		if data is None:
+			if analysis == "cloud":
+				data, keys = generator.get_word_frequency(repo_details, 
+					analysis + "_" + repo_details + ".log")
+			else:
+				data, keys = generator.parse_csv(repo_details, 
+					analysis + "_" + repo_name + ".csv")
+			cache.set('data_' + analysis + '_' + repo_details,
+					data, timeout=60*60)
+			cache.set('keys_' + analysis + '_' + repo_details,
+					keys, timeout=60*60)
+		return render_template('result.html',
+			repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
+			from_date=from_date, to_date=to_date,
+			data=json.dumps(data), keys=json.dumps(keys))
 	elif request.method == 'POST':
-		analysis = request.form['analysis']
+		analysis = request.form.get('analysis', '', type=str)
 		return redirect(url_for('result',
 			repo_name=repo_name, analysis=analysis,
 			from_date=from_date, to_date=to_date))

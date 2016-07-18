@@ -13,6 +13,9 @@ from datetime import datetime
 
 repo_dir = settings.repo_dir
 
+
+
+
 # called by refresh_repos
 def get_dir_list(path):
 	dir_list = [ item for item in os.listdir(path)
@@ -342,11 +345,16 @@ def ignore_module(entity):
 # called by result view
 # reads opened csv file
 # returns a list of the headers, and a dictionary of each row
-def parse_csv(uploaded_file):
-	reader = csv.reader(uploaded_file)
+def parse_csv(folder, filename):
 	data_dict = [] # list of dictionaries, one dict for each row
 	key_list = [] # list of row headers / keys
 
+	try:
+		csv_file = open(os.path.join(settings.csv_dir, folder, filename), 'rt')
+	except (FileNotFoundError, IOError): 
+		return ([], [])
+
+	reader = csv.reader(csv_file)
 	for i, row in enumerate(reader):
 		temp_dict = {}
 		if i == 0:
@@ -445,9 +453,15 @@ def parse_word(stem, word, word_list, stop_words):
 
 # aqcuires list of all words from commit messages
 # creates a list of dictionaries of words paired with frequency of occurrence
-def get_word_frequency(logfile):
+def get_word_frequency(folder, filename):
+	try:
+		logfile = open(os.path.join(settings.csv_dir, folder, filename), 'rt')
+	except UnicodeError:
+		logfile = io.open(os.path.join(settings.csv_dir, folder, filename), 
+			'rt', encoding='utf-8')
+	except (FileNotFoundError, IOError):
+		return []
 	log_list = logfile.read().split()
-	logfile.close()
 
 	word_list = []
 	stemmer = LancasterStemmer()
@@ -468,8 +482,9 @@ def get_word_frequency(logfile):
 	for word in sorted_word_list[:100]:
 		key = max(word['text'].keys(), key=(lambda k: word['text'][k]))
 		textFreqPairs.append({'text': key, 'freq': word['freq']})
-	return textFreqPairs
 
+	logfile.close()
+	return (textFreqPairs, []) # blank array for keys variable
 
 # retrieved from: http://stackoverflow.com/questions/3424899/
 # 	+ whats-the-simplest-way-to-subtract-a-month-from-a-date-in-python
