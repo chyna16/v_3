@@ -695,31 +695,33 @@ function createWordcloud(data) {
 
 // Dependant on have D3 V4
 function commitSelector(dates) {
-  var datum = []
-  dates.forEach(function(d){
+    d3.select("#commitSelector").html('');
+    
+    var datum = []
+    dates.forEach(function(d){
     datum.push(new Date(d))
-  })
-  datum.reverse()
+    })
+    datum.reverse()
 
-  var margin = {top: 10, right: 40, bottom: 30, left: 40},
+    var margin = {top: 10, right: 40, bottom: 30, left: 40},
       width = 960 - margin.left - margin.right,
       height = 140 - margin.top - margin.bottom;
 
-  var x = d3.scaleTime()
+    var x = d3.scaleTime()
       .domain([datum[0], datum[datum.length-1]])
       .rangeRound([0, width]);
 
-  var brush = d3.brushX()
+    var brush = d3.brushX()
       .extent([[0, 0], [width, height]])
       .on("end", brushended);
 
-  var svg = d3.select("#commitSelector").append("svg")
+    var svg = d3.select("#commitSelector").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
-  svg.append("g")
+    svg.append("g")
       .attr("class", "axis axis--grid")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x)
@@ -727,20 +729,20 @@ function commitSelector(dates) {
           .tickSize(-height)
           .tickFormat(function() { return null; }))
 
-  tickVals = [datum[0]]
-  tickVals = tickVals.concat(d3.timeMonth.range(datum[0],datum[datum.length-1]))
-  tickVals.push(datum[datum.length-1])
+    tickVals = [datum[0]]
+    tickVals = tickVals.concat(d3.timeMonth.range(datum[0],datum[datum.length-1]))
+    tickVals.push(datum[datum.length-1])
 
-  var formatDay = d3.timeFormat("%b %d"),
+    var formatDay = d3.timeFormat("%b %d"),
       formatMonth = d3.timeFormat("%b"),
       formatYear = d3.timeFormat("%Y");
-  function multiFormat(date) {
-    if (date == datum[0] || date == datum[datum.length-1]){
-      return formatDay(date)
+    function multiFormat(date) {
+        if (date == datum[0] || date == datum[datum.length-1]){
+          return formatDay(date)
+        }
+        return (d3.timeYear(date) < date ? formatMonth : formatYear)(date);
     }
-    return (d3.timeYear(date) < date ? formatMonth : formatYear)(date);
-  }
-  svg.append("g")
+    svg.append("g")
       .attr("class", "axis axis--x")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x)
@@ -751,45 +753,45 @@ function commitSelector(dates) {
     .selectAll("text")
       .attr("x", 6);
 
-  svg.append("g")
+    svg.append("g")
       .attr("class", "brush")
 
       .call(brush);
-  // Maps the selected range to snap to commit dates
-  function mapDateRange(date1, date2, dates) {
-    var returnVal = [dates[0],dates[dates.length-1]]
-    var lowerSearch = true
+    // Maps the selected range to snap to commit dates
+    function mapDateRange(date1, date2, dates) {
+        var returnVal = [dates[0],dates[dates.length-1]]
+        var lowerSearch = true
 
-    for (var i=0; i < dates.length; i++){
-      d = dates[i]
-      if (lowerSearch) {
-        if (d > date1) {
-          returnVal[0] = d
-          lowerSearch = false
+        for (var i=0; i < dates.length; i++){
+          d = dates[i]
+          if (lowerSearch) {
+            if (d > date1) {
+              returnVal[0] = d
+              lowerSearch = false
+            }
+          }
+          else {
+            if (d > date2) {
+              break
+            }
+            else {
+              returnVal[1] = d
+            }
+          }
         }
-      }
-      else {
-        if (d > date2) {
-          break
-        }
-        else {
-          returnVal[1] = d
-        }
-      }
+        return returnVal
     }
-    return returnVal
-  }
 
-  function brushended() {
-    if (!d3.event.sourceEvent) return; // Only transition after input.
-    if (!d3.event.selection) return; // Ignore empty selections.
-    var domain0 = d3.event.selection.map(x.invert),
-        domain1 = mapDateRange(domain0[0],domain0[1],datum);
-    var formFormat = d3.timeFormat('%Y-%m-%d')
-    d3.select('#previousDate').property("value", formFormat(domain1[0]))
-    d3.select('#currentDate').property("value", formFormat(domain1[1]))
-    d3.select(this)
-      .transition()
-        .call(brush.move, domain1.map(x));
-  }
+    function brushended() {
+        if (!d3.event.sourceEvent) return; // Only transition after input.
+        if (!d3.event.selection) return; // Ignore empty selections.
+        var domain0 = d3.event.selection.map(x.invert),
+            domain1 = mapDateRange(domain0[0],domain0[1],datum);
+        var formFormat = d3.timeFormat('%Y-%m-%d')
+        d3.select('#previousDate').property("value", formFormat(domain1[0]))
+        d3.select('#currentDate').property("value", formFormat(domain1[1]))
+        d3.select(this)
+          .transition()
+            .call(brush.move, domain1.map(x));
+    }
 }
