@@ -8,7 +8,6 @@ import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
 from werkzeug.contrib.cache import SimpleCache
-# from datetime import datetime
 
 app = Flask(__name__)
 secret = os.urandom(24)
@@ -23,9 +22,9 @@ list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
-clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
+clone_sched.add_job(lambda:generator.refresh_repos(),
 				 'cron', day='0-6', hour='1')
-# clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
+# clone_sched.add_job(lambda:generator.refresh_repos(),
 					# 'interval', hours=2)
 	# lambda passes function as parameter
 	# cron is a configuration for time schedules
@@ -37,53 +36,29 @@ clone_sched.start()
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
-	repo_list = generator.get_repo_list(repo_dir,
-		generator.get_dir_list(repo_dir))
 	if request.method == 'GET':
-		# previous_date = generator.get_prev_date()
-		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
-		return render_template('index.html',
-			repo_list=repo_list, list_of_projects=list_of_projects)
+		return render_template('index.html', list_of_projects=list_of_projects)
 	elif request.method == 'POST':
-		if request.form['submit_button'] == "run_analysis":
-			# if a selection was made from 'Available Repositories'
-			proj_key = request.form['proj_key']
-			repo_name = request.form['repo_name'].split('|')[0].lower()
-			repo_url = request.form['repo_name'].split('|')[1]
-			from_date = request.form['from_date']
-			to_date = request.form['to_date']
+		if request.form.get('submit_button', '', type=str) == "run_analysis":
+			proj_key = request.form.get('proj_key', '', type=str)
+			repo_name = request.form.get('repo_name', '', type=str).lower()
+			from_date = request.form.get('from_date', '', type=str)
+			to_date = request.form.get('to_date', '', type=str)
 
-			available_repo = [ repo for repo in repo_list
-				if repo.split('|')[0] == repo_name ]
-			remote_last_commit = stash_api.get_repo_timestamp(proj_key,
-				repo_name, 'http', '1')
+			generator.repo_check_and_update(repo_name, proj_key, to_date)
 
-			if available_repo == []:
-				print("Repo doesnt exist in local")
-				generator.clone_repo(repo_url, repo_dir, settings.password)
-			elif (remote_last_commit[0]
-					> available_repo[0].split('|')[1].split(" ")[0] < to_date):
-				print("Local Copy old")
-				generator.refresh_single_repo(repo_dir, repo_name)
-
-			if not generator.manage_csv_folder(repo_dir,
-					repo_name, from_date, to_date):
+			if not generator.manage_csv_folder(repo_name, from_date, to_date):
 				flash('No data for selected date range found.')
 				return redirect(url_for('index'))
 			else:
 				return redirect(url_for('dashboard',
 					repo_name=repo_name, from_date=from_date, to_date=to_date))
 					# redirects to dashboard view which opens input.html
-		elif request.form['submit_button'] == "refresh":
-			# if refresh button was click from 'Available Repositories'
-			repo_name = request.form['repo_name'].split('|')[0]
-			generator.refresh_single_repo(repo_dir, repo_name)
-			return redirect(url_for('index'))
 		elif request.form['submit_button'] == "clone":
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			generator.clone_repo(clone_url, repo_dir, password) # go to repo_dir and clone the repo
+			generator.clone_repo(clone_url, password) # go to repo_dir and clone the repo
 			# message = generator.get_status_message(clone_url)
 			# flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
@@ -92,13 +67,14 @@ def index():
 			project_name = request.form['submit_button']
 			return redirect(url_for('index_repo', project_name=project_name))
 
+
 @app.route('/_return_repos')
 def return_repos():
 	return_val = ''
 	key = request.args.get('key', '', type=str)
 	repos = stash_api.get_project_repos(key,'http')
 	for repo in repos:
-		return_val += '<option value="'+repo['name']+'|'+repo['url']+'">'+repo['name']+'</option>'
+		return_val += '<option value="'+repo['name']+'">'+repo['name']+'</option>'
 	return jsonify(result=return_val)
 
 @app.route('/_return_repo_dates')
@@ -117,8 +93,6 @@ def index_repo():
 		# dictionary of repos in Stash belong to selected project
 
 	if request.method == 'GET':
-		# previous_date = generator.get_prev_date()
-		# current_date = str(datetime.now()).split('.')[0].split(' ')[0]
 		return render_template('index_repo.html', repo_list=project_repos)
 	elif request.method == 'POST' and not request.form['repo_name'] == "":
 		selected_repo = request.form['repo_name'].split('|')
@@ -126,8 +100,8 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
-		generator.clone_repo(repo_url, repo_dir, settings.password) # go to repo_dir and clone the repo
-		generator.manage_csv_folder(repo_dir, repo_name, from_date, to_date)
+		generator.clone_repo(repo_url, settings.password) # go to repo_dir and clone the repo
+		generator.manage_csv_folder(repo_name, from_date, to_date)
 		return redirect(url_for('dashboard',
 			repo_name=repo_name, from_date=from_date, to_date=to_date))
 			# go straight to dashboard after cloning repo and generating files
@@ -215,22 +189,29 @@ def result():
 			repo_name=repo_name, analysis=analysis,
 			from_date=from_date, to_date=to_date))
 
+
 # this filter allows using '|fromjson' in a jinja template
 # to call json.loads() method
 @app.template_filter('fromjson')
 def convert_json(s):
 	return json.loads(s)
 
-# customized error page
-@app.errorhandler(404)
-def not_found(e):
-	return render_template ('404.html')
 
 # customized error page
 @app.errorhandler(400)
 def bad_request(e):
 	return render_template ('400.html')
 
+
+# customized error page
+@app.errorhandler(404)
+def not_found(e):
+	return render_template ('404.html')
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+	return render_template ('500.html')
 
 if __name__ == '__main__':
 	app.run(debug=True)
