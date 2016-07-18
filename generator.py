@@ -351,15 +351,13 @@ def parse_csv(folder, filename):
 
 	try:
 		csv_file = open(os.path.join(settings.csv_dir, folder, filename), 'rt')
-	except (FileNotFoundError, IOError): 
-		return ([], [])
+	except (FileNotFoundError, IOError): return ([], [])
 
 	reader = csv.reader(csv_file)
 	for i, row in enumerate(reader):
 		temp_dict = {}
 		if i == 0:
-			# if first row of file, fill key_list with headers
-			key_list = row
+			key_list = row # if first row of file, fill key_list with headers
 		else:
 			if not row: break # if codemaat produces blank csv's
 			# fill temp dict with each value in the row
@@ -367,6 +365,7 @@ def parse_csv(folder, filename):
 				for j, key in enumerate(key_list):
 					temp_dict[key] = row[j] # pair respective header w/ value
 				data_dict.append(temp_dict)
+	csv_file.close()
 
 	return (data_dict, key_list)
 
