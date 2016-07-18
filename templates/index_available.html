@@ -4,6 +4,7 @@
 <head>
   {% block head %}
     <title>{% block title %}{% endblock %} - V3</title>
+  <!-- TODO remove external ref to d3.v4 -->
   <script src="https://d3js.org/d3.v4.js"></script>
   <script src="../static/charts.js"></script>
   <script type="text/javascript">
@@ -61,67 +62,65 @@
 </head>
 
 <body>
-  <center><div id="timetag"></div></center>
-  <div id="spinner" class="spinner" style="display:none;">
-    <img id="img-spinner" src="../static/images/spinner.gif" alt="Loading"/>
-  </div>
+
+<!-- Spinner to indicate ajax or analysis running -->
+<div id="spinner" class="spinner" style="display:none;">
+  <img id="img-spinner" src="../static/images/spinner.gif" alt="Loading"/>
+</div>
 
 <form class="form-horizontal" method="POST" enctype="multipart/form-data">
 <div class="col-sm-2"></div>
-<center class="col-sm-8">
-<div id="repo-select" class="form-group">
-  <label for="project" class="sr-only control-label" >Select a Project: </label>
-  <div class="col-sm-6">
-    <select id="project" name='proj_key' class="form-control">
-      <option value="" disabled selected>Select a Project</option>
-      {% for project in list_of_projects %}
-       <option value="{{project[0]}}">{{project[1]}}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="col-sm-6">
-    <select id="repo" disabled="true" name='repo_name' class="form-control">
-      <option value="" disabled selected>Select a project first</option>
-    </select>
-  </div>
-</div>
-<br>
-<div id="date-select" class="form-group">
-    <label for="formInput">Date Range (Default: First -> Last Commit):</label><br>
+<center class="col-sm-8" style="width: 900px;">
+
+  <h3>Repository Selection</h3>
+
+  <!-- Project and repository selection -->
+  <div id="repo-select" class="form-group">
+    <label for="project" class="sr-only control-label" >Select a Project: </label>
     <div class="col-sm-6">
-      <div class="input-group">
-        <div class="input-group-addon">Start Date:</div>
-        <input type="date" class="form-control" id="previousDate" name="from_date" value="" placeholder='YYYY-MM-DD' disabled="true">
-      </div>
+      <select id="project" name='proj_key' class="form-control">
+        <option value="" disabled selected>Select a Project</option>
+        {% for project in list_of_projects %}
+          <option value="{{project[0]}}">{{project[1]}}</option>
+        {% endfor %}
+      </select>
     </div>
     <div class="col-sm-6">
-      <div class="input-group">
-      <div class="input-group-addon">End Date:</div>
-      <input type="date" class="form-control" id="currentDate" name="to_date" value="" placeholder='End Date: YYYY-MM-DD' disabled="true">
-      </div>
+      <select id="repo" disabled="true" name='repo_name' class="form-control">
+        <option value="" disabled selected>Select a project first</option>
+      </select>
     </div>
-    <div id="commitSelector"></div>
-</div>
-<div id="submit-form" class="form-group">
+  </div>
+
+  <!-- date range selection -->
+  <div id="date-select" class="form-group">
+      <label for="formInput">Date Range (Default: First -> Last Commit):</label><br>
+      <div class="col-sm-6">
+        <div class="input-group">
+          <div class="input-group-addon">Start Date:</div>
+          <input type="date" class="form-control" id="previousDate" name="from_date" placeholder='YYYY-MM-DD' disabled="true">
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="input-group">
+          <div class="input-group-addon">End Date:</div>
+          <input type="date" class="form-control" id="currentDate" name="to_date" placeholder='YYYY-MM-DD' disabled="true">
+        </div>
+      </div>
+      <div id="commitSelector"></div>
+  </div>
+
+  <!-- Submit Button -->
+  <div id="submit-form" class="form-group">
     <button type="submit" name="submit_button" value="run_analysis" id="nextbutton" class="btn btn-lg btn-primary" role="button" disabled="true">
       Run analysis
     </button>
-</div>
+  </div>
 </center>
 <div class="col-sm-2"></div>
 </form>
-
 <script>
-
-function displayTime(elem) {
-  var timetag = elem.children[0].value.split('|');
-  if (timetag[1] != undefined) {
-    $("#timetag").text(timetag[0] + ' updated as of: ' + timetag[1]);
-    $("#previousDate").val(timetag[2]);
-    $("#currentDate").val(timetag[3]);
-  }
-}
-
+// Submit Button activate spinner
 $("#nextbutton").click(function() {
   var $btn = $(this);
   $btn.button('loading');
