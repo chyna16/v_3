@@ -76,9 +76,16 @@ def refresh_single_repo(repo):
 # called by: visualizer at timed intervals
 # updates already cloned repositories
 def refresh_repos():
-	repo_list = get_dir_list()
+	repo_list = get_dir_list(repo_dir)
 	for repo in repo_list:
-		refresh_single_repo(repo)
+		filename = os.path.join(repo_dir, repo, 'timetag.txt')
+		try: 
+			with open(filename, 'rt') as timetag: datetime = timetag.read()
+		except IOError: datetime = ' '
+		project = stash_api.get_repo_detail(repo, 'key')
+		if datetime < stash_api.get_repo_timestamp(project, repo, 'http', '1')[0]:
+			refresh_single_repo(repo)
+
 
 # Check repo clone if it doesn't exist and re-clone if it is old
 def repo_check_and_update(repo_name, proj_key, to_date):
