@@ -38,7 +38,7 @@
 <p class="nav navbar-text visible-md-block visible-lg-block">Repository: {{ repo_name }}
     from
         {% if from_date != '' %} {{ from_date }}
-        {% else %} beginning 
+        {% else %} beginning
         {% endif %}
     to
         {% if to_date != '' %} {{ to_date }}
@@ -53,11 +53,11 @@
 <h3 class="visible-sm-block visible-xs-block">Repository: {{ repo_name }}
     from
         {% if from_date != '' %} {{ from_date }}
-        {% else %} beginning 
+        {% else %} beginning
         {% endif %}
     to
         {% if to_date != '' %} {{ to_date }}
-        {% else %} present 
+        {% else %} present
         {% endif %}
 </h3>
 </center>
@@ -133,7 +133,7 @@
     };
     var help_lst = {
         "metrics": "<ul><li>Select a metric to use for filtering (n-authors, n-revs, or all)</li><li>If you would like to narrow the range of authors or revisions click on <b>add filter</b> and use the sliders to select the desired values.</li><li>Hover over a bar to see its exact value.</li></ul>",
-        "age": "<ul><li>Selecting <b>added</b> shows just the number of line added.</li><li>Selecting <b>deleted</b> shows just the number of line deleted.</li><li>Selecting <b>filter</b> allows you to narrow the range of relevant values</li><li>Place your mouse over a bar to see its exact value.</li></ul>",
+        "age": "<ul><li>The scatter plot shows the number of lines Added vs. lines Removed</li><li>Selecting <b>filter</b> allows you to narrow the range of relevant values and remove outliers from your dataset</li><li>Place your mouse over a point to see its name and exact values.</li></ul>",
         "hotspots": "<ul><li>Blue circles correspond to the folder hierarchy of your project.</li><li>Click on these circles to drill down into folders of interest.</li><li>Circles that are pink <-> red, whose hue corresponds to the relative number of revisions, are the actual files in the repository.</li><li>The size of the circles corresponds to the number of lines contained within.</li></ul>",
         "coupling": "<ul><li>Click on a module name to see what other modules it is coupled with and to what extent.</li><li>Selecting <b>degree</b> shows percentage of times the two files were committed together.</li><li>Selecting <b>average-revs</b> displays pie charts divited by the number of mutual commits with coupled entities.</li>",
         "cloud": "<ul><li>The size and redness of the word is proportional to frequency.</li><li>Mouse over each word to see how many times that word was used.</li></ul>"
@@ -153,6 +153,6 @@
             else createTable(json_data);
         }
     })
-    
+
 </script>
 {% endblock %}
