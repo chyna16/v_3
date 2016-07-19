@@ -2,7 +2,9 @@
 // also called by createTable after table has been created / updated
 function createGraph(data) {
     if (analysis_type == "hotspots") {
-        createBubblePack(data);
+      var color = d3.scale.category20();
+      createHeader(color);
+      createBubblePack(data);
     }
     else if (analysis_type == "coupling") {
         // if coupling, graph is not create until chooseModule is called
@@ -24,7 +26,8 @@ function createGraph(data) {
 
 function createHeader(color) {
     var header = d3.select("#header").html('').append("p");
-    if (analysis_type != "age"){
+
+    if (analysis_type !== "age" && analysis_type !== "hotspots"){
       header
         .selectAll("button")
             .data(keys.filter(function(key) {
@@ -38,25 +41,26 @@ function createHeader(color) {
         .style('margin', '10px')
         .attr('value', function(d) { return d; })
         .on('click', function() { chooseColumn(this); });
-    }
-    if (analysis_type != 'coupling' && analysis_type != "age") {
-        header.append("button")
-            .attr('class', 'btn')
-            .text('all')
-            .style('background-color', 'black')
-            .style('color', 'white')
-            .style('margin', '10px')
-            .attr('value', 'default')
-            .on('click', function() { chooseColumn(this); });
-    }
 
+      if (analysis_type != 'coupling') {
+          header.append("button")
+              .attr('class', 'btn')
+              .text('all')
+              .style('background-color', 'black')
+              .style('color', 'white')
+              .style('margin', '10px')
+              .attr('value', 'default')
+              .on('click', function() { chooseColumn(this); });
+      }
+  }
     header.append("button")
-        .attr('class', 'btn')
-        .text('add filter')
-        .style('background-color', 'grey')
-        .style('color', 'white')
-        .style('margin', '10px')
-        .on('click', function() { toggleFilter(); });
+      .attr('class', 'btn')
+      .text('add filter')
+      .style('background-color', 'grey')
+      .style('color', 'white')
+      .style('margin', '10px')
+      .on('click', function() { toggleFilter(); });
+
 }
 
 
