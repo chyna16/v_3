@@ -505,7 +505,7 @@ function createBubblePack(inputData) {
         focus = d;
 
         // Auto-skip folders with one child
-        while(focus.children !== undefined && focus.children.children !== undefined && focus.children.length == 1) {
+        while(focus.children !== undefined && focus.children[0].children !== undefined && focus.children.length == 1) {
             focus = focus.children[0];
         }
 
