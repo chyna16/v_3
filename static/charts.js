@@ -14,6 +14,9 @@ function createGraph(data) {
     else if (analysis_type == "cloud") {
         createWordcloud(data);
     }
+    else if (analysis_type == "age") {
+      createScatterPlot(data);
+    }
     else {
         createBarGraph(data);
     }
@@ -21,8 +24,8 @@ function createGraph(data) {
 
 function createHeader(color) {
     var header = d3.select("#header").html('').append("p");
-
-    header
+    if (analysis_type != "age"){
+      header
         .selectAll("button")
             .data(keys.filter(function(key) {
                 return key != keys[0] && key != 'coupled'; }))
@@ -35,8 +38,8 @@ function createHeader(color) {
         .style('margin', '10px')
         .attr('value', function(d) { return d; })
         .on('click', function() { chooseColumn(this); });
-
-    if (analysis_type != 'coupling') {
+    }
+    if (analysis_type != 'coupling' && analysis_type != "age") {
         header.append("button")
             .attr('class', 'btn')
             .text('all')
@@ -221,6 +224,155 @@ function createBarGraph(data) {
             .attr("fill", "#325a7e");
 
     createHeader(color);
+}
+
+function createScatterPlot(data){
+  d3.select("#graph").html('');
+
+  var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 900 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom,
+    duration_time = 700;
+
+  var x_scale = d3.scale.linear().range([0,width]);
+  var y_scale = d3.scale.linear().range([height,0]);
+
+  var color = "#1ab7ea"
+
+  var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .offset([-10, 0])
+    .html(function(d) {
+      return "<p>File: " + d.id +
+        "</p><p>Lines Added: " + d.added +
+        "</p><p>Lines Removed: " + d.deleted + "</p>";
+    })
+
+  var x_axis = d3.svg.axis()
+    .scale(x_scale)
+    .ticks(10)
+    .orient("bottom");
+
+  var y_axis = d3.svg.axis()
+    .scale(y_scale)
+    .ticks(10)
+    .orient("left");
+
+  var svg = d3.select("#graph").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .call(tip)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("g")
+    .attr("transform", "translate(0,"+ height +")")
+    .attr("class", "axis")
+    .attr("id", "x_axis")
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Added");
+
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("id", "y_axis")
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Removed");
+
+  function update(arr_data) {
+    //Format Data
+    data = {};
+    arr_data.forEach(function(d) {
+      data[d.entity] = { id: d.entity };
+      data[d.entity]["added"] = d["added"];
+      data[d.entity]["deleted"] = d["deleted"];
+    });
+
+    color = d3.scale.linear().domain([0,d3.max(d3.values(data), function(d) {
+      return d.added*d.deleted;
+    })]).range(["#1ab7ea", "red"]);
+
+    //Calc X and Y scale
+    x_scale.domain([0,d3.max(d3.values(data), function(d) {
+      return d["added"]*1.1;
+    })]);
+    y_scale.domain([0,d3.max(d3.values(data), function(d) {
+      return d["deleted"]*1.1;
+    })]);
+
+    // update axis accordingly
+    d3.select("g#x_axis")
+      .transition()
+      .duration(duration_time)
+      .call(x_axis);
+
+    d3.select("g#y_axis")
+      .transition()
+      .duration(duration_time)
+      .call(y_axis);
+
+    //enter new nodes
+    var data_to_draw = d3.values(data).filter(function(d) {
+      return true;
+    });
+    var node_g = svg.selectAll("g.node")
+      .data(d3.values(data_to_draw));
+
+    //enter our groups
+    var node_g_enter = node_g.enter()
+      .append("g")
+      .attr("class", "node");
+
+    // Enter circles nested within our group
+    node_g_enter.append("circle");
+
+    // update currently existing nodes
+    var count = d3.values(data_to_draw).length;
+    node_g
+        .select("circle")
+        .transition()
+        .duration(duration_time)
+        .delay(function(d,i) {
+          return i / count * duration_time;
+        })
+        .attr("cx", function(d) { return x_scale(d["added"]); })
+        .attr("cy", function(d) {
+          if (d["deleted"]){
+            return y_scale(d["deleted"]);
+          }
+          return y_scale.range()[0];
+        });
+    node_g. select("circle")
+        .attr("r", 5)
+        .attr("fill", function(d) {
+            return color(d.added * d.deleted);
+        })
+        .on("mouseover", tip.show)
+        .on("mouseout", tip.hide);
+
+        //Exit old nodes
+        var exit_node_gs = node_g.exit();
+
+        exit_node_gs.transition().delay(duration_time * 3).remove();
+
+        exit_node_gs.select("circle")
+          .transition()
+          .delay(duration_time * 2)
+          .ease("bounce")
+          .duration(duration_time)
+          .attr("cy", y_scale.range()[0]);
+
+  }
+  update(data);
+  createHeader(color);
 }
 
 function createBubblePack(inputData) {
@@ -598,7 +750,6 @@ function createPieChart(data, module) {
     slice.append("text")
         .attr('transform', function(d) {
             return 'translate(' + textArc.centroid(d) + ')';
-                // + 'rotate(' + angle(d) + ')';
         })
         .attr('dy', '.35em')
         .attr('text-anchor', 'middle')
@@ -625,18 +776,6 @@ function createWordcloud(data) {
         .attr('class', "d3-tip")
         .direction(function(d) {
             var result = 's';
-            /* Posotion aware corner tip
-            if (d3.event.clientY > height/2) {
-                result = 'n';
-            } else {
-                result = 's';
-            }
-            if (d3.event.pageX > width/2) {
-                result += 'w';
-            } else {
-                result += 'e';
-            }
-            */
             return result;
         })
         .html(function(d) {
@@ -649,10 +788,7 @@ function createWordcloud(data) {
                     .words(commit_words)
                     .padding(10)
                     .font('monospace')
-                    // rotates random words 90 degrees
-                    // .rotate(function(d) { return Math.floor(Math.random() * 2) * 90; })
                     .rotate(function (d) {return 0})
-                    //not all words are being displayed if font size is too large
                     .text(function(d) {return d.text;})
                     .fontSize(function(d) {return font(d['freq'])})
                     .spiral("rectangular")
@@ -693,7 +829,7 @@ function createWordcloud(data) {
     }
 }
 
-// Dependant on have D3 V4
+// Dependant on D3 V4
 function commitSelector(dates) {
     d3.select("#commitSelector").html('');
 
@@ -729,6 +865,7 @@ function commitSelector(dates) {
           .tickSize(-height)
           .tickFormat(function() { return null; }))
 
+    // Assemble an array of values to use as ticks
     tickVals = [datum[0]]
     var endDate = d3.timeDay(datum[datum.length-1])-5
     if (d3.timeMonth.count(datum[0],datum[datum.length-1]) < 10)
@@ -740,6 +877,7 @@ function commitSelector(dates) {
 
     tickVals.push(datum[datum.length-1])
 
+    // Conditional formatting of ticks
     var formatDay = d3.timeFormat("%b %d"),
       formatMonth = d3.timeFormat("%b"),
       formatYear = d3.timeFormat("%Y");
@@ -749,6 +887,7 @@ function commitSelector(dates) {
         }
         return (d3.timeYear(date) < date ? formatMonth : formatYear)(date);
     }
+
     svg.append("g")
       .attr("class", "axis axis--x")
       .attr("transform", "translate(0," + height + ")")
@@ -759,8 +898,6 @@ function commitSelector(dates) {
       .attr("text-anchor", null)
     .selectAll("text")
       .style("text-anchor", "start")
-      //.attr("dx", ".8em")
-      //.attr("dy", "-.15em")
       .attr("transform", function(d) {
           return "rotate(45)"
           })
