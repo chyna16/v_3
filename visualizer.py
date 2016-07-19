@@ -56,18 +56,18 @@ def index():
 				return redirect(url_for('dashboard',
 					repo_name=repo_name, from_date=from_date, to_date=to_date))
 					# redirects to dashboard view which opens input.html
-		elif request.form['submit_button'] == "clone":
-			# if user provided a clone url and password
-			clone_url = request.form['clone_url']
-			password = request.form['password']
-			repo_manager.clone_repo(clone_url, repo_dir, password)
-			# message = generator.get_status_message(clone_url)
-			# flash(message) # displays a confirmation message on the screen
-			return redirect(url_for('index'))
-		else:
-			# if a selection was made from 'Stash Repositories'
-			project_name = request.form['submit_button']
-			return redirect(url_for('index_repo', project_name=project_name))
+		# elif request.form['submit_button'] == "clone":
+		# 	# if user provided a clone url and password
+		# 	clone_url = request.form['clone_url']
+		# 	password = request.form['password']
+		# 	repo_manager.clone_repo(clone_url, repo_dir, password)
+		# 	# message = generator.get_status_message(clone_url)
+		# 	# flash(message) # displays a confirmation message on the screen
+		# 	return redirect(url_for('index'))
+		# else:
+		# 	# if a selection was made from 'Stash Repositories'
+		# 	project_name = request.form['submit_button']
+		# 	return redirect(url_for('index_repo', project_name=project_name))
 
 
 @app.route('/_return_repos')
@@ -89,23 +89,23 @@ def return_repo():
 
 # NOTE: CURRENTLY NOT IN USE; SHOULD BE REMOVED SOON
 # page where user can select a repository after selecting a Stash project
-@app.route('/index_repo', methods=['GET', 'POST'])
-def index_repo():
-	if request.method == 'GET':
-		project_name = request.args.get('project_name')
-		project_repos = stash_api.get_project_repos(project_name, 'http')
-		return render_template('index_repo.html', repo_list=project_repos)
-	elif request.method == 'POST' and not request.form['repo_name'] == "":
-		selected_repo = request.form['repo_name'].split('|')
-		repo_name = selected_repo[0].lower()
-		repo_url = selected_repo[1] # string: clone url
-		from_date = request.form['from_date']
-		to_date = request.form['to_date']
-		repo_manager.clone_repo(clone_url, repo_dir, password)
-		generator.manage_csv_folder(repo_name, from_date, to_date)
-		return redirect(url_for('dashboard',
-			repo_name=repo_name, from_date=from_date, to_date=to_date))
-			# go straight to dashboard after cloning repo and generating files
+# @app.route('/index_repo', methods=['GET', 'POST'])
+# def index_repo():
+# 	if request.method == 'GET':
+# 		project_name = request.args.get('project_name')
+# 		project_repos = stash_api.get_project_repos(project_name, 'http')
+# 		return render_template('index_repo.html', repo_list=project_repos)
+# 	elif request.method == 'POST' and not request.form['repo_name'] == "":
+# 		selected_repo = request.form['repo_name'].split('|')
+# 		repo_name = selected_repo[0].lower()
+# 		repo_url = selected_repo[1] # string: clone url
+# 		from_date = request.form['from_date']
+# 		to_date = request.form['to_date']
+# 		repo_manager.clone_repo(clone_url, repo_dir, password)
+# 		generator.manage_csv_folder(repo_name, from_date, to_date)
+# 		return redirect(url_for('dashboard',
+# 			repo_name=repo_name, from_date=from_date, to_date=to_date))
+# 			# go straight to dashboard after cloning repo and generating files
 
 
 # page where user can select the specific analysis to view

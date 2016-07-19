@@ -26,23 +26,23 @@ def set_path(path):
 # called by index view to generate message
 # FIX: currently cd's into repo_dir and re-clones the repo
 # 	causing the message to be "already exists"
-def get_status_message(clone_url):
-	os.chdir(settings.repo_dir)
-	# temporary message handler for cloning repositories
-	clone_status = subprocess.getoutput('git clone ' + clone_url)
-	print ("this is the status: " + clone_status)
-	if 'Authentication failed' 	in clone_status:
-		message = "Authentication failed."
-	elif 'already exists' in clone_status:
-		message = """Repository exists. Check the 'Available
-		 Repositories' tab."""
-	elif 'not found' in clone_status:
-		message = """Repository not found. Either it does not exist, or you do
-		not have permission to access it."""
-	else:
-		message = "Cloning complete. Check the 'Available Repositories tab."
-	os.chdir(settings.v3_dir)
-	return message
+# def get_status_message(clone_url):
+# 	os.chdir(settings.repo_dir)
+# 	# temporary message handler for cloning repositories
+# 	clone_status = subprocess.getoutput('git clone ' + clone_url)
+# 	print ("this is the status: " + clone_status)
+# 	if 'Authentication failed' 	in clone_status:
+# 		message = "Authentication failed."
+# 	elif 'already exists' in clone_status:
+# 		message = """Repository exists. Check the 'Available
+# 		 Repositories' tab."""
+# 	elif 'not found' in clone_status:
+# 		message = """Repository not found. Either it does not exist, or you do
+# 		not have permission to access it."""
+# 	else:
+# 		message = "Cloning complete. Check the 'Available Repositories tab."
+# 	os.chdir(settings.v3_dir)
+# 	return message
 
 
 # called by generate_data functions
@@ -87,79 +87,79 @@ def create_log(log_type, repo_name, from_date, to_date, address):
 #obtains complexity history of entire repository, regardless of date selected
 #can take a long time (up to 3 min)when running on large repositories
 #requires the 'csvcat' python package
-def create_complexity_files(repo, address, from_date, to_date):
-	folder_name = repo + "_" + from_date + "_" + to_date
-	#files to be ignored
-	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
-	 '.spec', '.md', '.ignore', '.ttf', '.min', '.css')
+# def create_complexity_files(repo, address, from_date, to_date):
+# 	folder_name = repo + "_" + from_date + "_" + to_date
+# 	#files to be ignored
+# 	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
+# 	 '.spec', '.md', '.ignore', '.ttf', '.min', '.css')
 
-	file_list = []
-	csv_list = []
-	git_list = []
+# 	file_list = []
+# 	csv_list = []
+# 	git_list = []
 
-	# get the log id of the first and latest commit in the repository
-	first_id = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h" --no-patch --reverse | head -1')
-	last_id = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h" --no-patch | head -1')
-	# gets the list of commit IDs and their dates
-	git_values = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h %ad" --date=short --no-patch --reverse')
+# 	# get the log id of the first and latest commit in the repository
+# 	first_id = subprocess.getoutput('git --git-dir ' + address
+# 		+ ' log --pretty=format:"%h" --no-patch --reverse | head -1')
+# 	last_id = subprocess.getoutput('git --git-dir ' + address
+# 		+ ' log --pretty=format:"%h" --no-patch | head -1')
+# 	# gets the list of commit IDs and their dates
+# 	git_values = subprocess.getoutput('git --git-dir ' + address
+# 		+ ' log --pretty=format:"%h %ad" --date=short --no-patch --reverse')
 
-	for item in git_values.splitlines():
-		git_list.append(item)
-
-
-	for root, dirs, files in os.walk(settings.repo_dir + repo):
-		if '.git' in dirs:
-			dirs.remove('.git')
-		for file in files:
-			if file.endswith(extensions):
-				continue
-			file_list.append(os.path.join(root, file))
-
-	os.chdir(os.path.join(settings.repo_dir, repo))
-
-	#runs complexity analysis script on each file in the repository
-	for file in file_list:
-		split_path = file.split(repo + '/')
-		os.system('python2 ' + settings.v3_dir + '/git_complexity_trend.py --start '
-			+ first_id + ' --end ' + last_id + ' --file ' + split_path[1] + ' > '
-			+ settings.csv_dir  + folder_name + '/complex_'
-			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv')
+# 	for item in git_values.splitlines():
+# 		git_list.append(item)
 
 
-	os.chdir(os.path.join(settings.csv_dir, folder_name))
+# 	for root, dirs, files in os.walk(settings.repo_dir + repo):
+# 		if '.git' in dirs:
+# 			dirs.remove('.git')
+# 		for file in files:
+# 			if file.endswith(extensions):
+# 				continue
+# 			file_list.append(os.path.join(root, file))
 
-	for file in glob.glob("*.csv"):
-		csv_list.append(file)
+# 	os.chdir(os.path.join(settings.repo_dir, repo))
 
-	#appends csv files together into one
-	os.system('csvcat --skip-headers ' + (' '.join(csv_list)) + ' > '
-		+ 'complex_' + repo + '.csv')
+# 	#runs complexity analysis script on each file in the repository
+# 	for file in file_list:
+# 		split_path = file.split(repo + '/')
+# 		os.system('python2 ' + settings.v3_dir + '/git_complexity_trend.py --start '
+# 			+ first_id + ' --end ' + last_id + ' --file ' + split_path[1] + ' > '
+# 			+ settings.csv_dir  + folder_name + '/complex_'
+# 			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv')
 
-	#adds date column to csv file
-	with open('complex_' + repo + '.csv','r') as csvinput:
-		 with open('complexity_' + repo + '.csv', 'w') as csvoutput:
-			 csv_write = csv.writer(csvoutput, lineterminator='\n')
-			 csv_reader = csv.reader(csvinput)
 
-			 all = []
-			 row = next(csv_reader)
-			 row.append('date')
-			 all.append(row)
+# 	os.chdir(os.path.join(settings.csv_dir, folder_name))
 
-			 for row in csv_reader:
-				 for item in git_list:
-					 if item.split(' ')[0] in row:
-						 row.append(item.split(' ')[1])
-						 all.append(row)
-			 csv_write.writerows(all)
+# 	for file in glob.glob("*.csv"):
+# 		csv_list.append(file)
 
-	for file in glob.glob("complex_*"):
-		os.remove(file)
+# 	#appends csv files together into one
+# 	os.system('csvcat --skip-headers ' + (' '.join(csv_list)) + ' > '
+# 		+ 'complex_' + repo + '.csv')
 
-	os.chdir(setting.v3_dir)
+# 	#adds date column to csv file
+# 	with open('complex_' + repo + '.csv','r') as csvinput:
+# 		 with open('complexity_' + repo + '.csv', 'w') as csvoutput:
+# 			 csv_write = csv.writer(csvoutput, lineterminator='\n')
+# 			 csv_reader = csv.reader(csvinput)
+
+# 			 all = []
+# 			 row = next(csv_reader)
+# 			 row.append('date')
+# 			 all.append(row)
+
+# 			 for row in csv_reader:
+# 				 for item in git_list:
+# 					 if item.split(' ')[0] in row:
+# 						 row.append(item.split(' ')[1])
+# 						 all.append(row)
+# 			 csv_write.writerows(all)
+
+# 	for file in glob.glob("complex_*"):
+# 		os.remove(file)
+
+# 	os.chdir(setting.v3_dir)
 
 
 # called by: manage_csv_folder, refresh_repos
