@@ -4,6 +4,8 @@ import json
 import io
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 import generator # our script
+import data_manager # our script
+import repo_manager
 import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -22,7 +24,7 @@ list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
-clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
+clone_sched.add_job(lambda:repo_manager.refresh_repos(repo_dir),
 				 'cron', day='0-6', hour='1')
 # clone_sched.add_job(lambda:generator.refresh_repos(),
 					# 'interval', hours=2)
@@ -45,7 +47,7 @@ def index():
 			from_date = request.form.get('from_date', '', type=str)
 			to_date = request.form.get('to_date', '', type=str)
 
-			generator.repo_check_and_update(repo_name, proj_key, to_date)
+			repo_manager.repo_check_and_update(repo_name, proj_key, to_date)
 
 			if not generator.manage_csv_folder(repo_name, from_date, to_date):
 				flash('No data for selected date range found.')
@@ -58,7 +60,7 @@ def index():
 			# if user provided a clone url and password
 			clone_url = request.form['clone_url']
 			password = request.form['password']
-			generator.clone_repo(clone_url, password)
+			repo_manager.clone_repo(clone_url, repo_dir, password)
 			# message = generator.get_status_message(clone_url)
 			# flash(message) # displays a confirmation message on the screen
 			return redirect(url_for('index'))
@@ -99,7 +101,7 @@ def index_repo():
 		repo_url = selected_repo[1] # string: clone url
 		from_date = request.form['from_date']
 		to_date = request.form['to_date']
-		generator.clone_repo(repo_url, settings.password)
+		repo_manager.clone_repo(clone_url, repo_dir, password)
 		generator.manage_csv_folder(repo_name, from_date, to_date)
 		return redirect(url_for('dashboard',
 			repo_name=repo_name, from_date=from_date, to_date=to_date))
@@ -136,10 +138,10 @@ def result():
 		keys = cache.get('keys_' + analysis + '_' + repo_details)
 		if data is None:
 			if analysis == "cloud":
-				data, keys = generator.get_word_frequency(os.path.join(csv_dir, 
+				data, keys = data_manager.get_word_frequency(os.path.join(csv_dir, 
 					repo_details), analysis + "_" + repo_details + ".log")
 			else:
-				data, keys = generator.parse_csv(os.path.join(csv_dir, repo_details), 
+				data, keys = data_manager.parse_csv(os.path.join(csv_dir, repo_details), 
 					analysis + "_" + repo_name + ".csv")
 			if data == []: return render_template('404.html')
 			cache.set('data_' + analysis + '_' + repo_details,
