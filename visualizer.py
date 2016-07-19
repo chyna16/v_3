@@ -4,6 +4,8 @@ import json
 import io
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 import generator # our script
+import data_manager # our script
+import repo_manager
 import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -22,7 +24,7 @@ list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
-clone_sched.add_job(lambda:generator.refresh_repos(),
+clone_sched.add_job(lambda:repo_manager.refresh_repos(repo_dir),
 				 'cron', day='0-6', hour='1')
 # clone_sched.add_job(lambda:generator.refresh_repos(),
 					# 'interval', hours=2)
@@ -45,7 +47,7 @@ def index():
 			from_date = request.form.get('from_date', '', type=str)
 			to_date = request.form.get('to_date', '', type=str)
 
-			generator.repo_check_and_update(repo_name, proj_key, to_date)
+			repo_manager.repo_check_and_update(repo_name, proj_key, to_date)
 
 			if not generator.manage_csv_folder(repo_name, from_date, to_date):
 				flash('No data for selected date range found.')
@@ -54,18 +56,18 @@ def index():
 				return redirect(url_for('dashboard',
 					repo_name=repo_name, from_date=from_date, to_date=to_date))
 					# redirects to dashboard view which opens input.html
-		elif request.form['submit_button'] == "clone":
-			# if user provided a clone url and password
-			clone_url = request.form['clone_url']
-			password = request.form['password']
-			generator.clone_repo(clone_url, password)
-			# message = generator.get_status_message(clone_url)
-			# flash(message) # displays a confirmation message on the screen
-			return redirect(url_for('index'))
-		else:
-			# if a selection was made from 'Stash Repositories'
-			project_name = request.form['submit_button']
-			return redirect(url_for('index_repo', project_name=project_name))
+		# elif request.form['submit_button'] == "clone":
+		# 	# if user provided a clone url and password
+		# 	clone_url = request.form['clone_url']
+		# 	password = request.form['password']
+		# 	repo_manager.clone_repo(clone_url, repo_dir, password)
+		# 	# message = generator.get_status_message(clone_url)
+		# 	# flash(message) # displays a confirmation message on the screen
+		# 	return redirect(url_for('index'))
+		# else:
+		# 	# if a selection was made from 'Stash Repositories'
+		# 	project_name = request.form['submit_button']
+		# 	return redirect(url_for('index_repo', project_name=project_name))
 
 
 @app.route('/_return_repos')
@@ -87,23 +89,23 @@ def return_repo():
 
 # NOTE: CURRENTLY NOT IN USE; SHOULD BE REMOVED SOON
 # page where user can select a repository after selecting a Stash project
-@app.route('/index_repo', methods=['GET', 'POST'])
-def index_repo():
-	if request.method == 'GET':
-		project_name = request.args.get('project_name')
-		project_repos = stash_api.get_project_repos(project_name, 'http')
-		return render_template('index_repo.html', repo_list=project_repos)
-	elif request.method == 'POST' and not request.form['repo_name'] == "":
-		selected_repo = request.form['repo_name'].split('|')
-		repo_name = selected_repo[0].lower()
-		repo_url = selected_repo[1] # string: clone url
-		from_date = request.form['from_date']
-		to_date = request.form['to_date']
-		generator.clone_repo(repo_url, settings.password)
-		generator.manage_csv_folder(repo_name, from_date, to_date)
-		return redirect(url_for('dashboard',
-			repo_name=repo_name, from_date=from_date, to_date=to_date))
-			# go straight to dashboard after cloning repo and generating files
+# @app.route('/index_repo', methods=['GET', 'POST'])
+# def index_repo():
+# 	if request.method == 'GET':
+# 		project_name = request.args.get('project_name')
+# 		project_repos = stash_api.get_project_repos(project_name, 'http')
+# 		return render_template('index_repo.html', repo_list=project_repos)
+# 	elif request.method == 'POST' and not request.form['repo_name'] == "":
+# 		selected_repo = request.form['repo_name'].split('|')
+# 		repo_name = selected_repo[0].lower()
+# 		repo_url = selected_repo[1] # string: clone url
+# 		from_date = request.form['from_date']
+# 		to_date = request.form['to_date']
+# 		repo_manager.clone_repo(clone_url, repo_dir, password)
+# 		generator.manage_csv_folder(repo_name, from_date, to_date)
+# 		return redirect(url_for('dashboard',
+# 			repo_name=repo_name, from_date=from_date, to_date=to_date))
+# 			# go straight to dashboard after cloning repo and generating files
 
 
 # page where user can select the specific analysis to view
@@ -136,10 +138,10 @@ def result():
 		keys = cache.get('keys_' + analysis + '_' + repo_details)
 		if data is None:
 			if analysis == "cloud":
-				data, keys = generator.get_word_frequency(repo_details, 
-					analysis + "_" + repo_details + ".log")
+				data, keys = data_manager.get_word_frequency(os.path.join(csv_dir, 
+					repo_details), analysis + "_" + repo_details + ".log")
 			else:
-				data, keys = generator.parse_csv(repo_details, 
+				data, keys = data_manager.parse_csv(os.path.join(csv_dir, repo_details), 
 					analysis + "_" + repo_name + ".csv")
 			if data == []: return render_template('404.html')
 			cache.set('data_' + analysis + '_' + repo_details,
