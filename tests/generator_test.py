@@ -45,8 +45,7 @@ class FileParserTests(unittest.TestCase):
 
 
 	def test_parse_csv_output(self):
-		with open('testfile.csv') as uploaded_file:
-			dict_test, array_test = generator.parse_csv(uploaded_file)
+		dict_test, array_test = generator.parse_csv(self.temp_dir, 'testfile.csv')
 
 		self.assertEqual(dict_test,
 			[{'stat': 'commits', 'value': '26'}, {'stat': 'entities', 'value': '24'}]
@@ -82,14 +81,13 @@ class FileParserTests(unittest.TestCase):
 				self.assertEqual(row['lines'], '10')
 
 	def test_get_word_frequency_output(self):
-		with open('wordtest.log') as logfile:
-			words = generator.get_word_frequency(logfile)
+		words, keys = generator.get_word_frequency(self.temp_dir, 'wordtest.log')
 
-			self.assertEqual(words, [
-				{'text': 'word', 'freq': 2},
-				{'text': 'one', 'freq': 1},
-				{'text': 'two', 'freq': 1}
-			])
+		self.assertEqual(words, [
+			{'text': 'word', 'freq': 2},
+			{'text': 'one', 'freq': 1},
+			{'text': 'two', 'freq': 1}
+		])
 
 	def test_ignore_module_false(self):
 		result = generator.ignore_module("test")
@@ -124,10 +122,9 @@ class FileManagingTests(unittest.TestCase):
 class RepoManagingTests(unittest.TestCase):
 	def setUp(self):
 		self.temp_dir = tempfile.mkdtemp()
-		generator.repo_dir = self.temp_dir
-		os.chdir(self.temp_dir)
+		self.repo_url = 'https://'+ settings.username + '@stash.mtvi.com/scm/bot/mcshake.git'
 
-		self.repo_url = 'https://'+settings.username+'@stash.mtvi.com/scm/bot/mcshake.git'
+		os.chdir(self.temp_dir)
 
 		# sample_repo_url = stash_api.get_repo_url('mcshake', 'http')
 		# generator.clone_repo(self.repo_url, os.pathself.temp_dir, settings.password)
@@ -163,7 +160,7 @@ class RepoManagingTests(unittest.TestCase):
 	def test_get_commit_dates(self):
 		if not os.path.isdir('mcshake'):
 			generator.clone_repo(self.repo_url, self.temp_dir, settings.password)
-		f_date, l_date = generator.get_commit_dates('mcshake')
+		f_date, l_date = generator.get_commit_dates(settings.repo_dir, 'mcshake')
 		date_length = len(f_date.split('-'))
 		self.assertEqual(date_length, 3)
 		shutil.rmtree('mcshake')
@@ -171,10 +168,11 @@ class RepoManagingTests(unittest.TestCase):
 	def test_get_repo_list(self):
 		if not os.path.isdir('mcshake'):
 			generator.clone_repo(self.repo_url, self.temp_dir, settings.password)
-		repo_list = generator.get_repo_list(['mcshake'])
-		first, last = generator.get_commit_dates('mcshake')
-		current = str(datetime.now()).split('.')[0].split(' ')[0]
-		self.assertEqual(repo_list, ['mcshake|' + current + '|' + first + '|' + last])
+		repo_list = generator.get_repo_list(['mcshake'], self.temp_dir)
+		first, last = generator.get_commit_dates(self.temp_dir, 'mcshake')
+		filename = os.path.join(self.temp_dir, 'mcshake', 'timetag.txt')
+		with open(filename, 'rt') as timetag: latest_datetime = timetag.read()
+		self.assertEqual(repo_list, ['mcshake|' + latest_datetime + '|' + first + '|' + last])
 
 
 if __name__ == '__main__':

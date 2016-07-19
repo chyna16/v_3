@@ -11,10 +11,6 @@ import shutil
 from nltk.stem.lancaster import LancasterStemmer
 from datetime import datetime
 
-repo_dir = settings.repo_dir
-
-
-
 
 # called by refresh_repos
 def get_dir_list(path):
@@ -24,9 +20,9 @@ def get_dir_list(path):
 	return dir_list
 
 
-# called by get_repo_list, refresh_single_repo
+# called by: get_repo_list, refresh_single_repo
 # uses git log to get first & last commit dates
-def get_commit_dates(repo):
+def get_commit_dates(repo_dir, repo):
 	first_date = subprocess.getoutput('git --git-dir '
 		+ os.path.join(repo_dir, repo, '.git')
 		+ ' log --pretty=format:"%ad" --no-patch --date=short --reverse | head -1')
@@ -38,10 +34,10 @@ def get_commit_dates(repo):
 
 # called by: index view
 # params: path of repo directory, list of repo folders
-def get_repo_list(dir_list):
+def get_repo_list(dir_list, repo_dir):
 	repo_list = []
 	for repo in dir_list:
-		first_date, last_date = get_commit_dates(repo)
+		first_date, last_date = get_commit_dates(repo_dir, repo)
 		try:
 			filename = os.path.join(repo_dir, repo, 'timetag.txt')
 			with open(filename, 'rt') as timetag:
@@ -61,13 +57,13 @@ def add_datetime(folder_path):
 
 
 # called by: refresh_repos, index view
-def refresh_single_repo(repo):
+def refresh_single_repo(repo_dir, repo):
 	clone_url = stash_api.get_repo_url(repo, 'http')
 	if not clone_url: return # if function returned false
 	else:
 		shutil.rmtree(os.path.join(repo_dir, repo)) # delete repository
 		clone_repo(clone_url, repo_dir, settings.password)
-		from_date, to_date = get_commit_dates(repo)
+		from_date, to_date = get_commit_dates(repo_dir, repo)
 		csv_path = os.path.join(settings.csv_dir,
 			repo + "_" + from_date + "_" + to_date)
 		process_log(repo, from_date, to_date, csv_path)
@@ -75,7 +71,7 @@ def refresh_single_repo(repo):
 
 # called by: visualizer at timed intervals
 # updates already cloned repositories
-def refresh_repos():
+def refresh_repos(repo_dir):
 	repo_list = get_dir_list(repo_dir)
 	for repo in repo_list:
 		filename = os.path.join(repo_dir, repo, 'timetag.txt')
@@ -84,33 +80,24 @@ def refresh_repos():
 		except IOError: datetime = ' '
 		project = stash_api.get_repo_detail(repo, 'key')
 		if datetime < stash_api.get_repo_timestamp(project, repo, 'http', '1')[0]:
-			refresh_single_repo(repo)
+			refresh_single_repo(repo_dir, repo)
 
 
 # Check repo clone if it doesn't exist and re-clone if it is old
 def repo_check_and_update(repo_name, proj_key, to_date):
-	repo_list = get_repo_list(get_dir_list(repo_dir))
+	repo_list = get_repo_list(get_dir_list(settings.repo_dir), settings.repo_dir)
 	available_repo = [ repo for repo in repo_list
 		if repo.split('|')[0] == repo_name ]
 	remote_last_commit = stash_api.get_repo_timestamp(proj_key,
 		repo_name, 'http', '1')[0]
 
 	if available_repo == []:
-		# Repo Doesn't exist locally so clone
+		# if repo doesn't exist, clone it
 		repo_url = stash_api.get_repo_url(repo_name, 'http')
 		clone_repo(repo_url, repo_dir, settings.password)
-	elif (remote_last_commit > available_repo[0].split('|')[1].split(" ")[0] < to_date):
-		# Local copy is old so refresh
-		refresh_single_repo(repo_name)
-
-
-# called by index view to set path for codemaat
-# sets the path to the passed in address
-def set_path(path):
-	print("Setting a path to " + path)
-	os.environ['PATH'] += os.pathsep + path
-	print("Done.")
-	print("-" * 60)
+	elif (remote_last_commit > available_repo[0].split('|')[1] < to_date):
+		# else if local copy is older than latest commit, refresh
+		refresh_single_repo(settings.repo_dir, repo_name)
 
 
 # called by visualizer index view
@@ -134,11 +121,20 @@ def clone_repo(clone_url, location, password):
 	add_datetime(os.path.join(location, repo))
 
 
+# called by index view to set path for codemaat
+# sets the path to the passed in address
+def set_path(path):
+	print("Setting a path to " + path)
+	os.environ['PATH'] += os.pathsep + path
+	print("Done.")
+	print("-" * 60)
+
+
 # called by index view to generate message
 # FIX: currently cd's into repo_dir and re-clones the repo
 # 	causing the message to be "already exists"
 def get_status_message(clone_url):
-	os.chdir(repo_dir)
+	os.chdir(settings.repo_dir)
 	# temporary message handler for cloning repositories
 	clone_status = subprocess.getoutput('git clone ' + clone_url)
 	print ("this is the status: " + clone_status)
@@ -165,31 +161,6 @@ def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
 		+ analysis_name + "_" + repo_name + ".csv")
 
 
-# reports an overview of mined data from git's log file
-def generate_data_summary(repo_name, from_date, to_date):
-	print("Creating repository summary...")
-	run_codemaat('summary', 'summary', repo_name, from_date, to_date)
-	print("-" * 60)
-
-# reports the number of authors/revisions made per module
-def generate_data_metrics(repo_name, from_date, to_date):
-	print("Creating organizational metrics...")
-	run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
-		# Reports the number of authors/revisions made per module
-	print("-" * 60)
-
-# reports correlation of files that often commit together
-def generate_data_coupling(repo_name, from_date, to_date):
-	print("Creating coupling history...")
-	run_codemaat('coupling', 'coupling', repo_name, from_date, to_date)
-	print("-" * 60)
-
-# reports number of lines added vs deleted over the chosen date range
-def generate_data_age(repo_name, from_date, to_date):
-	print("Creating code age summary")
-	run_codemaat('entity-churn', 'age', repo_name, from_date, to_date)
-	print("-" * 60)
-
 # runs cloc to retrieve number of lines of code
 # merges with metrics data to show hotspots
 def generate_data_hotspots(repo_name, from_date, to_date):
@@ -197,7 +168,7 @@ def generate_data_hotspots(repo_name, from_date, to_date):
 	if not os.path.isfile("metrics_" + repo_name + ".csv"):
 		print("Creating metrics...")
 		run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
-	os.system("cloc " + repo_dir + repo_name
+	os.system("cloc " + settings.repo_dir + repo_name
 		+ " --unix --by-file --csv --quiet --report-file="
 		+ "lines_" + repo_name + ".csv")
 	merge_csv(repo_name)
@@ -246,7 +217,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 		git_list.append(item)
 
 
-	for root, dirs, files in os.walk(repo_dir + repo):
+	for root, dirs, files in os.walk(settings.repo_dir + repo):
 		if '.git' in dirs:
 			dirs.remove('.git')
 		for file in files:
@@ -254,7 +225,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 				continue
 			file_list.append(os.path.join(root, file))
 
-	os.chdir(os.path.join(repo_dir, repo))
+	os.chdir(os.path.join(settings.repo_dir, repo))
 
 	#runs complexity analysis script on each file in the repository
 	for file in file_list:
@@ -305,14 +276,14 @@ def process_log(repo, from_date, to_date, csv_path):
 		# if the csv_folder doesn't exist, make it
 	os.chdir(csv_path)
 	# cd into the folder and create logs and csv files
-	repo_address = os.path.join(repo_dir, repo, '.git')
+	repo_address = os.path.join(settings.repo_dir, repo, '.git')
 	create_log('logfile', repo, from_date, to_date, repo_address)
 	create_log('cloud', repo, from_date, to_date, repo_address)
 
-	generate_data_summary(repo, from_date, to_date)
-	generate_data_metrics(repo, from_date, to_date)
-	generate_data_coupling(repo, from_date, to_date)
-	generate_data_age(repo, from_date, to_date)
+	print("Running codemaat analyses")
+	run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
+	run_codemaat('coupling', 'coupling', repo_name, from_date, to_date)
+	run_codemaat('entity-churn', 'age', repo_name, from_date, to_date)
 	generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)
@@ -357,7 +328,7 @@ def parse_csv(folder, filename):
 	key_list = [] # list of row headers / keys
 
 	try:
-		csv_file = open(os.path.join(settings.csv_dir, folder, filename), 'rt')
+		csv_file = open(os.path.join(folder, filename), 'rt')
 	except (FileNotFoundError, IOError): return ([], [])
 
 	reader = csv.reader(csv_file)
@@ -461,9 +432,9 @@ def parse_word(stem, word, word_list, stop_words):
 # creates a list of dictionaries of words paired with frequency of occurrence
 def get_word_frequency(folder, filename):
 	try:
-		logfile = open(os.path.join(settings.csv_dir, folder, filename), 'rt')
+		logfile = open(os.path.join(folder, filename), 'rt')
 	except UnicodeError:
-		logfile = io.open(os.path.join(settings.csv_dir, folder, filename), 
+		logfile = io.open(os.path.join(folder, filename), 
 			'rt', encoding='utf-8')
 	except (FileNotFoundError, IOError):
 		return []
@@ -508,4 +479,5 @@ def get_word_frequency(folder, filename):
 
 # 	return previous_date
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+	print(repo_check_and_update('mcshake', 'BOT', '2016-07-19')

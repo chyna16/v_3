@@ -22,7 +22,7 @@ list_of_projects = stash_api.get_projects() # list of projects on Stash
 generator.set_path(maat_dir) # set path for codemaat
 
 clone_sched = BackgroundScheduler() # configuration for apscheduler
-clone_sched.add_job(lambda:generator.refresh_repos(),
+clone_sched.add_job(lambda:generator.refresh_repos(repo_dir),
 				 'cron', day='0-6', hour='1')
 # clone_sched.add_job(lambda:generator.refresh_repos(),
 					# 'interval', hours=2)
@@ -136,10 +136,10 @@ def result():
 		keys = cache.get('keys_' + analysis + '_' + repo_details)
 		if data is None:
 			if analysis == "cloud":
-				data, keys = generator.get_word_frequency(repo_details, 
-					analysis + "_" + repo_details + ".log")
+				data, keys = generator.get_word_frequency(os.path.join(csv_dir, 
+					repo_details), analysis + "_" + repo_details + ".log")
 			else:
-				data, keys = generator.parse_csv(repo_details, 
+				data, keys = generator.parse_csv(os.path.join(csv_dir, repo_details), 
 					analysis + "_" + repo_name + ".csv")
 			if data == []: return render_template('404.html')
 			cache.set('data_' + analysis + '_' + repo_details,
