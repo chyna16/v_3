@@ -953,6 +953,9 @@ function commitSelector(dates) {
         var formFormat = d3.timeFormat('%Y-%m-%d')
         d3.select('#previousDate').property("value", formFormat(domain1[0]))
         d3.select('#currentDate').property("value", formFormat(domain1[1]))
+
+        $('#currentDate').trigger('change');
+
         d3.select(this)
           .transition()
             .call(brush.move, domain1.map(x));

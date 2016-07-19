@@ -9,6 +9,7 @@
   <script src="../static/charts.js"></script>
   <script type="text/javascript">
   // Ajax Repo List Call
+  var dates = null;
   $(function() {
     $('select#project').bind('change', function() {
       $("#repo").empty()
@@ -51,7 +52,9 @@
               .prop("disabled",false);
           $("#nextbutton").prop("disabled",false);
           $("#spinner").hide();
+          dates = data.result;
           commitSelector(data.result);
+          getNumCommits(data.result,data.result[data.result.length-1].split(' ')[0],data.result[0].split(' ')[0])
         }
       });
       return false;
@@ -95,16 +98,22 @@
   <!-- date range selection -->
   <div id="date-select" class="form-group">
       <label for="formInput">Date Range (Default: First -> Last Commit):</label><br>
-      <div class="col-sm-6">
+      <div class="col-sm-4">
         <div class="input-group">
           <div class="input-group-addon">Start Date:</div>
           <input type="date" class="form-control" id="previousDate" name="from_date" placeholder='YYYY-MM-DD' disabled="true">
         </div>
       </div>
-      <div class="col-sm-6">
+      <div class="col-sm-4">
         <div class="input-group">
           <div class="input-group-addon">End Date:</div>
           <input type="date" class="form-control" id="currentDate" name="to_date" placeholder='YYYY-MM-DD' disabled="true">
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="input-group">
+          <div class="input-group-addon">Commits:</div>
+          <input type="text" class="form-control" id="commits" name="commits" placeholder='0' disabled="true">
         </div>
       </div>
       <div id="commitSelector"></div>
@@ -125,6 +134,22 @@ $("#nextbutton").click(function() {
   var $btn = $(this);
   $btn.button('loading');
   $("#spinner").show();
+});
+
+function getNumCommits(dates, date1, date2){
+  var numCommits = 0;
+  for (var i = 0; i < dates.length; i++){
+    if (dates[i] >= date1 && dates[i] <= date2){
+      numCommits++;
+    }
+  }
+  $("#commits").val(numCommits);
+}
+$('#previousDate').bind('change', function() {
+  getNumCommits(dates,$("#previousDate").val(),$("#currentDate").val());
+});
+$('#currentDate').bind('change', function() {
+  getNumCommits(dates,$("#previousDate").val(),$("#currentDate").val());
 });
 </script>
 </body>
