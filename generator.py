@@ -174,9 +174,9 @@ def process_log(repo, from_date, to_date, csv_path):
 	create_log('cloud', repo, from_date, to_date, repo_address)
 
 	print("Running codemaat analyses")
-	run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
-	run_codemaat('coupling', 'coupling', repo_name, from_date, to_date)
-	run_codemaat('entity-churn', 'age', repo_name, from_date, to_date)
+	run_codemaat('authors', 'metrics', repo, from_date, to_date)
+	run_codemaat('coupling', 'coupling', repo, from_date, to_date)
+	run_codemaat('entity-churn', 'age', repo, from_date, to_date)
 	generate_data_hotspots(repo, from_date, to_date)
 
 	os.chdir(settings.v3_dir)

@@ -76,7 +76,7 @@ def refresh_repos(repo_dir):
 	repo_list = get_dir_list(repo_dir)
 	for repo in repo_list:
 		filename = os.path.join(repo_dir, repo, 'timetag.txt')
-		try: 
+		try:
 			with open(filename, 'rt') as timetag: datetime = timetag.read()
 		except IOError: datetime = ' '
 		project = stash_api.get_repo_detail(repo, 'key')
@@ -95,7 +95,7 @@ def repo_check_and_update(repo_name, proj_key, to_date):
 	if available_repo == []:
 		# if repo doesn't exist, clone it
 		repo_url = stash_api.get_repo_url(repo_name, 'http')
-		clone_repo(repo_url, repo_dir, settings.password)
+		clone_repo(repo_url, settings.repo_dir, settings.password)
 	elif (remote_last_commit > available_repo[0].split('|')[1] < to_date):
 		# else if local copy is older than latest commit, refresh
 		refresh_single_repo(settings.repo_dir, repo_name)
