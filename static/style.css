@@ -110,7 +110,11 @@
 .axis--grid .tick--minor line {
   stroke-opacity: .5;
 }
-/* Ene commitSelector styling */
+
+.brush .selection {
+  stroke: #000;
+}
+/* End commitSelector styling */
 
 .spinner {
     position: fixed;
