@@ -839,7 +839,7 @@ function commitSelector(dates) {
 
     var datum = []
     dates.forEach(function(d){
-    datum.push(new Date(d.split(' ')[0]))
+    datum.push(new Date(d))
     })
     datum.reverse()
 
@@ -935,10 +935,8 @@ function commitSelector(dates) {
           }
           else {
             if (d > date2) {
+              returnVal[1] = dates[i-1]
               break
-            }
-            else {
-              returnVal[1] = d
             }
           }
         }

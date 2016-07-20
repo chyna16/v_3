@@ -7,6 +7,11 @@
   <!-- TODO remove external ref to d3.v4 -->
   <script src="https://d3js.org/d3.v4.js"></script>
   <script src="../static/charts.js"></script>
+  <style>
+    .brush .selection {
+      stroke: #000;
+    }
+  </style>
   <script type="text/javascript">
   // Ajax Repo List Call
   var dates = null;
@@ -139,7 +144,8 @@ $("#nextbutton").click(function() {
 function getNumCommits(dates, date1, date2){
   var numCommits = 0;
   for (var i = 0; i < dates.length; i++){
-    if (dates[i] >= date1 && dates[i] <= date2){
+    date = dates[i].split(' ')[0];
+    if (date >= date1 && date <= date2){
       numCommits++;
     }
   }
