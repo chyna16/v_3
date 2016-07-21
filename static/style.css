@@ -96,6 +96,26 @@
 
 /* End Navbar Styling */
 
+/* commitSelector styling */
+.axis--grid .domain {
+  fill: #1ab7ea;
+  stroke: none;
+}
+
+.axis--x .domain,
+.axis--grid .tick line {
+  stroke: #fff;
+}
+
+.axis--grid .tick--minor line {
+  stroke-opacity: .5;
+}
+
+.brush .selection {
+  stroke: #000;
+}
+/* End commitSelector styling */
+
 .spinner {
     position: fixed;
     top: 50%;
@@ -300,7 +320,7 @@ tbody td, thead th {
 .d3-tip {
   max-width: 300px;
   text-overflow: auto;
-
+  font-size: 14px;
   /* For Firefox */
   white-space: pre-wrap;
   word-break: break-all;
@@ -308,7 +328,6 @@ tbody td, thead th {
   word-wrap: break-word;
 
   line-height: 1;
-  font-weight: bold;
   padding: 12px;
   background: rgba(0, 0, 0, 0.8);
   color: #fff;

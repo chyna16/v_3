@@ -2,7 +2,9 @@
 // also called by createTable after table has been created / updated
 function createGraph(data) {
     if (analysis_type == "hotspots") {
-        createBubblePack(data);
+      var color = d3.scale.category20();
+      createHeader(color);
+      createBubblePack(data);
     }
     else if (analysis_type == "coupling") {
         // if coupling, graph is not create until chooseModule is called
@@ -14,6 +16,13 @@ function createGraph(data) {
     else if (analysis_type == "cloud") {
         createWordcloud(data);
     }
+    else if (analysis_type == "age") {
+      createScatterPlot(data);
+    }
+    else if (analysis_type == "complexity") {
+        d3.select("#header").html('').append("p")
+        .text('chart coming soon...');
+    }
     else {
         createBarGraph(data);
     }
@@ -22,9 +31,10 @@ function createGraph(data) {
 function createHeader(color) {
     var header = d3.select("#header").html('').append("p");
 
-    header
+    if (analysis_type !== "age" && analysis_type !== "hotspots"){
+      header
         .selectAll("button")
-            .data(keys.filter(function(key) { 
+            .data(keys.filter(function(key) {
                 return key != keys[0] && key != 'coupled'; }))
             .enter()
         .append("button")
@@ -34,27 +44,49 @@ function createHeader(color) {
         .style('color', 'white')
         .style('margin', '10px')
         .attr('value', function(d) { return d; })
-        .on('click', function() { chooseColumn(this); });
+        .on('click', function() { 
+            chooseColumn(this); });
 
-    if (analysis_type != 'coupling') {
-        header.append("button")
-            .attr('class', 'btn')
-            .text('all')
-            .style('background-color', 'black')
-            .style('color', 'white')
-            .style('margin', '10px')
-            .attr('value', 'default')
-            .on('click', function() { chooseColumn(this); });
+      if (analysis_type != 'coupling' && analysis_type != 'complexity') {
+          header.append("button")
+              .attr('class', 'btn')
+              .text('all')
+              .style('background-color', 'black')
+              .style('color', 'white')
+              .style('margin', '10px')
+              .attr('value', 'default')
+              .on('click', function() { chooseColumn(this); });
+      }
+  }
+  if (analysis_type != 'complexity') {
+    header.append("button")
+      .attr('class', 'btn')
+      .text('add filter')
+      .style('background-color', 'grey')
+      .style('color', 'white')
+      .style('margin', '10px')
+      .on('click', function() { toggleFilter(); });
     }
 
-    header.append("button")
-        .attr('class', 'btn')
-        .text('add filter')
-        .style('background-color', 'grey')
-        .style('color', 'white')
-        .style('margin', '10px')
-        .on('click', function() { toggleFilter(); });
+    if (analysis_type == 'complexity') {
+        d3.select("#header")
+        .append("select")
+        .selectAll("option")
+        .data(arr)
+        .enter()
+        .append("option")
+        .text(function(d) {
+            return d;});
+
+        d3.select('select')
+            .on("change", function(){
+                key = this.selectedIndex
+                createLineGraph.updateData()
+            })
+    }
+
 }
+
 
 
 function createBarGraph(data) {
@@ -67,8 +99,8 @@ function createBarGraph(data) {
     var width;
     var margin = {top: 20, left: 70, right: 20, bottom: 150};
     var height = 480 - margin.top - margin.bottom;
-    var color = d3.scale.ordinal().domain(keys).range(["#6d9af6", "#52465f"]);  
-    
+    var color = d3.scale.ordinal().domain(keys).range(["#6d9af6", "#52465f"]);
+
     if (data.length > 50) { w = data.length * 20; }
     else if (data.length < 10) { w = data.length * 100; }
     else { w = 1000; }
@@ -76,7 +108,7 @@ function createBarGraph(data) {
 
     if (chosen_key == 'default') {
         // if no column was specified, the data from all value columns is used
-        var labels = keys.filter(function(key) { 
+        var labels = keys.filter(function(key) {
             return key !== keys[0] && key !== 'values' && key !== 'coupled';
             // keys that would not make appropriate columns are filtered out
         });
@@ -97,21 +129,21 @@ function createBarGraph(data) {
 
     // the scale for each category of bars (each row)
     var x0Scale = d3.scale.ordinal()
-        // .domain(data.map(function(d) { return d.entity.split('/').pop(); })) 
+        // .domain(data.map(function(d) { return d.entity.split('/').pop(); }))
             // array of entities
         .domain(d3.range(0, data.length))
         .rangeBands([0, width], .05);
-        
+
     // the scale for individual bars within each category
     var x1Scale = d3.scale.ordinal()
         .domain(labels) // array of columns being used
         .rangeBands([0, x0Scale.rangeBand()]); // from 0 to category size
-    
+
     // the proportional scale for the height of the bars
     var yScale = d3.scale.linear()
         .range([height, 0])
-        .domain([0, d3.max(data, function(d) { 
-            return d3.max(d.values, function(d) { return d.value; }); 
+        .domain([0, d3.max(data, function(d) {
+            return d3.max(d.values, function(d) { return d.value; });
         })]); // max int from out of all columns being displayed
 
     // axes decleration using d3 axis() method
@@ -127,9 +159,9 @@ function createBarGraph(data) {
       .attr('class', 'd3-tip')
       .offset([-10, 0])
       .html(function(d) {
-        return "<center>" + "<strong>" 
+        return "<center>" + "<strong>"
             + d.entity + "<br>"
-            + d.type + ":</strong> <span style='color:red'>" 
+            + d.type + ":</strong> <span style='color:red'>"
             + d.value + "</span>" + "</center>";
       });
 
@@ -148,8 +180,8 @@ function createBarGraph(data) {
             .enter()
         .append("g")
             .attr("class", "category")
-            .attr("transform", function(d, i) { 
-                return "translate(" + x0Scale(i) + ",0)"; 
+            .attr("transform", function(d, i) {
+                return "translate(" + x0Scale(i) + ",0)";
             });
 
     // bars appended to each category depending on how many columns are being displayed
@@ -200,7 +232,7 @@ function createBarGraph(data) {
         .attr('class', 'axis')
         .attr('transform', 'translate(0,' + (height) + ')')
         .call(xAxis)
-        .selectAll("text")  
+        .selectAll("text")
             .style("text-anchor", "end")
             .attr("dx", "-1em")
             .attr("dy", ".05em")
@@ -213,7 +245,7 @@ function createBarGraph(data) {
         .attr('class', 'axis')
         .attr('transform', 'translate(0, 0)')
         .call(yAxis)
-        .selectAll("text")  
+        .selectAll("text")
             .style("text-anchor", "end")
             .attr("dx", "-1em")
             .attr("dy", ".15em")
@@ -221,6 +253,155 @@ function createBarGraph(data) {
             .attr("fill", "#325a7e");
 
     createHeader(color);
+}
+
+function createScatterPlot(data){
+  d3.select("#graph").html('');
+
+  var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 900 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom,
+    duration_time = 700;
+
+  var x_scale = d3.scale.linear().range([0,width]);
+  var y_scale = d3.scale.linear().range([height,0]);
+
+  var color = "#1ab7ea"
+
+  var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .offset([-10, 0])
+    .html(function(d) {
+      return "<p>File: " + d.id +
+        "</p><p>Lines Added: " + d.added +
+        "</p><p>Lines Removed: " + d.deleted + "</p>";
+    })
+
+  var x_axis = d3.svg.axis()
+    .scale(x_scale)
+    .ticks(10)
+    .orient("bottom");
+
+  var y_axis = d3.svg.axis()
+    .scale(y_scale)
+    .ticks(10)
+    .orient("left");
+
+  var svg = d3.select("#graph").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .call(tip)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("g")
+    .attr("transform", "translate(0,"+ height +")")
+    .attr("class", "axis")
+    .attr("id", "x_axis")
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Added");
+
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("id", "y_axis")
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Removed");
+
+  function update(arr_data) {
+    //Format Data
+    data = {};
+    arr_data.forEach(function(d) {
+      data[d.entity] = { id: d.entity };
+      data[d.entity]["added"] = d["added"];
+      data[d.entity]["deleted"] = d["deleted"];
+    });
+
+    color = d3.scale.linear().domain([0,d3.max(d3.values(data), function(d) {
+      return d.added*d.deleted;
+    })]).range(["#1ab7ea", "red"]);
+
+    //Calc X and Y scale
+    x_scale.domain([0,d3.max(d3.values(data), function(d) {
+      return d["added"]*1.1;
+    })]);
+    y_scale.domain([0,d3.max(d3.values(data), function(d) {
+      return d["deleted"]*1.1;
+    })]);
+
+    // update axis accordingly
+    d3.select("g#x_axis")
+      .transition()
+      .duration(duration_time)
+      .call(x_axis);
+
+    d3.select("g#y_axis")
+      .transition()
+      .duration(duration_time)
+      .call(y_axis);
+
+    //enter new nodes
+    var data_to_draw = d3.values(data).filter(function(d) {
+      return true;
+    });
+    var node_g = svg.selectAll("g.node")
+      .data(d3.values(data_to_draw));
+
+    //enter our groups
+    var node_g_enter = node_g.enter()
+      .append("g")
+      .attr("class", "node");
+
+    // Enter circles nested within our group
+    node_g_enter.append("circle");
+
+    // update currently existing nodes
+    var count = d3.values(data_to_draw).length;
+    node_g
+        .select("circle")
+        .transition()
+        .duration(duration_time)
+        .delay(function(d,i) {
+          return i / count * duration_time;
+        })
+        .attr("cx", function(d) { return x_scale(d["added"]); })
+        .attr("cy", function(d) {
+          if (d["deleted"]){
+            return y_scale(d["deleted"]);
+          }
+          return y_scale.range()[0];
+        });
+    node_g. select("circle")
+        .attr("r", 5)
+        .attr("fill", function(d) {
+            return color(d.added * d.deleted);
+        })
+        .on("mouseover", tip.show)
+        .on("mouseout", tip.hide);
+
+        //Exit old nodes
+        var exit_node_gs = node_g.exit();
+
+        exit_node_gs.transition().delay(duration_time * 3).remove();
+
+        exit_node_gs.select("circle")
+          .transition()
+          .delay(duration_time * 2)
+          .ease("bounce")
+          .duration(duration_time)
+          .attr("cy", y_scale.range()[0]);
+
+  }
+  update(data);
+  createHeader(color);
 }
 
 function createBubblePack(inputData) {
@@ -266,7 +447,7 @@ function createBubblePack(inputData) {
         .attr("height", diameter)
         .append("g")
         .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
-    
+
     // Process data in order to create tree structure out of file structure
     data.forEach(function(d){
         // Add repo name to path to create parent node
@@ -279,29 +460,29 @@ function createBubblePack(inputData) {
             for (var i=0; i<pieces.length; i=i+1){
                 insertion += pieces[i]
                 if(data.filter(function(a){ return a["full-path"] == insertion })[0] == undefined) {
-                    data.push({"full-path": insertion}); 
+                    data.push({"full-path": insertion});
                 }
                 insertion += "/";
-            }          
+            }
         }
-    });  
+    });
 
     var stratify = d3.stratify()
         .id(function(d) { return d["full-path"]; })
         .parentId(function(d) {
             var splitItem =  d["full-path"].substring(0, d["full-path"].lastIndexOf("/"));
-            return splitItem; 
+            return splitItem;
         });
 
     data.sort(function(a,b){
         var nameA=a["full-path"], nameB=b["full-path"];
         //sort string ascending
-        if (nameA < nameB) 
+        if (nameA < nameB)
             return -1;
         if (nameA > nameB)
             return 1;
         //default return value (no sort)
-        return 0; 
+        return 0;
     });
 
     // Create tree structure
@@ -319,8 +500,8 @@ function createBubblePack(inputData) {
         .enter().append("circle")
         .attr("class", function(d) { return d.parent ? d.children ? "node node--middle" : "node node--leaf" : "node node--root"; })
         .style("fill", function(d) { return d.children ? color(d.depth) : colorHotspot(d.data["n-revs"]); })
-        .on("click", function(d) { 
-            if (focus !== d) zoom(d), d3.event.stopPropagation(); 
+        .on("click", function(d) {
+            if (focus !== d) zoom(d), d3.event.stopPropagation();
         });
 
     var text = svg.selectAll("text")
@@ -345,14 +526,14 @@ function createBubblePack(inputData) {
     zoomTo([root.x, root.y, root.r * 2 + margin]);
 
     function zoom(d) {
-        var focus0 = focus; 
+        var focus0 = focus;
         focus = d;
 
         // Auto-skip folders with one child
-        while(focus.children !== undefined && focus.children.children !== undefined && focus.children.length == 1) {
+        while(focus.children !== undefined && focus.children[0].children !== undefined && focus.children.length == 1) {
             focus = focus.children[0];
         }
-        
+
         if (d.children !== undefined) {
             var transition = d3.transition()
                 .duration(d3.event.altKey ? 7500 : 750)
@@ -362,12 +543,12 @@ function createBubblePack(inputData) {
             });
 
             transition.selectAll("text")
-                .filter(function(d) { 
+                .filter(function(d) {
                     if(d == undefined) return false;
-                    return (d.parent === focus || this.style.visibility === "visible"); 
+                    return (d.parent === focus || this.style.visibility === "visible");
                 })
                 .style("fill-opacity", function(d) { return (d.parent === focus) ? 1 : 0; })
-                .each("end", function(a) { 
+                .each("end", function(a) {
                     if (a.parent === focus && labelFit(a,this)) this.style.visibility = "visible";
                     if (a.parent !== focus || !labelFit(a,this)) this.style.visibility = "hidden"; });
         }
@@ -445,7 +626,7 @@ function createBubbleChart(data) {
             .attr("y", function(d) { return d.y + 5; })
             .attr("text-anchor", "middle")
         .text(function(d) { if(d['entity'].length*6 <= d.r*2) return d['entity']; })
-            .style("fill", "black") 
+            .style("fill", "black")
             .style("font-size", "12px");
 }
 
@@ -464,8 +645,8 @@ function createMeter(data, module) {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function(d) {
-            return "<center>" + "<strong>" + d.coupled 
-                + "<br>" + "avg revisions: </strong> " + "<span style='color:red'>" 
+            return "<center>" + "<strong>" + d.coupled
+                + "<br>" + "avg revisions: </strong> " + "<span style='color:red'>"
                 + d['average-revs'] + "</span>" + "</center>";
             });
 
@@ -474,7 +655,7 @@ function createMeter(data, module) {
     //     .domain([0, data.length - 1])
     //     .range([r, w-r]);
 
-    // d3's arc creates settings for a circular path w/ radii & angles 
+    // d3's arc creates settings for a circular path w/ radii & angles
     var arc = d3.svg.arc()
         .startAngle(Math.PI) // meter begins at 6 o'clock
         .innerRadius(r - 30)
@@ -500,7 +681,7 @@ function createMeter(data, module) {
         .data(data)
         .enter()
         .append("g")
-            .attr('transform', function(d, i) { 
+            .attr('transform', function(d, i) {
                 return 'translate(' + (width / 2) + ',' +  (20 + (i * 200 + r)) + ')';
             })
         .call(tip)
@@ -511,12 +692,12 @@ function createMeter(data, module) {
     // path settings determined by arc & applied using 'd' attribute
     // this is the background meter which is a full circle
     meter.append("path")
-        .attr('d', arc.endAngle(3 * Math.PI)) 
+        .attr('d', arc.endAngle(3 * Math.PI))
         .style('fill', '#c5c2bd');
 
     // this is the foreground meter which shows percentage
     meter.append("path")
-        .attr('d', arc.endAngle(function(d) { 
+        .attr('d', arc.endAngle(function(d) {
             return (d.degree / 100) * (2 * Math.PI) + Math.PI;
         })) // endAngle represents progress compared to startAngle
         .attr('fill', '#a57103');
@@ -551,8 +732,8 @@ function createPieChart(data, module) {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function(d) {
-            return "<center>" + "<strong>" + d.data.coupled 
-                + "<br>" + "degree: </strong> " + "<span style='color:red'>" 
+            return "<center>" + "<strong>" + d.data.coupled
+                + "<br>" + "degree: </strong> " + "<span style='color:red'>"
                 + d.data['degree'] + "% </span>" + "</center>";
             });
 
@@ -596,9 +777,8 @@ function createPieChart(data, module) {
     }
 
     slice.append("text")
-        .attr('transform', function(d) { 
+        .attr('transform', function(d) {
             return 'translate(' + textArc.centroid(d) + ')';
-                // + 'rotate(' + angle(d) + ')';
         })
         .attr('dy', '.35em')
         .attr('text-anchor', 'middle')
@@ -625,18 +805,6 @@ function createWordcloud(data) {
         .attr('class', "d3-tip")
         .direction(function(d) {
             var result = 's';
-            /* Posotion aware corner tip
-            if (d3.event.clientY > height/2) {
-                result = 'n';
-            } else {
-                result = 's';
-            }
-            if (d3.event.pageX > width/2) {
-                result += 'w';
-            } else {
-                result += 'e';
-            }
-            */
             return result;
         })
         .html(function(d) {
@@ -649,10 +817,7 @@ function createWordcloud(data) {
                     .words(commit_words)
                     .padding(10)
                     .font('monospace')
-                    // rotates random words 90 degrees
-                    // .rotate(function(d) { return Math.floor(Math.random() * 2) * 90; })
                     .rotate(function (d) {return 0})
-                    //not all words are being displayed if font size is too large
                     .text(function(d) {return d.text;})
                     .fontSize(function(d) {return font(d['freq'])})
                     .spiral("rectangular")
@@ -690,5 +855,132 @@ function createWordcloud(data) {
                     return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
                 })
                 .text(function(d) { return d.text; });
+    }
+}
+
+// Dependant on D3 V4
+function commitSelector(dates) {
+    d3.select("#commitSelector").html('');
+
+    var datum = []
+    dates.forEach(function(d){
+    datum.push(new Date(d))
+    })
+    datum.reverse()
+
+    var margin = {top: 10, right: 40, bottom: 40, left: 20},
+      width = 900 - margin.left - margin.right,
+      height = 140 - margin.top - margin.bottom;
+
+    var x = d3.scaleTime()
+      .domain([datum[0], datum[datum.length-1]])
+      .rangeRound([0, width]);
+
+    var brush = d3.brushX()
+      .extent([[0, 0], [width, height]])
+      .on("end", brushended);
+
+    var svg = d3.select("#commitSelector").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+    svg.append("g")
+      .attr("class", "axis axis--grid")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x)
+          .tickValues(datum)
+          .tickSize(-height)
+          .tickFormat(function() { return null; }))
+
+    // Assemble an array of values to use as ticks
+    tickVals = [datum[0]]
+    var endDate = d3.timeDay(datum[datum.length-1])-5
+    if (d3.timeMonth.count(datum[0],datum[datum.length-1]) < 10)
+      tickVals = tickVals.concat(d3.timeMonth.range(datum[0],endDate));
+    else if (d3.timeMonth.count(datum[0],datum[datum.length-1]) < 30)
+      tickVals = tickVals.concat(d3.timeMonth.every(3).range(datum[0],endDate));
+    else
+      tickVals = tickVals.concat(d3.timeMonth.every(6).range(datum[0],endDate));
+
+    tickVals.push(datum[datum.length-1])
+
+    // Conditional formatting of ticks
+    var formatDay = d3.timeFormat("%b %d"),
+      formatMonth = d3.timeFormat("%b"),
+      formatYear = d3.timeFormat("%Y");
+    function multiFormat(date) {
+        if (date == datum[0] || date == datum[datum.length-1]){
+          return formatDay(date)
+        }
+        return (d3.timeYear(date) < date ? formatMonth : formatYear)(date);
+    }
+
+    svg.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x)
+          .tickValues(tickVals)
+          .tickFormat(multiFormat)
+          .tickPadding(0))
+      .attr("text-anchor", null)
+    .selectAll("text")
+      .style("text-anchor", "start")
+      .attr("transform", function(d) {
+          return "rotate(45)"
+          })
+      .attr("x", 6);
+
+    svg.append("g")
+      .attr("class", "brush")
+      .call(brush);
+
+    var borderPath = svg.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("height", height)
+      .attr("width", width)
+      .style("stroke", 'black')
+      .style("fill", "none")
+      .style("stroke-width", '1px');
+
+    // Maps the selected range to snap to commit dates
+    function mapDateRange(date1, date2, dates) {
+        var returnVal = [dates[0],dates[dates.length-1]]
+        var lowerSearch = true
+
+        for (var i=0; i < dates.length; i++){
+          d = dates[i]
+          if (lowerSearch) {
+            if (d > date1) {
+              returnVal[0] = d
+              lowerSearch = false
+            }
+          }
+          else {
+            if (d > date2) {
+              returnVal[1] = dates[i-1]
+              break
+            }
+          }
+        }
+        return returnVal
+    }
+
+    function brushended() {
+        if (!d3.event.sourceEvent) return; // Only transition after input.
+        if (!d3.event.selection) return; // Ignore empty selections.
+        var domain0 = d3.event.selection.map(x.invert),
+            domain1 = mapDateRange(domain0[0],domain0[1],datum);
+        var formFormat = d3.timeFormat('%Y-%m-%d')
+        d3.select('#previousDate').property("value", formFormat(domain1[0]))
+        d3.select('#currentDate').property("value", formFormat(domain1[1]))
+
+        $('#currentDate').trigger('change');
+
+        d3.select(this)
+          .transition()
+            .call(brush.move, domain1.map(x));
     }
 }
