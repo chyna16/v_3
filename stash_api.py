@@ -48,10 +48,10 @@ def get_details():
 
 # called by index_repo view
 # makes new api call using selected project to get list of repos
-def get_project_repos(selected_key, url_type):
+def get_project_repos(selected_key, url_type, limit):
 	url_repos = ('https://stash.mtvi.com/rest/api/1.0/projects/'
 		+ selected_key
-		+ '/repos')
+		+ '/repos?limit=' + limit)
 	repos = requests.get(
 		url=url_repos, auth=(settings.username, settings.password)
 	)

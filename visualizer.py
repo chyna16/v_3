@@ -72,7 +72,7 @@ def index():
 def return_repos():
 	return_val = ''
 	key = request.args.get('key', '', type=str)
-	repos = stash_api.get_project_repos(key,'http')
+	repos = stash_api.get_project_repos(key, 'http', '100')
 	for repo in repos:
 		return_val += '<option value="'+repo['name']+'">'+repo['name']+'</option>'
 	return jsonify(result=return_val)
