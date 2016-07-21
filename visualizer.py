@@ -9,13 +9,14 @@ import repo_manager
 import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
-from werkzeug.contrib.cache import SimpleCache
+from flask.ext.cache import Cache
 
 app = Flask(__name__)
 secret = os.urandom(24)
 app.secret_key = secret
 
-cache = SimpleCache()
+app.config['CACHE_TYPE'] = 'simple'
+app.cache = Cache(app)
 
 maat_dir = settings.maat_dir # address of codemaat
 repo_dir = settings.repo_dir # address of cloned repositories
@@ -124,6 +125,15 @@ def dashboard():
 			from_date=from_date, to_date=to_date))
 
 
+@app.cache.memoize(timeout=60*60)
+def get_csv_data(path, filename):
+	return data_manager.parse_csv(path, filename)
+
+@app.cache.memoize(timeout=60*60)
+def get_log_data(path, filename):
+	return data_manager.get_word_frequency(path, filename)
+
+
 # page where user can view the visualized data
 @app.route('/result', methods=['GET', 'POST'])
 def result():
@@ -134,20 +144,14 @@ def result():
 	if request.method == 'GET':
 		analysis = request.args.get('analysis')
 		repo_details = repo_name + "_" + from_date + "_" + to_date
-		data = cache.get('data_' + analysis + '_' + repo_details)
-		keys = cache.get('keys_' + analysis + '_' + repo_details)
-		if data is None:
-			if analysis == "cloud":
-				data, keys = data_manager.get_word_frequency(os.path.join(csv_dir, 
-					repo_details), analysis + "_" + repo_details + ".log")
-			else:
-				data, keys = data_manager.parse_csv(os.path.join(csv_dir, repo_details), 
-					analysis + "_" + repo_name + ".csv")
-			if data == []: return render_template('404.html')
-			cache.set('data_' + analysis + '_' + repo_details,
-					data, timeout=60*60)
-			cache.set('keys_' + analysis + '_' + repo_details,
-					keys, timeout=60*60)
+		if analysis == "cloud":
+			data, keys = get_log_data(os.path.join(csv_dir, repo_details), 
+				analysis + "_" + repo_details + ".log")
+		else:
+			data, keys = get_csv_data(os.path.join(csv_dir, repo_details), 
+				analysis + "_" + repo_name + ".csv")
+		if data == []: 
+			return render_template('404.html')
 		return render_template('result.html',
 			repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
 			from_date=from_date, to_date=to_date,
