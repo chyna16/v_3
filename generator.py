@@ -210,7 +210,7 @@ def create_log(log_type, repo_name, from_date, to_date, address):
 	print("-" * 60)
 
 
-#obtains complexity history of entire repository, regardless of date selected
+#obtains complexity history of repository
 #can take a long time (up to 3 min)when running on large repositories
 #requires the 'csvcat' python package
 def create_complexity_files(repo, address, from_date, to_date):
@@ -223,14 +223,17 @@ def create_complexity_files(repo, address, from_date, to_date):
 	csv_list = []
 	git_list = []
 
-	# get the log id of the first and latest commit in the repository
+	# get the log id of the first and latest commit in the repository based on date
 	first_id = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h" --no-patch --reverse | head -1')
+		+ ' log --pretty=format:"%h" --no-patch --reverse --after=' 
+		+ from_date + ' --before=' + to_date + ' | head -1')
 	last_id = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h" --no-patch | head -1')
-	# gets the list of commit IDs and their dates
+		+ ' log --pretty=format:"%h" --no-patch --after=' 
+		+ from_date + ' --before=' + to_date + ' | head -1')
+	# gets the list of commit IDs and their dates in ISO format
 	git_values = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h %ad" --date=short --no-patch --reverse')
+		+ ' log --pretty=format:"%h %ad" --date=iso --no-patch --reverse --after=' 
+		+ from_date + ' --before=' + to_date)
 
 	for item in git_values.splitlines():
 		git_list.append(item)
@@ -278,14 +281,14 @@ def create_complexity_files(repo, address, from_date, to_date):
 			 for row in csv_reader:
 				 for item in git_list:
 					 if item.split(' ')[0] in row:
-						 row.append(item.split(' ')[1])
+						 row.append(item[10:])
 						 all.append(row)
 			 csv_write.writerows(all)
 
 	for file in glob.glob("complex_*"):
 		os.remove(file)
 
-	os.chdir(setting.v3_dir)
+	os.chdir(settings.v3_dir)
 
 
 # called by: manage_csv_folder, refresh_repos
@@ -299,6 +302,8 @@ def process_log(repo, from_date, to_date, csv_path):
 	create_log('logfile', repo, from_date, to_date, repo_address)
 	create_log('cloud', repo, from_date, to_date, repo_address)
 
+	create_complexity_files(repo, repo_address, from_date, to_date)
+	os.chdir(csv_path)
 	generate_data_summary(repo, from_date, to_date)
 	generate_data_metrics(repo, from_date, to_date)
 	generate_data_coupling(repo, from_date, to_date)
