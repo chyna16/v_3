@@ -68,7 +68,7 @@ def get_project_repos(selected_key, url_type, limit):
 		print("api call failed")
 
 	return repo_list
-	
+
 
 def get_repo_timestamp(selected_key, selected_repo, url_type, limit):
 	selected_repo = selected_repo.replace(' ','-')
