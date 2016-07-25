@@ -11,7 +11,7 @@ function createGraph(data) {
         var color = d3.scale.category20();
         createHeader(color);
         d3.select("#graph")
-            .html('<p><p>Choose an enitity to view degree of coupling.</p></p>');
+          .html('<p><p>Choose an enitity to view degree of coupling.</p></p>');
     }
     else if (analysis_type == "cloud") {
         createWordcloud(data);
@@ -44,8 +44,7 @@ function createHeader(color) {
         .style('color', 'white')
         .style('margin', '10px')
         .attr('value', function(d) { return d; })
-        .on('click', function() { 
-            chooseColumn(this); });
+        .on('click', function() { chooseColumn(this); });
 
       if (analysis_type != 'coupling' && analysis_type != 'complexity') {
           header.append("button")
@@ -93,8 +92,6 @@ function createBarGraph(data) {
     d3.select("#graph").html('');
         // .html("") causes the wrapper to be emptied out
         // this prevents copies from being made each time function is called
-        // NOTE: this apparently does not work in Safari; fix later
-
     var w;
     var width;
     var margin = {top: 20, left: 70, right: 20, bottom: 150};
@@ -203,12 +200,12 @@ function createBarGraph(data) {
                     .style("fill", function(d) { return color(d.type); });
                 })
             .attr("height", 0)
-            .attr("width", 0)
-            .transition()
-            .duration(900)
-            .attr("height", function(d) { return height - yScale(d.value); })
             .attr("width", x1Scale.rangeBand())
             .attr("x", function(d) { return x1Scale(d.type); })
+            .attr("y", height);
+
+    bar.transition().duration(900)
+            .attr("height", function(d) { return height - yScale(d.value); })
             .attr("y", function(d) { return yScale(d.value); });
         //labels dont display with this + transition enabled
         // .append("svg:title")
@@ -432,9 +429,9 @@ function createBubblePack(inputData) {
         .direction('e')
         .offset([0, 10])
         .html(function(d) {
-            return "<p>File: <text style='color:red'>" + d.data["entity"]+ "</p>"
-                +"<p>Revisions: " + d.data["n-revs"] + "</p>"
-                +"<p>Lines: " + d.data["lines"] + "</p>";
+            return "<p>File: <text style='color:red'>" + d.data["entity"]
+                + "</p>" + "<p>Revisions: " + d.data["n-revs"] + "</p>"
+                + "<p>Lines: " + d.data["lines"] + "</p>";
         });
 
     // Set Pack settings
@@ -446,7 +443,7 @@ function createBubblePack(inputData) {
         .attr("width", diameter)
         .attr("height", diameter)
         .append("g")
-        .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+        .attr("transform", "translate(" + diameter/2 + "," + diameter/2 + ")");
 
     // Process data in order to create tree structure out of file structure
     data.forEach(function(d){
