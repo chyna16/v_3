@@ -23,28 +23,6 @@ def set_path(path):
 	print("-" * 60)
 
 
-# called by index view to generate message
-# FIX: currently cd's into repo_dir and re-clones the repo
-# 	causing the message to be "already exists"
-# def get_status_message(clone_url):
-# 	os.chdir(settings.repo_dir)
-# 	# temporary message handler for cloning repositories
-# 	clone_status = subprocess.getoutput('git clone ' + clone_url)
-# 	print ("this is the status: " + clone_status)
-# 	if 'Authentication failed' 	in clone_status:
-# 		message = "Authentication failed."
-# 	elif 'already exists' in clone_status:
-# 		message = """Repository exists. Check the 'Available
-# 		 Repositories' tab."""
-# 	elif 'not found' in clone_status:
-# 		message = """Repository not found. Either it does not exist, or you do
-# 		not have permission to access it."""
-# 	else:
-# 		message = "Cloning complete. Check the 'Available Repositories tab."
-# 	os.chdir(settings.v3_dir)
-# 	return message
-
-
 # called by generate_data functions
 # helper function to handle command line input for running codemaat
 def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
@@ -78,7 +56,7 @@ def create_log(log_type, repo_name, from_date, to_date, address):
 	if from_date: sys_command += ' --after=' + from_date
 	if to_date: sys_command += ' --before=' + to_date
 	sys_command += (' > '
-		+ log_type + '_' + repo_name + '_' + from_date + '_' + to_date + '.log')
+		+ log_type +'_'+ repo_name +'_'+ from_date +'_'+ to_date + '.log')
 	os.system(sys_command)
 	print("Done.")
 	print("-" * 60)
@@ -97,17 +75,17 @@ def create_complexity_files(repo, address, from_date, to_date):
 	csv_list = []
 	git_list = []
 
-	# get the log id of the first and latest commit in the repository based on date
+	# get the log id of first and latest commit in the repository based on date
 	first_id = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h" --no-patch --reverse --after=' 
+		+ ' log --pretty=format:"%h" --no-patch --reverse --after='
 		+ from_date + ' --before=' + to_date + ' | head -1')
 	last_id = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h" --no-patch --after=' 
+		+ ' log --pretty=format:"%h" --no-patch --after='
 		+ from_date + ' --before=' + to_date + ' | head -1')
 	# gets the list of commit IDs and their dates in ISO format
 	git_values = subprocess.getoutput('git --git-dir ' + address
-		+ ' log --pretty=format:"%h %ad" --date=iso --no-patch --reverse --after=' 
-		+ from_date + ' --before=' + to_date)
+		+ ' log --pretty=format:"%h %ad" --date=iso --no-patch '
+		+ '--reverse --after=' + from_date + ' --before=' + to_date)
 
 	for item in git_values.splitlines():
 		git_list.append(item)
@@ -121,16 +99,16 @@ def create_complexity_files(repo, address, from_date, to_date):
 				continue
 			file_list.append(os.path.join(root, file))
 
-	os.chdir(os.path.join(settings.repo_dir, repo))
-
 	#runs complexity analysis script on each file in the repository
 	for file in file_list:
 		split_path = file.split(repo + '/')
-		os.system('python2 ' + settings.v3_dir + '/git_complexity_trend.py --start '
-			+ first_id + ' --end ' + last_id + ' --file ' + split_path[1] + ' > '
+		p = subprocess.Popen('python2 ' + settings.v3_dir
+			+ '/git_complexity_trend.py --start ' + first_id
+			+ ' --end ' + last_id + ' --file ' + split_path[1] + ' > '
 			+ settings.csv_dir  + folder_name + '/complex_'
-			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv')
-
+			+ os.path.basename(os.path.normpath(split_path[1])) + '.csv',
+			cwd = os.path.join(settings.repo_dir, repo), shell=True)
+		p.wait()
 
 	os.chdir(os.path.join(settings.csv_dir, folder_name))
 
@@ -197,8 +175,8 @@ def manage_csv_folder(repo, from_date, to_date):
 		os.system("mkdir " + csv_path)
 		process_log(repo, from_date, to_date, csv_path)
 
-		if os.stat(os.path.join(
-			csv_path, "logfile_" + repo + '_' + from_date + '_' + to_date + '.log')
+		if os.stat(os.path.join(csv_path,
+			"logfile_" + repo + '_' + from_date + '_' + to_date + '.log')
 		).st_size == 0:
 			# if the generated logfile does not have data
 			return False
@@ -212,8 +190,8 @@ def manage_csv_folder(repo, from_date, to_date):
 # def monthdelta(date, delta):
 # 	m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
 # 	if not m: m = 12
-# 	d = min(date.day, [31,
-# 		29 if y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
+# 	d = min(date.day, [31, 29 if
+#		y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
 # 	return date.replace(day=d,month=m, year=y)
 
 # def get_prev_date():
