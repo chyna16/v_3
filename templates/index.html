@@ -23,9 +23,9 @@ $(function() {
       }
       else {
         $('#repo').prop( "disabled", false )
-                  .empty()
-                  .append("<option value='' disabled selected>Select a Repo</option>")
-                  .append(data.result);
+          .empty()
+          .append("<option value='' disabled selected>Select a Repo</option>")
+          .append(data.result);
       }
     });
     return false;
@@ -42,15 +42,19 @@ $(function() {
         console.log("boo")
       }
       else {
-        $("#previousDate").val(data.result[data.result.length-1].split(' ')[0])
+        dates = data.result;
+        var prvDate = dates[dates.length-1].split(' ')[0];
+        var curDate = dates[0].split(' ')[0];
+
+        $("#previousDate").val(prvDate)
             .prop("disabled",false);
-        $("#currentDate").val(data.result[0].split(' ')[0])
+        $("#currentDate").val(curDate)
             .prop("disabled",false);
         $("#nextbutton").prop("disabled",false);
         $("#spinner").hide();
-        dates = data.result;
-        commitSelector(data.result);
-        getNumCommits(data.result,data.result[data.result.length-1].split(' ')[0],data.result[0].split(' ')[0])
+
+        commitSelector(dates);
+        updateNumCommits(dates, prvDate, curDate);
       }
     });
     return false;
@@ -63,7 +67,7 @@ $(function() {
     $("#spinner").show();
   });
 
-  function getNumCommits(dates, date1, date2){
+  function updateNumCommits(dates, date1, date2){
     var numCommits = 0;
     for (var i = 0; i < dates.length; i++){
       date = dates[i].split(' ')[0];
@@ -75,14 +79,14 @@ $(function() {
   }
 
   $('#previousDate').bind('change', function() {
-    getNumCommits(dates,$("#previousDate").val(),$("#currentDate").val());
+    updateNumCommits(dates,$("#previousDate").val(),$("#currentDate").val());
   });
   $('#currentDate').bind('change', function() {
-    getNumCommits(dates,$("#previousDate").val(),$("#currentDate").val());
+    updateNumCommits(dates,$("#previousDate").val(),$("#currentDate").val());
   });
 
   document.getElementById("help").style.display = 'block';
-  document.getElementById("help").innerHTML = "<div><p>Inspired by Adam Tornhill's book <u><i>Your Code as a Crime Scene</i></u>, this web application is designed assist in locating problem areas in your code, finding ways to improve it, and eliminating productivity sinks. This is done by analyzing your version-control history and highlighting aspects of this history for you to analyze.</p></div><div><ul><li><strong>Step One: </strong>Select a project and repository from the drop-down menu.</li><li><strong>Step Two: </strong>Choose a date range by inputting dates or clicking and dragging on the interactive date picker (white lines represent commits).</li><li><strong>Step Three: </strong>Click Run Analysis.</li></ul></div>";
+  document.getElementById("help").innerHTML = "<div><p>Inspired by Adam Tornhill's book <u><i>Your Code as a Crime Scene</i></u>, this web application is designed assist in locating problem areas in your code, finding ways to improve it, and eliminating productivity sinks. This is done by analyzing your version-control history and highlighting aspects of this history for you to analyze.</p></div><div><ul><li><strong>Step One: </strong>Select a project and repository from the drop-down menu.</li><li><strong>Step Two: </strong>Choose a date range by inputting dates or clicking and dragging on the interactive date picker (red lines represent commits).</li><li><strong>Step Three: </strong>Click Run Analysis.</li></ul></div>";
 });
 </script>
 {% endblock %}
@@ -95,11 +99,13 @@ $(function() {
 	<div class="container" style="min-height:100% width:80%">
 	{% with messages = get_flashed_messages() %}
 	  {% if messages %}
-	    {% for message in messages %}
-		  <div class="alert alert-warning alert-dismissible" role="alert">
-		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-			{{message}}
-		  </div>
+    {% for message in messages %}
+	  <div class="alert alert-warning alert-dismissible" role="alert">
+	  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+		{{message}}
+	  </div>
 		{% endfor %}
 	  {% endif %}
 	{% endwith %}
@@ -113,7 +119,7 @@ $(function() {
 
   <form class="form-horizontal" method="POST" enctype="multipart/form-data">
   <div class="col-sm-2"></div>
-  <center class="col-sm-8" style="width: 900px;">
+  <center class="col-sm-8" style="min-width: 900px;">
 
     <h3>Repository Selection</h3>
 
@@ -137,7 +143,8 @@ $(function() {
 
     <!-- date range selection -->
     <div id="date-select" class="form-group">
-        <label for="formInput">Date Range (Default: First -> Last Commit):</label><br>
+        <label for="formInput">Date Range (Default: First -> Last Commit):</label>
+        <br>
         <div class="col-sm-4">
           <div class="input-group">
             <div class="input-group-addon">Start Date:</div>
