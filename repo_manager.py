@@ -79,7 +79,7 @@ def refresh_repos(repo_dir):
 		try:
 			with open(filename, 'rt') as timetag: datetime = timetag.read()
 		except IOError: datetime = ' '
-		project = stash_api.get_repo_detail(repo, 'key')
+		project = stash_api.get_repo_detail(repo, 'project', 'key')
 		if datetime < stash_api.get_repo_timestamp(project, repo, 'http', '1')[0]:
 			refresh_single_repo(repo_dir, repo)
 
