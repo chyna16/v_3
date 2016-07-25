@@ -13,21 +13,20 @@ $(function() {
     $("#repo").empty()
               .prop("disabled", true)
               .append("<option>Loading Repos...</option>");
-    $.getJSON($SCRIPT_ROOT + '/_return_repos', {
-      key: $("#project").find(":selected").val()
-    }, function(data) {
-      if (data.result === ""){
-        $("#repo").empty()
-                  .prop("disabled", true)
-                  .append("<option>No Repos Available</option>");
-      }
-      else {
-        $('#repo').prop( "disabled", false )
-          .empty()
-          .append("<option value='' disabled selected>Select a Repo</option>")
-          .append(data.result);
-      }
-    });
+
+    var selKey = $("#project").find(":selected").val()
+    if(!sessionStorage.getItem(selKey)) {
+      $.getJSON($SCRIPT_ROOT + '/_return_repos', {
+        key: selKey
+      }, function (data) {
+        sessionStorage.setItem(selKey, data.result)
+        updateRepoList(data.result)
+      });
+
+    } else {
+      updateRepoList(sessionStorage.getItem(selKey));
+    }
+
     return false;
   });
   // Ajax repo date call
@@ -67,6 +66,20 @@ $(function() {
     $("#spinner").show();
   });
 
+  function updateRepoList(resultData){
+    if (resultData === ""){
+      $("#repo").empty()
+                .prop("disabled", true)
+                .append("<option>No Repos Available</option>");
+    }
+    else {
+      $('#repo').prop( "disabled", false )
+        .empty()
+        .append("<option value='' disabled selected>Select a Repo</option>")
+        .append(resultData);
+    }
+  }
+
   function updateNumCommits(dates, date1, date2){
     var numCommits = 0;
     for (var i = 0; i < dates.length; i++){
@@ -84,6 +97,14 @@ $(function() {
   $('#currentDate').bind('change', function() {
     updateNumCommits(dates,$("#previousDate").val(),$("#currentDate").val());
   });
+
+  // If back button is selected repopulates repo list
+  (function(){
+    var pKey = $("#project").find(":selected").val();
+    if (pKey != "" && sessionStorage.getItem(pKey)) {
+      updateRepoList(sessionStorage.getItem(pKey));
+    }
+  }());
 
   document.getElementById("help").style.display = 'block';
   document.getElementById("help").innerHTML = "<div><p>Inspired by Adam Tornhill's book <u><i>Your Code as a Crime Scene</i></u>, this web application is designed assist in locating problem areas in your code, finding ways to improve it, and eliminating productivity sinks. This is done by analyzing your version-control history and highlighting aspects of this history for you to analyze.</p></div><div><ul><li><strong>Step One: </strong>Select a project and repository from the drop-down menu.</li><li><strong>Step Two: </strong>Choose a date range by inputting dates or clicking and dragging on the interactive date picker (red lines represent commits).</li><li><strong>Step Three: </strong>Click Run Analysis.</li></ul></div>";
