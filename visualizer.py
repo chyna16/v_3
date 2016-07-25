@@ -84,7 +84,7 @@ def return_repos():
 def return_repo():
 	key = request.args.get('key', '', type=str)
 	name = request.args.get('name', '', type=str)
-	dates = stash_api.get_repo_timestamp(key, name, 'http', '15000')
+	dates = stash_api.get_repo_timestamp(key, name, '15000')
 	return jsonify(result=dates)
 
 

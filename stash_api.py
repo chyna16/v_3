@@ -64,7 +64,7 @@ def get_project_repos(selected_key, url_type, limit):
 # called by: 
 # 	_return_repo_dates view, repo_manager.refresh_repos/repo_check_and_update
 # returns a list of datetimes of commits
-def get_repo_timestamp(selected_key, selected_repo, url_type, limit):
+def get_repo_timestamp(selected_key, selected_repo, limit):
 	selected_repo = selected_repo.replace(' ','-')
 	url_repos = ('https://stash.mtvi.com/rest/api/1.0/projects/'
 		+ selected_key + '/repos/' + selected_repo + '/commits?limit=' + limit)
@@ -90,7 +90,6 @@ def get_repo_timestamp(selected_key, selected_repo, url_type, limit):
 # makes api call to search for a repo by name and get clone url
 def get_repo_url(repo_name, url_type):
 	links = get_repo_detail(repo_name, 'links', 'clone')
-	print(links)
 	repo_url = ''
 	try:
 		for link in links:
