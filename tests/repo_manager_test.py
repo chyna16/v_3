@@ -14,18 +14,30 @@ import repo_manager
 
 
 class RepoManagerTests(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		self.temp_dir = tempfile.mkdtemp()
-		self.repo_url = 'https://'+ settings.username + '@stash.mtvi.com/scm/bot/mcshake.git'
+		self.mcshake_url = 'https://'+ settings.username + '@stash.mtvi.com/scm/bot/mcshake.git'
+		self.v3_url = 'https://'+ settings.username + '@stash.mtvi.com/scm/me/v3.git'
 
 		os.chdir(self.temp_dir)
 
-		# sample_repo_url = stash_api.get_repo_url('mcshake', 'http')
-		# repo_manager.clone_repo(self.repo_url, os.pathself.temp_dir, settings.password)
+		os.system('git clone https://' 
+			+ settings.username + ':' + settings.password + '@stash.mtvi.com/scm/bot/mcshake.git')
+		with open(os.path.join('mcshake', 'timetag.txt'), 'wt') as timetag:
+			d = str(datetime.now()).split('.')[0].split(' ')
+			timetag.write(d[0])
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(self):
 		os.chdir('..')
 		shutil.rmtree(self.temp_dir)
+
+	def setUp(self):
+		pass
+
+	def tearDown(self):
+		pass
 
 
 	def test_get_dir_list(self):
@@ -38,9 +50,9 @@ class RepoManagerTests(unittest.TestCase):
 		shutil.rmtree('test_dir_2')
 
 	def test_clone_repo(self):
-		repo_manager.clone_repo(self.repo_url, self.temp_dir, settings.password)
-		assert os.path.isdir('mcshake')
-		shutil.rmtree('mcshake')
+		repo_manager.clone_repo(self.v3_url, self.temp_dir, settings.password)
+		assert os.path.isdir('v3')
+		shutil.rmtree('v3')
 
 	def test_clone_command(self):
 		clone_cmd = repo_manager.get_clone_command('https://test_name@stash.mtvi.com', 'qwerty')
@@ -52,16 +64,11 @@ class RepoManagerTests(unittest.TestCase):
 		os.remove('timetag.txt')
 
 	def test_get_commit_dates(self):
-		if not os.path.isdir('mcshake'):
-			repo_manager.clone_repo(self.repo_url, self.temp_dir, settings.password)
 		f_date, l_date = repo_manager.get_commit_dates(settings.repo_dir, 'mcshake')
 		date_length = len(f_date.split('-'))
 		self.assertEqual(date_length, 3)
-		shutil.rmtree('mcshake')
 
 	def test_get_repo_list(self):
-		if not os.path.isdir('mcshake'):
-			repo_manager.clone_repo(self.repo_url, self.temp_dir, settings.password)
 		repo_list = repo_manager.get_repo_list(['mcshake'], self.temp_dir)
 		first, last = repo_manager.get_commit_dates(self.temp_dir, 'mcshake')
 		filename = os.path.join(self.temp_dir, 'mcshake', 'timetag.txt')

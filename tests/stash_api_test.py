@@ -12,6 +12,14 @@ import unittest
 
 
 class ApiCallTests(unittest.TestCase):
+	@classmethod
+	def setUpClass(self):
+		pass
+
+	@classmethod
+	def tearDownClass(self):
+		pass
+
 	def setUp(self):
 		pass
 

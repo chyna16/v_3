@@ -19,7 +19,8 @@ import visualizer
 
 
 class ViewTests(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		self.app = visualizer.app.test_client()
 		self.app.testing = True
 
@@ -28,8 +29,16 @@ class ViewTests(unittest.TestCase):
 			repo_manager.clone_repo(url, settings.repo_dir, settings.password)
 			generator.manage_csv_folder('mcshake', '2014-10-24', '2014-12-23')
 
+	@classmethod
+	def tearDownClass(self):
+		pass
+
+	def setUp(self):
+		pass
+
 	def tearDown(self):
 		pass
+
 
 	def test_index_status_code(self):
 		result = self.app.get('/')

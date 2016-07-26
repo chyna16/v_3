@@ -13,7 +13,8 @@ import data_manager
 
 
 class DataManagerTests(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		self.temp_dir = tempfile.mkdtemp()
 
 		self.stemmer = LancasterStemmer()
@@ -38,9 +39,16 @@ class DataManagerTests(unittest.TestCase):
 
 		os.chdir(self.temp_dir)
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(self):
 		os.chdir('..')
 		shutil.rmtree(self.temp_dir)
+
+	def setUp(self):
+		pass
+
+	def tearDown(self):
+		pass
 
 
 	def test_parse_csv_output(self):

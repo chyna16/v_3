@@ -14,7 +14,8 @@ import generator
 
 
 class GeneratorTests(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		self.temp_dir = tempfile.mkdtemp()
 		os.chdir(self.temp_dir)
 
@@ -27,9 +28,17 @@ class GeneratorTests(unittest.TestCase):
 		t.writelines('jdlkfsj dslkjlds kkddkls')
 		t.close()
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(self):
 		os.chdir('..')
 		shutil.rmtree(self.temp_dir)
+
+	def setUp(self):
+		pass
+
+	def tearDown(self):
+		pass
+
 
 	def test_create_log(self):
 		generator.create_log('logfile', 'v3_test', '', '', settings.v3_dir + '/.git')
