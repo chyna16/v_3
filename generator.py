@@ -121,22 +121,24 @@ def create_complexity_files(repo, address, from_date, to_date):
 
 	#adds date column to csv file
 	with open('complex_' + repo + '.csv','r') as csvinput:
-		 with open('complexity_' + repo + '.csv', 'w') as csvoutput:
-			 csv_write = csv.writer(csvoutput, lineterminator='\n')
-			 csv_reader = csv.reader(csvinput)
+		with open('complexity_' + repo + '.csv', 'w') as csvoutput:
+			csv_write = csv.writer(csvoutput, lineterminator='\n')
+			csv_reader = csv.reader(csvinput)
 
-			 all = []
-			 row = next(csv_reader)
-			 row.append('date')
-			 all.append(row)
+			all = []
+			try:
+				row = next(csv_reader)
+				row.append('date')
+				all.append(row)
 
-			 for row in csv_reader:
-				 for item in git_list:
-					 if item.split(' ')[0] in row:
-						 row.append(item[10:])
-						 all.append(row)
-			 csv_write.writerows(all)
-
+				for row in csv_reader:
+					for item in git_list:
+						if item.split(' ')[0] in row:
+							row.append(item[10:])
+							all.append(row)
+							csv_write.writerows(all)
+			except:
+				print('No Complexity')
 	for file in glob.glob("complex_*"):
 		os.remove(file)
 
