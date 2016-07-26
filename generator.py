@@ -34,12 +34,12 @@ def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
 
 # runs cloc to retrieve number of lines of code
 # merges with metrics data to show hotspots
-def generate_data_hotspots(repo_name, from_date, to_date):
+def generate_data_hotspots(repo_name, from_date, to_date, repo_dir=settings.repo_dir):
 	print("Creating repository hotspots...")
 	if not os.path.isfile("metrics_" + repo_name + ".csv"):
 		print("Creating metrics...")
 		run_codemaat('authors', 'metrics', repo_name, from_date, to_date)
-	os.system("cloc " + settings.repo_dir + repo_name
+	os.system("cloc " + os.path.join(repo_dir, repo_name)
 		+ " --unix --by-file --csv --quiet --report-file="
 		+ "lines_" + repo_name + ".csv")
 	data_manager.merge_csv(repo_name)
@@ -168,9 +168,9 @@ def process_log(repo, from_date, to_date, csv_path):
 # called by: index view
 # sets the address where csv files are/will be located
 # calls helper functions that handle folder, logfile, & codemaat
-def manage_csv_folder(repo, from_date, to_date):
+def manage_csv_folder(repo, from_date, to_date, csv_dir=settings.csv_dir):
 	folder_name = repo + "_" + from_date + "_" + to_date
-	csv_path = os.path.join(settings.csv_dir, folder_name)
+	csv_path = os.path.join(csv_dir, folder_name)
 		# complete address of csv folder for chosen repo
 	if not os.path.exists(csv_path):
 		print("creating folder: " + csv_path)
