@@ -79,8 +79,8 @@ def refresh_repos(repo_dir):
 		try:
 			with open(filename, 'rt') as timetag: datetime = timetag.read()
 		except IOError: datetime = ' '
-		project = stash_api.get_repo_detail(repo, 'key')
-		if datetime < stash_api.get_repo_timestamp(project, repo, 'http', '1')[0]:
+		project = stash_api.get_repo_detail(repo, 'project', 'key')
+		if datetime < stash_api.get_repo_timestamp(project, repo, '1')[0]:
 			refresh_single_repo(repo_dir, repo)
 
 
@@ -90,7 +90,7 @@ def repo_check_and_update(repo_name, proj_key, to_date):
 	available_repo = [ repo for repo in repo_list
 		if repo.split('|')[0] == repo_name ]
 	remote_last_commit = stash_api.get_repo_timestamp(proj_key,
-		repo_name, 'http', '1')[0]
+		repo_name, '1')[0]
 
 	if available_repo == []:
 		# if repo doesn't exist, clone it

@@ -104,7 +104,7 @@
 
 .axis--x .domain,
 .axis--grid .tick line {
-  stroke: #fff;
+  stroke: #931616;
 }
 
 .axis--grid .tick--minor line {

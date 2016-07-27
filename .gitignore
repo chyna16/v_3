@@ -80,6 +80,7 @@ celerybeat-schedule
 
 # codemaat files
 *.csv
+csv/
 
 # v3 project files
 settings.py
