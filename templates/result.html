@@ -28,6 +28,7 @@
                 <li><button class="btn btn-link" type="submit" name="analysis" value="coupling">Coupling</button></li>
                 <li><button class="btn btn-link" type="submit" name="analysis" value="age">Churn</button></li>
                 <li><button class="btn btn-link" type="submit" name="analysis" value="cloud">Word Cloud</button></li>
+                <li><button class="btn btn-link" type="submit" name="analysis" value="complexity">Complexity</button></li>
             </form>
           </ul>
     </li>
@@ -130,7 +131,7 @@
         "hotspots": "A hotspot is an area of your project that is receiving a disproportionate amount of attention. The metrics we are using here to identify hotspots are the number of lines of code and the number of revisions. High values for either, but especially both, are cause for further analysis and may help steer your development goals.",
         "coupling": "Coupling analyzes the connections between modules made in the current repository. Paired modules with high degree of coupling implies dependency; if one is changed, the other is likely to be affected. Here we use 30% of commits as the minimum threashold for possible coupling.",
         "cloud": "View the patterns within commit messages. See which words are used the most while committing to get an understanding of things that are commonly worked on.",
-        "complexity": "Complexity analyzes the amount of lines in a file, amount of indentations and variance of complexity."
+        "complexity": "Complexity analyzes the amount of lines in a file, amount of indentations and variance of complexity. Select a module from the dropdown list below to display the graph, and a button to show each indivdual value for the selected module."
     };
     var help_lst = {
         "metrics": "<ul><li>Select a metric to use for filtering (n-authors, n-revs, or all)</li><li>If you would like to narrow the range of authors or revisions click on <b>add filter</b> and use the sliders to select the desired values.</li><li>Hover over a bar to see its exact value.</li></ul>",
