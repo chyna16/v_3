@@ -91,7 +91,8 @@ def create_complexity_files(repo, address, from_date, to_date):
 	folder_name = repo + "_" + from_date + "_" + to_date
 	#files to be ignored
 	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
-	 '.spec', '.md', '.ignore', '.ttf', '.min', '.css')
+	 '.spec', '.md', '.ignore', '.ttf', '.min', '.css', '.xml', '.pdf','.dmd', 
+	 '.properties', '.local', '.ftl')
 
 	file_list = []
 	csv_list = []
