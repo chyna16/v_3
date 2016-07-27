@@ -20,8 +20,9 @@ function createGraph(data) {
       createScatterPlot(data);
     }
     else if (analysis_type == "complexity") {
-        d3.select("#header").html('').append("p")
-        .text('chart coming soon...');
+        var color = d3.scale.category20();
+        createHeader(color);
+        createLineGraph(data);
     }
     else {
         createBarGraph(data);
@@ -35,7 +36,10 @@ function createHeader(color) {
       header
         .selectAll("button")
             .data(keys.filter(function(key) {
-                return key != keys[0] && key != 'coupled'; }))
+                if (analysis_type == "complexity") 
+                    { return key != keys[0] && key != keys[1] 
+                        && key != keys[6] && key != 'coupled'}
+                else { return key != keys[0] && key != 'coupled' };}))
             .enter()
         .append("button")
         .attr('class', 'btn')
@@ -68,25 +72,142 @@ function createHeader(color) {
       .on('click', function() { toggleFilter(); });
     }
 
-    if (analysis_type == 'complexity') {
+
+}
+
+
+function createLineGraph(data, name, button){
+    d3.select("#wrapper").html('Select a module from the dropdown list above.');
+    arr = []
+    data.map(function(d) { 
+        if (arr.indexOf(d[keys[0]]) == -1){
+        arr.push(d[keys[0]])}
+            })
+
+    var w;
+    var width;
+    var margin = {top: 20, left: 70, right: 20, bottom: 130};
+    var height = 450 - margin.top - margin.bottom;
+    var color = d3.scale.ordinal().domain(keys).range(["#6d9af6", "#52465f"]);
+    
+    width = 900;
+
+    if (chosen_key == 'default') {
+        var labels = keys.filter(function(key) { 
+            return key !== keys[0] && key !== 'values' && key !== 'coupled' 
+            && key !== 'rev' && key !== 'date';
+            // keys that would not make appropriate columns are filtered out
+        });
+    }
+    else {
+        var labels = keys.filter(function(key) { return key == chosen_key; });
+    }
+
+    var formatDate = d3.time.format("%Y-%m-%d %X %Z");
+
+    var x = d3.time.scale()
+        .range([0, width]);
+
+    var y = d3.scale.linear()
+        .range([height, 0])
+        .domain([0, d3.max(filtered_data, function(d) { return d.value; })]); 
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+function updateData(data, name, button){
+    d3.select("#wrapper").html('');
+     var filtered_data = (data.filter(function(d) { return d.name == name;}))
+
+    var line = d3.svg.line()
+        // .interpolate("basis")
+        .x(function(d) { return x(formatDate.parse(d.date)); })
+        .y(function(d) { return y(d[button]); });
+
+    var svg = d3.select("#wrapper")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      x.domain(d3.extent(filtered_data, function(d) { return formatDate.parse(d.date); }));
+      y.domain(d3.extent(filtered_data, function(d) { return +d[button]; }));
+
+      svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+      svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+        .append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .style("font-size", "14px")
+          .text("'" + button + "'");
+
+      svg.append("path")
+          .datum(filtered_data)
+          .attr("class", "line")
+          .attr("d", line);
+
+        if (chosen_key == 'default') {
+            var labels = keys.filter(function(key) { 
+                return key !== keys[0] && key !== 'values' && key !== 'coupled' 
+                && key !== 'rev' && key !== 'date';
+                // keys that would not make appropriate columns are filtered out
+            });
+        }
+        else {
+            // if a column was specified, only the data from that column is used
+            var labels = keys.filter(function(key) { return key == chosen_key; });
+        }
+
+        // a values object is appended to each object (row) in the data
+        // values itself has an object for each column in labels
+        filtered_data.forEach(function(d, i) {
+            delete d.values; // delete data from previous renditions of the graph
+            d.values = labels.map(function(label) {
+                return {entity: d.name, type: label, value: +d[label]};
+            });
+        });
+
+      x.domain(d3.extent(filtered_data, function(d) { return formatDate.parse(d.date); }));
+      y.domain(d3.extent(filtered_data, function(d) { return +d[button]; }));
+    }
         d3.select("#header")
         .append("select")
         .selectAll("option")
         .data(arr)
         .enter()
         .append("option")
-        .text(function(d) {
-            return d;});
+        .text(function(d) { return d; });
+
+     var buttonValue = 'n'
 
         d3.select('select')
             .on("change", function(){
                 key = this.selectedIndex
-                createLineGraph.updateData()
+                nameof = (arr[key])
+                updateData(data, nameof, buttonValue)
             })
-    }
 
+        d3.select("#header")
+        .selectAll(".btn")
+        .on('click', function() {
+            buttonValue = this.value
+            updateData(data, nameof, buttonValue); 
+        });
 }
-
 
 
 function createBarGraph(data) {

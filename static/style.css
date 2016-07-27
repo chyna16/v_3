@@ -380,7 +380,7 @@ tbody td, thead th {
 .line {
   fill: none;
   stroke: steelblue;
-  stroke-width: 1.5px;
+  stroke-width: 4px;
 }
 
 /* end axes styling */
