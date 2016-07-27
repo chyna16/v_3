@@ -10,8 +10,10 @@ import stash_api # our script
 import settings # our script
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask.ext.cache import Cache
+from resources.api_data import csv_api
 
 app = Flask(__name__)
+app.register_blueprint(csv_api)
 secret = os.urandom(24)
 app.secret_key = secret
 
@@ -84,6 +86,8 @@ def return_repos():
 def return_repo():
 	key = request.args.get('key', '', type=str)
 	name = request.args.get('name', '', type=str)
+	if not key == '' or name == '':
+		return jsonify(null='api call did not return anything')
 	dates = stash_api.get_repo_timestamp(key, name, '15000')
 	return jsonify(result=dates)
 
