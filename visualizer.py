@@ -86,7 +86,7 @@ def return_repos():
 def return_repo():
 	key = request.args.get('key', '', type=str)
 	name = request.args.get('name', '', type=str)
-	if not key == '' or name == '':
+	if key == '' or name == '':
 		return jsonify(null='api call did not return anything')
 	dates = stash_api.get_repo_timestamp(key, name, '15000')
 	return jsonify(result=dates)
@@ -149,12 +149,12 @@ def result():
 		analysis = request.args.get('analysis')
 		repo_details = repo_name + "_" + from_date + "_" + to_date
 		if analysis == "cloud":
-			data, keys = get_log_data(os.path.join(csv_dir, repo_details), 
+			data, keys = get_log_data(os.path.join(csv_dir, repo_details),
 				analysis + "_" + repo_details + ".log")
 		else:
-			data, keys = get_csv_data(os.path.join(csv_dir, repo_details), 
+			data, keys = get_csv_data(os.path.join(csv_dir, repo_details),
 				analysis + "_" + repo_name + ".csv")
-		if data == []: 
+		if data == []:
 			return render_template('404.html')
 		return render_template('result.html',
 			repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
