@@ -137,7 +137,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 						if item.split(' ')[0] in row:
 							row.append(item[10:])
 							all.append(row)
-							csv_write.writerows(all)
+				csv_write.writerows(all)
 			except:
 				print('No Complexity')
 	for file in glob.glob("complex_*"):
