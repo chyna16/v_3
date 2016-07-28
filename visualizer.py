@@ -2,7 +2,7 @@ import os
 import fnmatch
 import json
 import io
-from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
+from flask import Flask, request, render_template, redirect, url_for, flash, jsonify, abort
 import generator # our script
 import data_manager # our script
 import repo_manager
@@ -50,6 +50,10 @@ def index():
 			from_date = request.form.get('from_date', '', type=str)
 			to_date = request.form.get('to_date', '', type=str)
 
+			if (not generator.valid_date(from_date) or
+				not generator.valid_date(to_date)):
+				flash('Invalid date input.')
+				return redirect(url_for('index'))
 			repo_manager.repo_check_and_update(repo_name, proj_key, to_date)
 
 			if not generator.manage_csv_folder(repo_name, from_date, to_date):
@@ -147,6 +151,8 @@ def result():
 
 	if request.method == 'GET':
 		analysis = request.args.get('analysis')
+		if not repo_name or not analysis or not from_date or not to_date:
+			abort(404)
 		repo_details = repo_name + "_" + from_date + "_" + to_date
 		if analysis == "cloud":
 			data, keys = get_log_data(os.path.join(csv_dir, repo_details),
@@ -155,7 +161,7 @@ def result():
 			data, keys = get_csv_data(os.path.join(csv_dir, repo_details),
 				analysis + "_" + repo_name + ".csv")
 		if data == []:
-			return render_template('404.html')
+			abort(404)
 		return render_template('result.html',
 			repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
 			from_date=from_date, to_date=to_date,
