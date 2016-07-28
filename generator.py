@@ -23,6 +23,19 @@ def set_path(path):
 	print("-" * 60)
 
 
+# called by index view
+# returns a bool after checking date is in correct yyyy-mm-dd form
+def valid_date(date):
+	date = date.split(' ')[0].split('-')
+	if not len(date) == 3:
+		return False
+	try:
+		correct_date = datetime(int(date[0]), int(date[1]), int(date[2]))
+		return True
+	except ValueError:
+		return False
+
+
 # called by generate_data functions
 # helper function to handle command line input for running codemaat
 def run_codemaat(analysis_type, analysis_name, repo_name, from_date, to_date):
