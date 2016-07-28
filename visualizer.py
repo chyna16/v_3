@@ -50,6 +50,10 @@ def index():
 			from_date = request.form.get('from_date', '', type=str)
 			to_date = request.form.get('to_date', '', type=str)
 
+			if (not generator.valid_date(from_date) or 
+				not generator.valid_date(to_date)):
+				flash('Invalid date input.')
+				return redirect(url_for('index'))
 			repo_manager.repo_check_and_update(repo_name, proj_key, to_date)
 
 			if not generator.manage_csv_folder(repo_name, from_date, to_date):
