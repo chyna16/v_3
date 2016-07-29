@@ -397,12 +397,14 @@ function createScatterPlot(data){
 
   var x_axis = d3.svg.axis()
     .scale(x_scale)
-    .ticks(10)
+    .innerTickSize(-height)
+    .outerTickSize(10)
     .orient("bottom");
 
   var y_axis = d3.svg.axis()
     .scale(y_scale)
-    .ticks(10)
+    .innerTickSize(-width)
+    .outerTickSize(10)
     .orient("left");
 
   var svg = d3.select("#graph").append("svg")
