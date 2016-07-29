@@ -108,11 +108,12 @@
 }
 
 .axis--grid .tick--minor line {
-  stroke-opacity: .5;
+  stroke-opacity: 0;
 }
 
 .brush .selection {
-  stroke: #000;
+  fill: #fff;
+  fill-opacity: 0.5;
 }
 /* End commitSelector styling */
 

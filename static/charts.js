@@ -445,9 +445,15 @@ function createScatterPlot(data){
       data[d.entity]["deleted"] = d["deleted"];
     });
 
-    color = d3.scale.linear().domain([0,d3.max(d3.values(data), function(d) {
-      return d.added*d.deleted;
-    })]).range(["#1ab7ea", "red"]);
+    cAddMax = d3.max(d3.values(data), function(d) { return parseInt(d.added); });
+    cDelMax = d3.max(d3.values(data), function(d) { return parseInt(d.deleted); });
+    function scaleColor(point) {
+      add = parseInt(point.added) / cAddMax;
+      del = parseInt(point.deleted) / cDelMax;
+      return add + del;
+    }
+
+    color = d3.scale.linear().domain([0,1]).range(["#1ab7ea", "red"]);
 
     //Calc X and Y scale
     x_scale.domain([0,d3.max(d3.values(data), function(d) {
@@ -502,7 +508,7 @@ function createScatterPlot(data){
     node_g. select("circle")
         .attr("r", 5)
         .attr("fill", function(d) {
-            return color(d.added * d.deleted);
+            return color(scaleColor(d));
         })
         .on("mouseover", tip.show)
         .on("mouseout", tip.hide);
