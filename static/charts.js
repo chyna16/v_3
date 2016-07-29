@@ -36,8 +36,8 @@ function createHeader(color) {
       header
         .selectAll("button")
             .data(keys.filter(function(key) {
-                if (analysis_type == "complexity") 
-                    { return key != keys[0] && key != keys[1] 
+                if (analysis_type == "complexity")
+                    { return key != keys[0] && key != keys[1]
                         && key != keys[6] && key != 'coupled'}
                 else { return key != keys[0] && key != 'coupled' };}))
             .enter()
@@ -78,7 +78,7 @@ function createHeader(color) {
 function createLineGraph(data, name, button){
     d3.select("#wrapper").html('Select a module from the dropdown list above.');
     arr = []
-    data.map(function(d) { 
+    data.map(function(d) {
         if (arr.indexOf(d[keys[0]]) == -1){
         arr.push(d[keys[0]])}
             })
@@ -88,12 +88,12 @@ function createLineGraph(data, name, button){
     var margin = {top: 20, left: 70, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
     var color = d3.scale.ordinal().domain(keys).range(["#6d9af6", "#52465f"]);
-    
+
     width = 900;
 
     if (chosen_key == 'default') {
-        var labels = keys.filter(function(key) { 
-            return key !== keys[0] && key !== 'values' && key !== 'coupled' 
+        var labels = keys.filter(function(key) {
+            return key !== keys[0] && key !== 'values' && key !== 'coupled'
             && key !== 'rev' && key !== 'date';
             // keys that would not make appropriate columns are filtered out
         });
@@ -109,7 +109,7 @@ function createLineGraph(data, name, button){
 
     var y = d3.scale.linear()
         .range([height, 0])
-        .domain([0, d3.max(filtered_data, function(d) { return d.value; })]); 
+        .domain([0, d3.max(filtered_data, function(d) { return d.value; })]);
 
     var xAxis = d3.svg.axis()
         .scale(x)
@@ -160,8 +160,8 @@ function updateData(data, name, button){
           .attr("d", line);
 
         if (chosen_key == 'default') {
-            var labels = keys.filter(function(key) { 
-                return key !== keys[0] && key !== 'values' && key !== 'coupled' 
+            var labels = keys.filter(function(key) {
+                return key !== keys[0] && key !== 'values' && key !== 'coupled'
                 && key !== 'rev' && key !== 'date';
                 // keys that would not make appropriate columns are filtered out
             });
@@ -204,7 +204,7 @@ function updateData(data, name, button){
         .selectAll(".btn")
         .on('click', function() {
             buttonValue = this.value
-            updateData(data, nameof, buttonValue); 
+            updateData(data, nameof, buttonValue);
         });
 }
 
@@ -536,9 +536,8 @@ function createBubblePack(inputData) {
 
     // Establish color scales
     var color = d3.scale.linear()
-        .domain([-1, 5])
-        .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
-        .interpolate(d3.interpolateHcl);
+        .domain([0, 5])
+        .range(["#1ab7ea", "#0B108C"])
 
     var colorHotspot = d3.scale.linear()
         .domain([0, d3.max(data, function(d) { return +d['n-revs']; })])
