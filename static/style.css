@@ -98,13 +98,13 @@
 
 /* commitSelector styling */
 .axis--grid .domain {
-  fill: #1ab7ea;
+  fill: #000;
   stroke: none;
 }
 
 .axis--x .domain,
 .axis--grid .tick line {
-  stroke: #931616;
+  stroke: #1ab7ea;
 }
 
 .axis--grid .tick--minor line {
