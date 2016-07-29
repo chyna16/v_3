@@ -14,7 +14,7 @@ def get_projects():
 	url_projects = 'https://stash.mtvi.com/rest/api/1.0/projects?limit=100'
 
 	try:
-		projects = requests.get(url=url_projects, 
+		projects = requests.get(url=url_projects,
 			auth=(settings.username, settings.password))
 		json_projects = json.loads(projects.text)
 		for project in json_projects['values']:
@@ -29,9 +29,10 @@ def get_projects():
 def get_repo_detail(repo_name, category, value):
 	repo_call = ('https://stash.mtvi.com/rest/api/1.0/repos?name=' + repo_name)
 	try:
-		repo_info = requests.get(url=repo_call, 
+		repo_info = requests.get(url=repo_call,
 			auth=(settings.username, settings.password))
 		json_repo = json.loads(repo_info.text)
+
 		data = json_repo['values'][0][category][value]
 		return data
 	except (requests.exceptions.ConnectionError, KeyError):
@@ -47,34 +48,34 @@ def get_project_repos(selected_key, url_type, limit):
 	repo_list = []
 
 	try:
-		repos = requests.get(url=url_repos, 
+		repos = requests.get(url=url_repos,
 			auth=(settings.username, settings.password))
-		json_repos = json.loads(repos.text)	
+		json_repos = json.loads(repos.text)
 		for repo_name in json_repos['values']:
 			for link in repo_name['links']['clone']:
 				if link['name'] == url_type:
 					repo_list.append(
-						{'name': repo_name['name'], 'url': link['href']}
+						{'name': repo_name['name'].replace(' ','-'), 'url': link['href']}
 					)	# creates a list of dictionaries for every repo
 	except (requests.exceptions.ConnectionError, KeyError):
 		print("api call failed")
 	return repo_list
 
 
-# called by: 
+# called by:
 # 	_return_repo_dates view, repo_manager.refresh_repos/repo_check_and_update
 # returns a list of datetimes of commits
 def get_repo_timestamp(selected_key, selected_repo, limit):
-	selected_repo = selected_repo.replace(' ','-')
+	selected_repo = selected_repo
 	url_repos = ('https://stash.mtvi.com/rest/api/1.0/projects/'
 		+ selected_key + '/repos/' + selected_repo + '/commits?limit=' + limit)
 	time_list = []
 	converted_time_list = []
 
 	try:
-		repos = requests.get(url=url_repos, 
+		repos = requests.get(url=url_repos,
 			auth=(settings.username, settings.password))
-		json_repos = json.loads(repos.text)	
+		json_repos = json.loads(repos.text)
 		for timestamp in json_repos['values']:
 			time_list.append(timestamp['authorTimestamp'])
 	except (requests.exceptions.ConnectionError, KeyError):
