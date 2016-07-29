@@ -116,6 +116,11 @@
 }
 /* End commitSelector styling */
 
+.tick line{
+    opacity: 0.2;
+}
+
+
 .spinner {
     position: fixed;
     top: 50%;
