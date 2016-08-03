@@ -23,7 +23,6 @@ def set_path(path):
 	print("-" * 60)
 
 
-# called by index view
 # returns a bool after checking date is in correct yyyy-mm-dd form
 def valid_date(date):
 	date = date.split(' ')[0].split('-')
@@ -35,6 +34,13 @@ def valid_date(date):
 	except ValueError:
 		return False
 
+# called by index view
+def bad_range(start,end):
+	if not valid_date(start) and not valid_date(end):
+		return True
+	elif start > end:
+		return True
+	return False
 
 # called by generate_data functions
 # helper function to handle command line input for running codemaat
@@ -82,7 +88,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 	folder_name = repo + "_" + from_date + "_" + to_date
 	#files to be ignored
 	extensions = ('.png', '.csv', '.jpg', '.svg', '.html', '.less', '.swf',
-	 '.spec', '.md', '.ignore', '.ttf', '.min', '.css', '.xml', '.pdf','.dmd', 
+	 '.spec', '.md', '.ignore', '.ttf', '.min', '.css', '.xml', '.pdf','.dmd',
 	 '.properties', '.local', '.ftl')
 
 	file_list = []
@@ -200,6 +206,13 @@ def manage_csv_folder(repo, from_date, to_date, csv_dir=settings.csv_dir):
 		print("folder exists: " + csv_path)
 	return True
 
+def analysis_exists(repo, from_date, to_date, csv_dir=settings.csv_dir):
+	folder_name = repo + "_" + from_date + "_" + to_date
+	csv_path = os.path.join(csv_dir, folder_name)
+
+	if os.path.exists(csv_path):
+		return True
+	return False
 
 # retrieved from: http://stackoverflow.com/questions/3424899/
 # 	+ whats-the-simplest-way-to-subtract-a-month-from-a-date-in-python
