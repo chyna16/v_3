@@ -136,8 +136,8 @@ def create_complexity_files(repo, address, from_date, to_date):
 		csv_list.append(file)
 
 	#appends csv files together into one
-	os.system('csvcat --skip-headers ' + (' '.join(csv_list)) + ' > '
-		+ 'complex_' + repo + '.csv')
+	os.system(settings.csvcat_path + ' --skip-headers '
+		+ (' '.join(csv_list)) + ' > ' + 'complex_' + repo + '.csv')
 
 	#adds date column to csv file
 	with open('complex_' + repo + '.csv','r') as csvinput:
