@@ -27,20 +27,15 @@ app.cache = Cache(app)
 celery = Celery(app.name, backend=settings.RESULT_BACKEND,
                 broker=settings.BROKER_URL)
 
-maat_dir = settings.maat_dir # address of codemaat
-repo_dir = settings.repo_dir # address of cloned repositories
-csv_dir = settings.csv_dir # address of csv folders
-list_of_projects = stash_api.get_projects() # list of projects on Stash
-generator.set_path(maat_dir) # set path for codemaat
+maat_dir = settings.maat_dir
+repo_dir = settings.repo_dir
+csv_dir = settings.csv_dir
+list_of_projects = stash_api.get_projects()
+generator.set_path(maat_dir)
 
-clone_sched = BackgroundScheduler() # configuration for apscheduler
-clone_sched.add_job(lambda:repo_manager.refresh_repos(repo_dir),
-                 'cron', day='0-6', hour='1')
-# clone_sched.add_job(lambda:generator.refresh_repos(),
-                    # 'interval', hours=2)
-    # lambda passes function as parameter
-    # cron is a configuration for time schedules
-    # configured for everyday of week (0-6), at 12 AM (0)
+clone_sched = BackgroundScheduler()
+clone_sched.add_job(lambda: repo_manager.refresh_repos(repo_dir),
+                    'cron', day='0-6', hour='1')
 clone_sched.start()
 
 
@@ -57,6 +52,7 @@ def index():
         return redirect(url_for('dashboard',
             repo_name=repo_name, from_date=from_date, to_date=to_date))
 
+
 # Ajax route for starting async analysis
 @app.route('/start_task', methods=['POST'])
 def start_task():
@@ -66,20 +62,22 @@ def start_task():
     to_date = request.form.get('to_date', '', type=str)
 
     if generator.bad_range(from_date, to_date):
-        return jsonify({}), 200, {'result':'DATE_ERROR'}
+        return jsonify({}), 200, {'result': 'DATE_ERROR'}
     elif generator.analysis_exists(repo_name, from_date, to_date):
-        return jsonify({}), 200, {'result':'EXISTS'}
+        return jsonify({}), 200, {'result': 'EXISTS'}
     else:
         task = run_analysis.delay(repo_name, proj_key, from_date, to_date)
-        return jsonify({}), 202, {'result':'RUNNING',
-            'location':url_for('taskstatus',task_id=task.id)}
+        return jsonify({}), 202, {'result': 'RUNNING',
+            'location': url_for('taskstatus', task_id=task.id)}
+
 
 # Status route for task status retrieval
 @app.route('/status/<task_id>')
 def taskstatus(task_id):
     task = run_analysis.AsyncResult(task_id)
-    response = { 'state': task.state }
+    response = {'state': task.state}
     return jsonify(response)
+
 
 # Asyncronous task (clone and run analysis)
 @celery.task(bind=True)
@@ -90,15 +88,17 @@ def run_analysis(self, repo_name, proj_key, from_date, to_date):
     generator.manage_csv_folder(repo_name, from_date, to_date)
     return (repo_name, from_date, to_date)
 
+
 @app.route('/_return_repos')
 def return_repos():
     return_val = ''
     key = request.args.get('key', '', type=str)
     repos = stash_api.get_project_repos(key, 'http', '100')
     for repo in repos:
-        return_val += ('<option value="' + repo['name']+'">'
-                        + repo['name'] + '</option>')
+        return_val += ('<option value="' + repo['name'] + '">' +
+                       repo['name'] + '</option>')
     return jsonify(result=return_val)
+
 
 @app.route('/_return_repo_dates')
 def return_repo():
@@ -126,11 +126,12 @@ def dashboard():
             from_date=from_date, to_date=to_date))
 
 
-@app.cache.memoize(timeout=60*60)
+@app.cache.memoize(timeout=60 * 60)
 def get_csv_data(path, filename):
     return data_manager.parse_csv(path, filename)
 
-@app.cache.memoize(timeout=60*60)
+
+@app.cache.memoize(timeout=60 * 60)
 def get_log_data(path, filename):
     return data_manager.get_word_frequency(path, filename)
 
@@ -176,18 +177,18 @@ def convert_json(s):
 # customized error page
 @app.errorhandler(400)
 def bad_request(e):
-    return render_template ('400.html')
+    return render_template('400.html')
 
 
 # customized error page
 @app.errorhandler(404)
 def not_found(e):
-    return render_template ('404.html')
+    return render_template('404.html')
 
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return render_template ('500.html')
+    return render_template('500.html')
 
 if __name__ == '__main__':
     app.run(debug=settings.DEBUG_MODE)
