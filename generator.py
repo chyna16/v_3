@@ -122,7 +122,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 	#runs complexity analysis script on each file in the repository
 	for file in file_list:
 		split_path = file.split(repo + '/')
-		p = subprocess.Popen('python2 ' + settings.v3_dir
+		p = subprocess.Popen('python2.7 ' + settings.v3_dir
 			+ '/git_complexity_trend.py --start ' + first_id
 			+ ' --end ' + last_id + ' --file ' + split_path[1] + ' > '
 			+ settings.csv_dir  + folder_name + '/complex_'
