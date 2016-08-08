@@ -118,10 +118,15 @@ function createLineGraph(data, name, button){
 
     var xAxis = d3.svg.axis()
         .scale(x)
+        .innerTickSize(-height)
+        .outerTickSize(10)
+        .tickPadding(10)
         .orient("bottom");
 
     var yAxis = d3.svg.axis()
         .scale(y)
+        .innerTickSize(-width)
+        .outerTickSize(10)
         .orient("left");
 
 function updateData(data, name, button){

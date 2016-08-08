@@ -379,10 +379,6 @@ tbody td, thead th {
   font-size: 11px;
 }
 
-.x.axis path {
-  display: none;
-}
-
 .line {
   fill: none;
   stroke: steelblue;
