@@ -36,8 +36,8 @@ $(function() {
       key: $("#project").find(":selected").val(),
       name: $("#repo").find(":selected").text()
     }, function(data) {
-      if (data.result === ""){
-        console.log("No repo data returned")
+      if (data.result.length < 2){
+        alert("Uh Oh! Repo returned less than two commits.")
       }
       else {
         dates = data.result;
@@ -49,11 +49,11 @@ $(function() {
         $("#currentDate").val(curDate)
             .prop("disabled",false);
         $("#nextbutton").prop("disabled",false);
-        $("#spinner").hide();
 
         commitSelector(dates);
         updateNumCommits(dates, prvDate, curDate);
       }
+      $("#spinner").hide();
     });
     return false;
   });
