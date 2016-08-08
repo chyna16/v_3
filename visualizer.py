@@ -155,6 +155,10 @@ def result():
             data, keys = get_csv_data(os.path.join(csv_dir, repo_details),
                 analysis + "_" + repo_name + ".csv")
         if data == []:
+            if analysis == 'coupling':
+                flash('Congratulations! No coupling detected.')
+                return redirect(url_for('dashboard',
+                    repo_name=repo_name, from_date=from_date, to_date=to_date))
             abort(404)
         return render_template('result.html',
             repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
