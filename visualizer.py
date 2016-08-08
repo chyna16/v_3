@@ -9,6 +9,10 @@ from flask.ext.cache import Cache
 from resources.api_data import csv_api
 from celery import Celery
 
+# Server config
+#import sys
+#sys.path.append('/etc/')
+
 # Our Scripts
 import generator
 import data_manager
