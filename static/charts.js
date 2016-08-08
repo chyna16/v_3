@@ -77,11 +77,16 @@ function createHeader(color) {
 
 function createLineGraph(data, name, button){
     d3.select("#wrapper").html('Select a module from the dropdown list above.');
+    stage = []
     arr = []
     data.map(function(d) {
-        if (arr.indexOf(d[keys[0]]) == -1){
-        arr.push(d[keys[0]])}
-            })
+        if (stage.indexOf(d[keys[0]]) == -1){
+          stage.push(d[keys[0]])
+        }
+        else if (arr.indexOf(d[keys[0]]) == -1){
+          arr.push(d[keys[0]])
+        }
+      })
 
     var w;
     var width;
@@ -121,8 +126,7 @@ function createLineGraph(data, name, button){
 
 function updateData(data, name, button){
     d3.select("#wrapper").html('');
-     var filtered_data = (data.filter(function(d) { return d.name == name;}))
-
+    var filtered_data = (data.filter(function(d) { return d.name == name;}))
     var line = d3.svg.line()
         // .interpolate("basis")
         .x(function(d) { return x(formatDate.parse(d.date)); })
@@ -206,6 +210,8 @@ function updateData(data, name, button){
             buttonValue = this.value
             updateData(data, nameof, buttonValue);
         });
+
+  updateData(data, arr[0], buttonValue)
 }
 
 
