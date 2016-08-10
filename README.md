@@ -1,4 +1,5 @@
 <img src="http://ec2-52-7-214-244.compute-1.amazonaws.com/static/images/V3_Logo.svg" alt="V3" height="36px"/>
+
 # Viacom Version Visualizer
 
 Inspired by Adam Tornhill's book <i>Your Code as a Crime Scene</i>, this web application is designed to help locate problem areas in your code, find ways to improve it, and eliminate productivity sinks. This is done by analyzing your version-control logs and highlighting aspects of the project's history for you to inspect.
