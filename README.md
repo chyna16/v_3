@@ -14,6 +14,7 @@ Inspired by Adam Tornhill's book <i>Your Code as a Crime Scene</i>, this web app
 
 4. Rather than guessing at which sections of code need to be revised, we want the project to tell us where our work will payoff the most.
 
+
 ## Getting Started
 ------------------
 
@@ -63,6 +64,7 @@ If both are running without error, navigate to [localhost:5000](localhost:5000)
 
 ## Editing V3
 If you would like to get started editing V3, I would recommend looking at an analysis of the project on V3 (meta, I know). Hotspots, in particular, should give you an idea of the main files that you should look at to get started. But, as you may have already figured, <code>visualizer.py</code> contains the main Flask app.
+
 
 ## Visualizations
 -----------------
