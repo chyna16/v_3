@@ -1,4 +1,5 @@
-# <img src="http://ec2-52-7-214-244.compute-1.amazonaws.com/static/images/V3_Logo.svg" alt="V3" style="height: 36px;"/>  Viacom Version Visualizer
+<img src="http://ec2-52-7-214-244.compute-1.amazonaws.com/static/images/V3_Logo.svg" alt="V3" height="36px"/>
+# Viacom Version Visualizer
 
 Inspired by Adam Tornhill's book <i>Your Code as a Crime Scene</i>, this web application is designed to help locate problem areas in your code, find ways to improve it, and eliminate productivity sinks. This is done by analyzing your version-control logs and highlighting aspects of the project's history for you to inspect.
 
@@ -11,8 +12,9 @@ Inspired by Adam Tornhill's book <i>Your Code as a Crime Scene</i>, this web app
 3. Hard to understand and tricky to modify code slows productivity and degrades system quality.
 
 4. Rather than guessing at which sections of code need to be revised, we want the project to tell us where our work will payoff the most.
-------------------
+
 ## Getting Started
+------------------
 
 ### System
 Running V3 is best done on a Mac or Linux environment. If you are working on a Windows machine, I'd recommend using VirtualBox running your favorite recent flavor of Linux (Ubuntu is always a safe bet).
@@ -61,8 +63,8 @@ If both are running without error, navigate to [localhost:5000](localhost:5000)
 ## Editing V3
 If you would like to get started editing V3, I would recommend looking at an analysis of the project on V3 (meta, I know). Hotspots, in particular, should give you an idea of the main files that you should look at to get started. But, as you may have already figured, <code>visualizer.py</code> contains the main Flask app.
 
------------------
 ## Visualizations
+-----------------
 
 ### Interpretation is Key
 Each visualization highlights aspects of a project that should be taken as leads for you look into further. There are no definitive rules for what is good or bad. There is no replacement for your intuition, but we can steer it in the right direction.
