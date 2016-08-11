@@ -10,13 +10,13 @@
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     {% for message in messages %}
-	  <div class="alert alert-warning alert-dismissible" role="alert">
-	  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-	  <span aria-hidden="true">×</span>
-	  </button>
-		{{message}}
-	  </div>
-	{% endfor %}
+    <div class="alert alert-warning alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">×</span>
+    </button>
+    {{message}}
+    </div>
+  {% endfor %}
   {% endif %}
 {% endwith %}
 </div>
@@ -25,65 +25,80 @@
 <br>
 <form method="POST" enctype="multipart/form-data">
 <center>
-<div class="col-md-12">
-	<div class="col-md-6">
-	<button type="submit" name="analysis" value="metrics">
-		<img src="../static/images/thumbnail_metrics.png">
-	</button>
-	<br>
-	<b>Metrics</b>
-	<p>View the amount of effort (revisions and coders) that went into each module.</p>
-	</div>
-	<div class="col-md-6">
-	<button type="submit" name="analysis" value="hotspots">
-		<img src="../static/images/thumbnail_hotspots.png">
-	</button>
-	<br>
-	<b>Hotspots</b>
-	<p>Find potential problem children within your code base. See which modules may need refactoring.</p>
-	</div>
-</div>
-<br><br><br><br><br><br><br><br><br><br><br>
-<div class="col-md-12">
-	<div class="col-md-6">
-	<button type="submit" name="analysis" value="coupling">
-		<img src="../static/images/thumbnail_coupling.png">
-	</button>
-	<br>
-	<b>Coupling</b>
-	<p>Look at the relational history of your modules, and which other modules each may be dependent on.</p>
-	</div>
-	<div class="col-md-6">
-	<button type="submit" name="analysis" value="age">
-		<img src="../static/images/thumbnail_age.png">
-	</button>
-	<br>
-	<b>Line Churn</b>
-	<p>View the code history of your modules. Compare the amount of lines added vs those deleted.</p>
-	</div>
-</div>
-<br><br><br><br><br><br><br><br><br><br><br>
-<div class="col-md-12">
-	<!-- <center> -->
-	<div class="col-md-6">
-	<button type="submit" name="analysis" value="cloud">
-		<img src="../static/images/thumbnail_cloud.png">
-		<!-- image credit: Cynthia Matuszek
-		http://www.csee.umbc.edu/~cmat/ -->
-	</button>
-	<br>
-	<b>Word Cloud</b>
-	<p>View a visual representation of your repository's commit messages.</p>
-	</div>
-	<div class="col-md-6">
-	<button type="submit" name="analysis" value="complexity">
-		<img src="../static/images/thumbnail_complexity.png" alt="Line Chart">
-	</button>
-	<br>
-	<b>Complexity</b>
-	<p>View the amount of indentations in each module.</p>
-	</div>
-	<!-- </center> -->
+<div class="row" style="width:80%;">
+
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail">
+    <button type="submit" name="analysis" value="metrics" class='button-nostyle'>
+      <img src="../static/images/thumbnail_metrics.png" alt="Metrics Bargraph" width="100%">
+      <div class="caption">
+        <h3>Metrics</h3>
+        <p>View the amount of effort (revisions and coders) that went into each module.</p>
+      </div>
+    </button>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail">
+    <button type="submit" name="analysis" value="hotspots" class='button-nostyle'>
+      <img src="../static/images/thumbnail_hotspots.png" alt="Hotspots Bubble-Pack" width="100%">
+      <div class="caption">
+        <h3>Hotspots</h3>
+        <p>Find potential problem children within your code base. See which modules may need refactoring.</p>
+      </div>
+    </button>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail">
+    <button type="submit" name="analysis" value="coupling" class='button-nostyle'>
+      <img src="../static/images/thumbnail_coupling.png" alt="Coupling Donuts" width="100%">
+      <div class="caption">
+        <h3>Coupling</h3>
+        <p>Look at the relational history of your modules, and which other modules each may be dependent on.</p>
+      </div>
+    </button>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail">
+    <button type="submit" name="analysis" value="age" class='button-nostyle'>
+      <img src="../static/images/thumbnail_age.png" alt="Line Curn Graph" width="100%">
+      <div class="caption">
+        <h3>Line Churn</h3>
+        <p>View the code history of your modules. Compare the amount of lines added vs those deleted.</p>
+      </div>
+    </button>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail">
+    <button type="submit" name="analysis" value="cloud" class='button-nostyle'>
+      <img src="../static/images/thumbnail_cloud.png" alt="Word Cloud" width="100%">
+      <div class="caption">
+        <h3>Word Cloud</h3>
+        <p>View a visual representation of your repository's commit messages.</p>
+      </div>
+    </button>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail">
+    <button type="submit" name="analysis" value="complexity" class='button-nostyle'>
+      <img src="../static/images/thumbnail_complexity.png" alt="Complexity Line Graph" width="100%">
+      <div class="caption">
+        <h3>Complexity</h3>
+        <p>View the amount of indentations in each module.</p>
+      </div>
+    </button>
+    </div>
+  </div>
+
 </div>
 </center>
 </form>
@@ -92,9 +107,3 @@
     document.getElementById("help").innerHTML = "<div><h2>Dashboard</h2><p>Welcome to the dashboard, your one stop shop for repository analysis. Each visualization will inform you of various aspects of the project and, hopefully, accelerate your development process.</p></div><div><p>This page is super simple, just browse through the different visualizations and click on the one that catches your fancy.</p></div>";
 </script>
 {% endblock %}
-
-	<!-- {% for file in csv_list %}
-	    <button class="btn btn-primary-outline" name="analysis" value={{file}} autocomplete="off">{{file}}</button>
-	{% endfor %} -->
-<!-- 
-	<button class="btn btn-primary-outline" name="options" value="option2" autocomplete="off"> Blank Button </button> -->
