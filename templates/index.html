@@ -63,7 +63,6 @@ $(function() {
     var $btn = $(this);
     $btn.button('loading');
     $("#spinner").show();
-    start_analysis()
   });
 
   function updateRepoList(resultData){
@@ -110,52 +109,6 @@ $(function() {
   document.getElementById("help").innerHTML = "<div><p>Inspired by Adam Tornhill's book <u><i>Your Code as a Crime Scene</i></u>, this web application is designed assist in locating problem areas in your code, finding ways to improve it, and eliminating productivity sinks. This is done by analyzing your version-control history and highlighting aspects of this history for you to analyze.</p></div><div><ul><li><strong>Step One: </strong>Select a project and repository from the drop-down menu.</li><li><strong>Step Two: </strong>Choose a date range by inputting dates or clicking and dragging on the interactive date picker (blue lines represent commits).</li><li><strong>Step Three: </strong>Click Run Analysis.</li></ul></div>";
 
 });
-
-  function start_analysis() {
-    div = $('#nextbutton').text('Running Analysis')
-
-    $.ajax({
-      type: 'POST',
-      url: '/start_task',
-      data: $('form').serialize(),
-      success: function(data, status, request) {
-        result = request.getResponseHeader('result');
-        if (result == 'EXISTS') {
-          $( "#submitbutton" ).trigger('click')
-        }
-        else if (result == 'DATE_ERROR') {
-          alert('Bad Date')
-        }
-        else {
-          status_url = request.getResponseHeader('location');
-          update_progress(status_url, div);
-      }
-      },
-      error: function() {
-        alert('Unexpected error');
-      }
-    });
-  }
- var delay = 0;
-  function update_progress(status_url, status_div) {
-    $.getJSON(status_url, function(data){
-      status_div.text(data['state'])
-      if (data['state'] == 'SUCCESS'){
-        $( "#submitbutton" ).trigger('click')
-      }
-      else if (data['state'] == 'FAILURE') {
-          status_div.text('Failure of state:' + data['state'])
-      }
-      else {
-        delay += 2000;
-        // rerun in 2 seconds
-        setTimeout(function() {
-            update_progress(status_url, status_div);
-        }, delay);
-      }
-    })
-  }
-
 </script>
 {% endblock %}
 
@@ -238,14 +191,11 @@ $(function() {
 
   <!-- Submit Button -->
   <div class="form-group">
-    <button type="submit" name="submit_button" value="run_analysis" id="submitbutton" class="btn btn-lg btn-primary" role="button" style="display: none;" >
+    <button type="submit" name="submit_button" value="run_analysis" id="nextbutton" class="btn btn-lg btn-primary" role="button" disabled="true" >
       submit form
     </button>
   </div>
-  </form>
-  <button value="run_analysis" id="nextbutton" class="btn btn-lg btn-primary" role="button" disabled="true">
-    Run analysis
-  </button>
+
 </center>
 <div class="col-sm-2"></div>
 {% endblock %}

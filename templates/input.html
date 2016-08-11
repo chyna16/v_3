@@ -3,6 +3,35 @@
 {% block title %} Dashboard {% endblock %}
 
 {% block head %}
+
+<script>
+var delay = 0;
+ function update_progress(status_url) {
+   $.getJSON(status_url, function(data){
+     console.log(data['state'])
+     if (data['state'] == 'SUCCESS'){
+       console.log('Activate everything')
+     }
+     else if (data['state'] == 'FAILURE') {
+        console.log('FAILURE')
+     }
+     else {
+       if (delay < 10000) delay += 2000;
+       // rerun in 2 seconds
+       setTimeout(function() {
+           update_progress(status_url);
+       }, delay);
+     }
+   })
+ }
+
+$(function() {
+  var surl = '{{ location }}'
+  if (surl != 'NULL'){
+    update_progress(surl)
+  }
+})
+</script>
 {% endblock %}
 
 {% block content %}

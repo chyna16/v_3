@@ -50,29 +50,22 @@ def index():
     if request.method == 'GET':
         return render_template('index.html', list_of_projects=list_of_projects)
     elif request.method == 'POST':
+        proj_key = request.form.get('proj_key', '', type=str)
         repo_name = request.form.get('repo_name', '', type=str).lower()
         from_date = request.form.get('from_date', '', type=str)
         to_date = request.form.get('to_date', '', type=str)
-        return redirect(url_for('dashboard',
-            repo_name=repo_name, from_date=from_date, to_date=to_date))
 
-
-# Ajax route for starting async analysis
-@app.route('/start_task', methods=['POST'])
-def start_task():
-    proj_key = request.form.get('proj_key', '', type=str)
-    repo_name = request.form.get('repo_name', '', type=str).lower()
-    from_date = request.form.get('from_date', '', type=str)
-    to_date = request.form.get('to_date', '', type=str)
-
-    if generator.bad_range(from_date, to_date):
-        return jsonify({}), 200, {'result': 'DATE_ERROR'}
-    elif generator.analysis_exists(repo_name, from_date, to_date):
-        return jsonify({}), 200, {'result': 'EXISTS'}
-    else:
-        task = run_analysis.delay(repo_name, proj_key, from_date, to_date)
-        return jsonify({}), 202, {'result': 'RUNNING',
-            'location': url_for('taskstatus', task_id=task.id)}
+        if generator.bad_range(from_date, to_date):
+            flash("Sorry. There was a problem with your date range.")
+            return redirect(url_for('index', list_of_projects=list_of_projects))
+        elif generator.analysis_exists(repo_name, from_date, to_date):
+            return redirect(url_for('dashboard', repo_name=repo_name,
+                from_date=from_date, to_date=to_date, location='NULL'))
+        else:
+            task = run_analysis.delay(repo_name, proj_key, from_date, to_date)
+            return redirect(url_for('dashboard', repo_name=repo_name,
+                from_date=from_date, to_date=to_date,
+                location=url_for('taskstatus', task_id=task.id)))
 
 
 # Status route for task status retrieval
@@ -120,9 +113,10 @@ def dashboard():
     repo_name = request.args.get('repo_name')
     from_date = request.args.get('from_date')
     to_date = request.args.get('to_date')
+    location = request.args.get('location')
     if request.method == 'GET':
         # buttons to all analyses available; assumed all have been run
-        return render_template('input.html')
+        return render_template('input.html', location=location)
     elif request.method == 'POST':
         analysis = request.form.get('analysis', '', type=str)
         return redirect(url_for('result',
