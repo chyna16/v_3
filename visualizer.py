@@ -121,7 +121,7 @@ def dashboard():
         analysis = request.form.get('analysis', '', type=str)
         return redirect(url_for('result',
             repo_name=repo_name, analysis=analysis,
-            from_date=from_date, to_date=to_date))
+            from_date=from_date, to_date=to_date, location=location))
 
 
 @app.cache.memoize(timeout=60 * 60)
@@ -140,6 +140,7 @@ def result():
     repo_name = request.args.get('repo_name')
     from_date = request.args.get('from_date')
     to_date = request.args.get('to_date')
+    location = request.args.get('location', '', type=str)
 
     if request.method == 'GET':
         analysis = request.args.get('analysis')
@@ -153,20 +154,26 @@ def result():
             data, keys = get_csv_data(os.path.join(csv_dir, repo_details),
                 analysis + "_" + repo_name + ".csv")
         if data == []:
+            task_id = location.split("/")[-1]
+            state = run_analysis.AsyncResult(task_id).state
+            if not (state == 'SUCCESS' or state == 'NULL'):
+                flash('Sorry, thats not available yet.')
+                return redirect(url_for('dashboard', repo_name=repo_name,
+                    from_date=from_date, to_date=to_date, location=location))
             if analysis == 'coupling':
                 flash('Congratulations! No coupling detected.')
-                return redirect(url_for('dashboard',
-                    repo_name=repo_name, from_date=from_date, to_date=to_date))
+                return redirect(url_for('dashboard', repo_name=repo_name,
+                    from_date=from_date, to_date=to_date, location=location))
             abort(404)
         return render_template('result.html',
             repo_name=json.dumps(repo_name), analysis=json.dumps(analysis),
             from_date=from_date, to_date=to_date,
-            data=json.dumps(data), keys=json.dumps(keys))
+            data=json.dumps(data), keys=json.dumps(keys), location=location)
     elif request.method == 'POST':
         analysis = request.form.get('analysis', '', type=str)
         return redirect(url_for('result',
             repo_name=repo_name, analysis=analysis,
-            from_date=from_date, to_date=to_date))
+            from_date=from_date, to_date=to_date, location=location))
 
 
 # this filter allows using '|fromjson' in a jinja template
