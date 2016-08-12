@@ -80,7 +80,7 @@ def taskstatus(task_id):
 @celery.task(bind=True)
 def run_analysis(self, repo_name, proj_key, from_date, to_date):
     self.update_state(state="CLONING")
-    repo_manager.repo_check_and_update(repo_name, proj_key, to_date)
+    repo_manager.repo_check_and_update(repo_name, proj_key, to_date, self)
     self.update_state(state="ANALYZING")
     generator.manage_csv_folder(repo_name, from_date, to_date, self)
     return (repo_name, from_date, to_date)

@@ -24,8 +24,13 @@ function update_progress(status_url) {
 
 function display_available(state) {
   switch(state) {
+    case 'CLONING':
+      break;
+    case 'ANALYZING':
+      break;
     case 'SUCCESS':
     case 'NULL':
+      $('.progress').hide()
     case 'complexity':
       $('#complexity').show();
     case 'churn':
@@ -38,6 +43,39 @@ function display_available(state) {
       $('#metrics').show();
     case 'cloud':
       $('#cloud').show();
+    default:
+      break;
+  }
+
+  switch(state) {
+    case 'CLONING':
+      $('.progress-bar').html('Cloning');
+      break;
+    case 'ANALYZING':
+      $('.progress-bar').html('Analyzing Commit Messages');
+      break;
+    case 'SUCCESS':
+    case 'NULL':
+      $('#analysis-header').html('Select an Analysis:')
+      break;
+    case 'complexity':
+      $('.progress-bar').html('Analysis Complete');
+      break;
+    case 'churn':
+      $('.progress-bar').html('Analyzing Complexity');
+      break;
+    case 'coupling':
+      $('.progress-bar').html('Analyzing Code Churn');
+      break;
+    case 'hotspots':
+      $('.progress-bar').html('Analyzing Coupling');
+      break;
+    case 'metrics':
+      $('.progress-bar').html('Analyzing Hotspots');
+      break;
+    case 'cloud':
+      $('.progress-bar').html('Analyzing Metrics');
+      break;
     default:
       break;
   }
@@ -71,7 +109,16 @@ $(function() {
 {% endwith %}
 </div>
 
-<h1>Select an Analysis to Display</h1>
+<center>
+  <h2 id='analysis-header'>Running Analysis</h2>
+  <div class="progress" style='width:50%; height:36px;'>
+    <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%; line-height:36px; font-size:16px;">
+
+      Pending in Queue
+    </div>
+  </div>
+</center>
+
 <br>
 <form method="POST" enctype="multipart/form-data">
 <center>
@@ -128,7 +175,7 @@ $(function() {
   <div id='churn' class="col-sm-6 col-md-4 dashboard">
     <div class="thumbnail">
     <button type="submit" name="analysis" value="age" class='button-nostyle'>
-      <img src="../static/images/thumbnail_age.png" alt="Line Curn Graph" width="100%">
+      <img src="../static/images/thumbnail_churn.png" alt="Line Curn Graph" width="100%">
       <div class="caption">
         <h3>Line Churn</h3>
         <p>View the code history of your modules. Compare the number of lines added vs those deleted.</p>

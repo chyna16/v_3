@@ -89,7 +89,7 @@ def refresh_repos(repo_dir):
 
 
 # Check repo clone if it doesn't exist and re-clone if it is old
-def repo_check_and_update(repo_name, proj_key, to_date):
+def repo_check_and_update(repo_name, proj_key, to_date, celery_task):
     repo_list = get_repo_list(get_dir_list(settings.repo_dir),
                               settings.repo_dir)
     available_repo = [repo for repo in repo_list
@@ -103,7 +103,7 @@ def repo_check_and_update(repo_name, proj_key, to_date):
         clone_repo(repo_url, settings.repo_dir, settings.password)
     elif (remote_last_commit > available_repo[0].split('|')[1] < to_date):
         # else if local copy is older than latest commit, refresh
-        refresh_single_repo(settings.repo_dir, repo_name)
+        refresh_single_repo(settings.repo_dir, repo_name, celery_task)
 
 
 # called by visualizer index view
