@@ -121,6 +121,15 @@
     opacity: 0.2;
 }
 
+.thumb-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.dashboard {
+  display: none;
+}
+
 .spinner {
     position: fixed;
     top: 50%;
@@ -271,29 +280,6 @@ tbody td, thead th {
 }
 
 /* help Dropdown */
-
-
-/*  Depricated
-.help {
-  cursor: pointer;
-}
-
-.help-drop {
-  width: 400px;
-  display: none;
-  background-color: skyblue;
-  opacity: .9;
-  color: white;
-  font-size: 20px;
-  padding: 10px;
-  border-radius: 10px;
-  border: 2px solid black;
-}
-
-.help:active .help-drop {
-  display: block;
-}
-*/
 
 .help-div {
   padding: 10px 10%;

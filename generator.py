@@ -173,7 +173,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 
 # called by: manage_csv_folder, refresh_repos
 # generates log file and runs codemaat
-def process_log(repo, from_date, to_date, csv_path):
+def process_log(repo, from_date, to_date, csv_path, celery_task):
     if not os.path.isdir(csv_path):
         # if the csv_folder doesn't exist, make it
         os.system("mkdir " + csv_path)
@@ -182,28 +182,31 @@ def process_log(repo, from_date, to_date, csv_path):
     repo_address = os.path.join(settings.repo_dir, repo, '.git')
     create_log('logfile', repo, from_date, to_date, repo_address)
     create_log('cloud', repo, from_date, to_date, repo_address)
-    create_complexity_files(repo, repo_address, from_date, to_date)
-    os.chdir(csv_path)
-    print("Running codemaat analyses")
+    celery_task.update_state(state="cloud")
     run_codemaat('authors', 'metrics', repo, from_date, to_date)
-    run_codemaat('coupling', 'coupling', repo, from_date, to_date)
-    run_codemaat('entity-churn', 'age', repo, from_date, to_date)
+    celery_task.update_state(state="metrics")
     generate_data_hotspots(repo, from_date, to_date)
-
+    celery_task.update_state(state="hotspots")
+    run_codemaat('coupling', 'coupling', repo, from_date, to_date)
+    celery_task.update_state(state="coupling")
+    run_codemaat('entity-churn', 'age', repo, from_date, to_date)
+    celery_task.update_state(state="churn")
+    create_complexity_files(repo, repo_address, from_date, to_date)
+    celery_task.update_state(state="complexity")
     os.chdir(settings.v3_dir)
 
 
 # called by: index view
 # sets the address where csv files are/will be located
 # calls helper functions that handle folder, logfile, & codemaat
-def manage_csv_folder(repo, from_date, to_date, csv_dir=settings.csv_dir):
+def manage_csv_folder(repo, from_date, to_date, celery_task, csv_dir=settings.csv_dir):
     folder_name = repo + "_" + from_date + "_" + to_date
     # complete address of csv folder for chosen repo
     csv_path = os.path.join(csv_dir, folder_name)
     if not os.path.exists(csv_path):
         print("creating folder: " + csv_path)
         os.system("mkdir " + csv_path)
-        process_log(repo, from_date, to_date, csv_path)
+        process_log(repo, from_date, to_date, csv_path, celery_task)
 
         if os.stat(os.path.join(csv_path, "logfile_" + repo + '_' + from_date +
          '_' + to_date + '.log')).st_size == 0:
@@ -221,21 +224,3 @@ def analysis_exists(repo, from_date, to_date, csv_dir=settings.csv_dir):
     if os.path.exists(csv_path):
         return True
     return False
-
-# retrieved from: http://stackoverflow.com/questions/3424899/
-#     + whats-the-simplest-way-to-subtract-a-month-from-a-date-in-python
-# def monthdelta(date, delta):
-#     m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
-#     if not m: m = 12
-#     d = min(date.day, [31, 29 if
-#        y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
-#     return date.replace(day=d,month=m, year=y)
-
-# def get_prev_date():
-#     for m in range(-2, -1):
-#         month_string = str(monthdelta(datetime.now(), m))
-#     previous_date = ((month_string)[:10])
-
-#     return previous_date
-
-# if __name__ == '__main__':
