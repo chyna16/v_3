@@ -59,7 +59,7 @@ def add_datetime(folder_path):
 
 
 # called by: refresh_repos, index view
-def refresh_single_repo(repo_dir, repo):
+def refresh_single_repo(repo_dir, repo, celery_task):
     clone_url = stash_api.get_repo_url(repo, 'http')
     if not clone_url:
         return  # if function returned false
@@ -69,7 +69,7 @@ def refresh_single_repo(repo_dir, repo):
         from_date, to_date = get_commit_dates(repo_dir, repo)
         csv_path = os.path.join(settings.csv_dir,
             repo + "_" + from_date + "_" + to_date)
-        generator.process_log(repo, from_date, to_date, csv_path)
+        generator.process_log(repo, from_date, to_date, csv_path, celery_task)
 
 
 # called by: visualizer at timed intervals
