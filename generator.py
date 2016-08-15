@@ -138,7 +138,7 @@ def create_complexity_files(repo, address, from_date, to_date):
 
     os.chdir(os.path.join(settings.csv_dir, folder_name))
 
-    for file in glob.glob("*.csv"):
+    for file in glob.glob("complex_*.csv"):
         csv_list.append(file)
 
     # appends csv files together into one
