@@ -65,9 +65,9 @@ If both are running without error, navigate to [localhost:5000](localhost:5000)
 ## Editing V3
 If you would like to get started editing V3, I would recommend looking at an analysis of the project on V3 (meta, I know). Hotspots, in particular, should give you an idea of the main files that you should look at to get started. But, as you may have already figured, <code>visualizer.py</code> contains the main Flask app.
 
-<img src="http://ec2-52-7-214-244.compute-1.amazonaws.com/static/images/V3LayerDiagram.jpg" alt="Layer Diagram" width="200px"/>
+<img src="http://ec2-52-7-214-244.compute-1.amazonaws.com/static/images/V3LayerDiagram.jpg" alt="Layer Diagram" width="50%px"/>
 <br>
-<img src="http://ec2-52-7-214-244.compute-1.amazonaws.com/static/images/V3Sequence.png" alt="Sequence" width="200px"/>
+<img src="http://ec2-52-7-214-244.compute-1.amazonaws.com/static/images/V3Seqence.png" alt="Sequence" width="50%"/>
 
 ## Visualizations
 -----------------
