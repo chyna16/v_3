@@ -156,7 +156,7 @@ def result():
         if data == []:
             task_id = location.split("/")[-1]
             state = run_analysis.AsyncResult(task_id).state
-            if not (state == 'SUCCESS' or state == 'NULL'):
+            if not (state == 'SUCCESS' or location == 'NULL'):
                 flash('Sorry, thats not available yet.')
                 return redirect(url_for('dashboard', repo_name=repo_name,
                     from_date=from_date, to_date=to_date, location=location))

@@ -189,7 +189,7 @@ def process_log(repo, from_date, to_date, csv_path, celery_task):
     celery_task.update_state(state="hotspots")
     run_codemaat('coupling', 'coupling', repo, from_date, to_date)
     celery_task.update_state(state="coupling")
-    run_codemaat('entity-churn', 'age', repo, from_date, to_date)
+    run_codemaat('entity-churn', 'churn', repo, from_date, to_date)
     celery_task.update_state(state="churn")
     create_complexity_files(repo, repo_address, from_date, to_date)
     celery_task.update_state(state="complexity")

@@ -1,3 +1,32 @@
+function createGraphAlpha(data, analysis) {
+  var color = d3.scale.category20();
+
+  switch (analysis){
+    case 'cloud':
+      createWordcloud(data);
+      break;
+    case 'coupling':
+      // if coupling, graph is not create until chooseModule is called
+      createHeader(color);
+      d3.select("#graph")
+        .html('<p>Choose an enitity to view degree of coupling.</p>');
+      break;
+    case 'complexity':
+      break;
+    case 'churn':
+      createScatterPlot(data);
+      break;
+    case 'hotspots':
+      createHeader(color);
+      createBubblePack(data);
+      break;
+    case 'metrics':
+      break;
+    default:
+      break;
+  }
+}
+
 // this is called by chooseColumn when the user selects data for y-axis
 // also called by createTable after table has been created / updated
 function createGraph(data) {
@@ -11,12 +40,12 @@ function createGraph(data) {
         var color = d3.scale.category20();
         createHeader(color);
         d3.select("#graph")
-          .html('<p><p>Choose an enitity to view degree of coupling.</p></p>');
+          .html('<p>Choose an enitity to view degree of coupling.</p>');
     }
     else if (analysis_type == "cloud") {
         createWordcloud(data);
     }
-    else if (analysis_type == "age") {
+    else if (analysis_type == "churn") {
       createScatterPlot(data);
     }
     else if (analysis_type == "complexity") {
@@ -32,7 +61,7 @@ function createGraph(data) {
 function createHeader(color) {
     var header = d3.select("#header").html('').append("p");
 
-    if (analysis_type !== "age" && analysis_type !== "hotspots"){
+    if (analysis_type !== "churn" && analysis_type !== "hotspots"){
       header
         .selectAll("button")
             .data(keys.filter(function(key) {

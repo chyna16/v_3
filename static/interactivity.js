@@ -5,7 +5,7 @@ function applyFilter(filter_value) {
     var bool = false;
 
     filter_obj.forEach(function(d) {
-        if (parseInt(filter_value[d.key]) < d.value.from 
+        if (parseInt(filter_value[d.key]) < d.value.from
         || parseInt(filter_value[d.key]) > d.value.to) {
             bool = true;
         }
@@ -58,11 +58,9 @@ function toggleFilter() {
 function setFilter() {
     filter_obj = [];
 
-    keys.forEach(function(d, i) { 
+    keys.forEach(function(d, i) {
         if (d != keys[0] && d != 'coupled') {
             var filter_key = d;
-            // var from_value = parseInt(document.getElementById(d).children[1].value);
-            // var to_value = parseInt(document.getElementById(d).children[2].value);
 
             var values = $("#" + d + "-slider-range").slider( "option", "values" );
             var from_value = values[0];
@@ -91,7 +89,7 @@ function createSlider() {
     keys.forEach(function(key) {
         if (key != keys[0] && key != 'coupled') {
             var slider = d3.select("#filter");
-            // slider.style('display', 'hidden')
+
             var p = slider.append("center").append("p");
             p.append("label")
                 .attr('for', key + '-amount')
@@ -106,7 +104,7 @@ function createSlider() {
 
             var max_value = d3.max(json_data, function(d) { return +d[key]; })
 
-            // original version of jquery function retrieved from: 
+            // original version of jquery function retrieved from:
             // http://jqueryui.com/slider/#range
             $(function() {
                 $( "#" + key + "-slider-range" ).slider({
@@ -171,8 +169,6 @@ function chooseModule(elem) {
 
     if (chosen_key == "average-revs") { createPieChart(coupled_data, chosen_module); }
     else { createMeter(coupled_data, chosen_module); } // meter chart is created
-
-    // $("#wrapper").mCustomScrollbar("update");
 }
 
 
@@ -181,33 +177,14 @@ function chooseModule(elem) {
 // calls function to create graph using the selected data
 function chooseColumn(elem) {
     chosen_key = elem.getAttribute('value'); // chosen_key is reassigned
-    
-    createGraph(filtered_data); 
+    createGraph(filtered_data);
 }
 
-
-// NOTE: currently not in use
-// changes the display of corresponding graph to show or hide
-function toggleGraph(elem) {
-    var display_status = document.getElementById(elem.getAttribute('name')).style.display;
-
-    if (display_status == "none") 
-        { document.getElementById(elem.getAttribute('name')).style.display = "block"; }
-    else { document.getElementById(elem.getAttribute('name')).style.display = "none"; }
-}
 
 
 // called by DOMContentLoaded event
 // modifies styling of divs depending on type of analysis
 function configureDivs() {
-    // d3.select("#wrapper")
-        // .attr('class', 'mCustomScrollbar')
-        // .attr('data-mcs-theme', 'dark');
-
-    // d3.select("#table")
-        // .attr('class', 'mCustomScrollbar')
-        // .attr('data-mcs-theme', 'dark');
-
     if (analysis_type == 'coupling') {
         d3.select("#container")
             .style('display', 'flex');
@@ -218,10 +195,8 @@ function configureDivs() {
             .style('margin-top', '30px');
 
         d3.select("#table")
-            // .style('height', '400px')
             .style('margin-top', '0');
     }
-
     else {
         d3.select("#table")
             .style('width', '1000px');
@@ -232,7 +207,5 @@ function configureDivs() {
         d3.select("#wrapper")
             .style('width', '1000px')
             .style('overflow-x', 'auto');
-
-        // $("#wrapper").mCustomScrollbar({ axis: 'x' })
     }
 }
