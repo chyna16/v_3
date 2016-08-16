@@ -3,135 +3,128 @@
 {% block title %} Result {% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="../static/jquery-ui.min.css">
-
-    <script src="../static/jquery-ui.min.js"></script>
-    <script src="../static/d3.min.js"></script>
-    <script src="../static/d3-tip.js"></script>
-    <script src="../static/d3.layout.cloud.js"></script>
-    <script src="../static/d3-hierarchy.v0.3.min.js"></script>
-
-    <script src="../static/interactivity.js"></script>
-    <script src="../static/table.js"></script>
-    <script src="../static/charts.js"></script>
+  <!-- library css and js -->
+  <link rel="stylesheet" href="../static/jquery-ui.min.css">
+  <script src="../static/jquery-ui.min.js"></script>
+  <script src="../static/d3.min.js"></script>
+  <script src="../static/d3-tip.js"></script>
+  <script src="../static/d3.layout.cloud.js"></script>
+  <script src="../static/d3-hierarchy.v0.3.min.js"></script>
+  <!-- project scripts -->
+  <script src="../static/interactivity.js"></script>
+  <script src="../static/table.js"></script>
+  <script src="../static/charts.js"></script>
 {% endblock %}
 
 {% block nav_injection %}
-    <li class="dropdown" role="navigation">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Analyses<span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <form method="POST" enctype="multipart/form-data">
-                <li><button class="btn btn-link" type="submit" name="analysis" value="metrics">Metrics</button></li>
-                <li><button class="btn btn-link" type="submit" name="analysis" value="hotspots">Hotspots</button></li>
-                <li><button class="btn btn-link" type="submit" name="analysis" value="coupling">Coupling</button></li>
-                <li><button class="btn btn-link" type="submit" name="analysis" value="churn">Churn</button></li>
-                <li><button class="btn btn-link" type="submit" name="analysis" value="cloud">Word Cloud</button></li>
-                <li><button class="btn btn-link" type="submit" name="analysis" value="complexity">Complexity</button></li>
-            </form>
-          </ul>
-    </li>
+<li class="dropdown" role="navigation">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Analyses<span class="caret"></span></a>
+  <ul class="dropdown-menu">
+    <form method="POST" enctype="multipart/form-data">
+      <li><button class="btn btn-link" type="submit" name="analysis" value="metrics">Metrics</button></li>
+      <li><button class="btn btn-link" type="submit" name="analysis" value="hotspots">Hotspots</button></li>
+      <li><button class="btn btn-link" type="submit" name="analysis" value="coupling">Coupling</button></li>
+      <li><button class="btn btn-link" type="submit" name="analysis" value="churn">Churn</button></li>
+      <li><button class="btn btn-link" type="submit" name="analysis" value="cloud">Word Cloud</button></li>
+      <li><button class="btn btn-link" type="submit" name="analysis" value="complexity">Complexity</button></li>
+    </form>
+  </ul>
+</li>
 {% endblock %}
-
 
 {% block page_title %}
 <p class="nav navbar-text visible-md-block visible-lg-block">Repository: {{ repo_name }}
-    from
-        {% if from_date != '' %} {{ from_date }}
-        {% else %} beginning
-        {% endif %}
-    to
-        {% if to_date != '' %} {{ to_date }}
-        {% else %} present
-        {% endif %}
+  from
+    {% if from_date != '' %} {{ from_date }}
+    {% else %} beginning
+    {% endif %}
+  to
+    {% if to_date != '' %} {{ to_date }}
+    {% else %} present
+    {% endif %}
 </p>
 {% endblock %}
 
-
 {% block content %}
 <center>
-<h3 class="visible-sm-block visible-xs-block">Repository: {{ repo_name }}
+  <h3 class="visible-sm-block visible-xs-block">Repository: {{ repo_name }}
     from
-        {% if from_date != '' %} {{ from_date }}
-        {% else %} beginning
-        {% endif %}
+      {% if from_date != '' %} {{ from_date }}
+      {% else %} beginning
+      {% endif %}
     to
-        {% if to_date != '' %} {{ to_date }}
-        {% else %} present
-        {% endif %}
-</h3>
-</center>
-<center>
-    <div id="header"></div>
-    <form id="filter" style="display: none"></form>
-    <div id="title"></div>
+      {% if to_date != '' %} {{ to_date }}
+      {% else %} present
+      {% endif %}
+  </h3>
+
+  <div id="header"></div>
+  <form id="filter" style="display: none"></form>
+  <div id="title"></div>
 </center>
 
 <center>
 <div id="container">
 
   <div id="wrapper">
-      <!-- This is where graphs will be created -->
+    <!-- This is where graphs will be created -->
   </div>
 
   <div id="table" class="col-md-10">
-      <table class="table">
-          <thead id="thead"></thead>
-          <tbody id="tbody"></tbody>
-      </table>
+    <table class="table">
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
 
 </div>
 </center>
 
 <script>
-    var keys = {{keys|safe}}; // an array of the column headers in original order
-    var json_data = {{data|safe}}; // an array of objects for row of data
-    var analysis_type = {{analysis|safe}}
-    var repo = {{repo_name|safe}}
-    // default filter variables
-    // declared outside so that value can be changed/accessed by other functions
-    var filtered_data = json_data; // to be used as a filtered copy of json_data
-    var filter_obj = [];
-    var entity_list = {};
-    var temp_elem;
+  var keys = {{keys|safe}};
+  var json_data = {{data|safe}};
+  var analysis_type = {{analysis|safe}}
+  var repo = {{repo_name|safe}}
+  // default filter variables
+  // declared outside so that value can be changed/accessed by other functions
+  var filtered_data = json_data; // to be used as a filtered copy of json_data
+  var filter_obj = [];
+  var entity_list = {};
+  var temp_elem;
+  var chosen_key = "default"; // used by metrics
 
-    var chosen_key = "default"; // the default key represents all columns
+  // Create Graph after content load
+  document.addEventListener("DOMContentLoaded", function(event) {
+    createSlider();
+    createGraph(json_data, analysis_type);
+  })
 
-    // the script waits until all the html content has been loaded
-    // before calling the function
-    // to create the default table/graph
-    document.addEventListener("DOMContentLoaded", function(event) {
-      createSlider();
-      createGraph(json_data, analysis_type);
-    })
-
-    // Populate Help Menu based on analysis type
-    var help = document.getElementById("help");
-    var help_ttl = {
-        "metrics": "Author and Revision Metrics",
-        "churn": "Line Churn",
-        "hotspots": "Hotspots",
-        "coupling": "Coupling",
-        "cloud": "Word Cloud",
-        "complexity": "Complexity Analysis"
-    };
-    var help_desc = {
-        "metrics": "Orginazational Metrics are for predicting possible issues regarding quality of your code. Modules with a high number of authors and revisions together may be a sign of quality issues.",
-        "churn": "Compare lines added vs. lines deleted, also know as Code Churn. A large number of lines of code added could be a sign that a file may need refactoring. A large number of lines removed could indicate that the file was recently refactored. And a large number of both may imply instability - Expect Bugs.",
-        "hotspots": "A hotspot is an area of your project that is receiving a disproportionate amount of attention. The metrics we are using here to identify hotspots are the number of lines of code and the number of revisions. High values for either, but especially both, are cause for further analysis and may help steer your development goals.",
-        "coupling": "Coupling analyzes the connections between modules made in the current repository. Paired modules with high degree of coupling implies dependency; if one is changed, the other is likely to be affected. Here we use 30% of commits as the minimum threashold for possible coupling.",
-        "cloud": "View the patterns within commit messages. See which words are used the most while committing to get an understanding of things that are commonly worked on.",
-        "complexity": "Complexity analyzes the amount of lines in a file, amount of indentations and variance of complexity. Select a module from the dropdown list below to display the graph, and a button to show each indivdual value for the selected module."
-    };
-    var help_lst = {
-        "metrics": "<ul><li>Select a metric to use for filtering (n-authors, n-revs, or all)</li><li>If you would like to narrow the range of authors or revisions click on <b>add filter</b> and use the sliders to select the desired values.</li><li>Hover over a bar to see its exact value.</li></ul>",
-        "churn": "<ul><li>The scatter plot shows the number of lines Added vs. lines Removed</li><li>Selecting <b>filter</b> allows you to narrow the range of relevant values and remove outliers from your dataset</li><li>Place your mouse over a point to see its name and exact values.</li></ul>",
-        "hotspots": "<ul><li>Blue circles correspond to the folder hierarchy of your project.</li><li>Click on these circles to drill down into folders of interest.</li><li>Circles that are pink <-> red, whose hue corresponds to the relative number of revisions, are the actual files in the repository.</li><li>The size of the circles corresponds to the number of lines contained within.</li></ul>",
-        "coupling": "<ul><li>Click on a module name to see what other modules it is coupled with and to what extent.</li><li>Selecting <b>degree</b> shows percentage of times the two files were committed together.</li><li>Selecting <b>average-revs</b> displays pie charts divited by the number of mutual commits with coupled entities.</li>",
-        "cloud": "<ul><li>The size and redness of the word is proportional to frequency.</li><li>Mouse over each word to see how many times that word was used.</li></ul>",
-        "complexity": "<ul><li><b>n</b> - number of lines with code. Includes comments, ignores empty lines.</li><li><b>total</b> - accumulated complexity(total number of indentations, includes indented comments).</li><li><b>mean</b> - Average amount of indentations per line.</li><li><b>sd(standard deviation)</b> - Variance of complexity within the module. An amount close to the mean is good.</li> <br> <li>An <b>ascending</b> line means that there is an increase in complexity; <b>Decending</b> lines usually mean an increase in simplicity, or refactoring.</li><li>A <b>straight</b> line means no change was made; A line with <b>small changes in shape</b> means stable progression of module development.</li></ul>"
-    };
-    help.innerHTML = '<div><h2>'+help_ttl[analysis_type]+'</h2><p>'+help_desc[analysis_type]+'</p></div><div>'+help_lst[analysis_type]+'</div>';
+  // Populate Help Menu based on analysis type
+  var help = document.getElementById("help");
+  var help_ttl = {
+    "metrics": "Author and Revision Metrics",
+    "churn": "Line Churn",
+    "hotspots": "Hotspots",
+    "coupling": "Coupling",
+    "cloud": "Word Cloud",
+    "complexity": "Complexity Analysis"
+  };
+  var help_desc = {
+    "metrics": "Orginazational Metrics are for predicting possible issues regarding quality of your code. Modules with a high number of authors and revisions together may be a sign of quality issues.",
+    "churn": "Compare lines added vs. lines deleted, also know as Code Churn. A large number of lines of code added could be a sign that a file may need refactoring. A large number of lines removed could indicate that the file was recently refactored. And a large number of both may imply instability - Expect Bugs.",
+    "hotspots": "A hotspot is an area of your project that is receiving a disproportionate amount of attention. The metrics we are using here to identify hotspots are the number of lines of code and the number of revisions. High values for either, but especially both, are cause for further analysis and may help steer your development goals.",
+    "coupling": "Coupling analyzes the connections between modules made in the current repository. Paired modules with high degree of coupling implies dependency; if one is changed, the other is likely to be affected. Here we use 30% of commits as the minimum threashold for possible coupling.",
+    "cloud": "View the patterns within commit messages. See which words are used the most while committing to get an understanding of things that are commonly worked on.",
+    "complexity": "Complexity analyzes the amount of lines in a file, amount of indentations and variance of complexity. Select a module from the dropdown list below to display the graph, and a button to show each indivdual value for the selected module."
+  };
+  var help_lst = {
+    "metrics": "<ul><li>Select a metric to use for filtering (n-authors, n-revs, or all)</li><li>If you would like to narrow the range of authors or revisions click on <b>add filter</b> and use the sliders to select the desired values.</li><li>Hover over a bar to see its exact value.</li></ul>",
+    "churn": "<ul><li>The scatter plot shows the number of lines Added vs. lines Removed</li><li>Selecting <b>filter</b> allows you to narrow the range of relevant values and remove outliers from your dataset</li><li>Place your mouse over a point to see its name and exact values.</li></ul>",
+    "hotspots": "<ul><li>Blue circles correspond to the folder hierarchy of your project.</li><li>Click on these circles to drill down into folders of interest.</li><li>Circles that are pink <-> red, whose hue corresponds to the relative number of revisions, are the actual files in the repository.</li><li>The size of the circles corresponds to the number of lines contained within.</li></ul>",
+    "coupling": "<ul><li>Click on a module name to see what other modules it is coupled with and to what extent.</li><li>Selecting <b>degree</b> shows percentage of times the two files were committed together.</li><li>Selecting <b>average-revs</b> displays pie charts divited by the number of mutual commits with coupled entities.</li>",
+    "cloud": "<ul><li>The size and redness of the word is proportional to frequency.</li><li>Mouse over each word to see how many times that word was used.</li></ul>",
+    "complexity": "<ul><li><b>n</b> - number of lines with code. Includes comments, ignores empty lines.</li><li><b>total</b> - accumulated complexity(total number of indentations, includes indented comments).</li><li><b>mean</b> - Average amount of indentations per line.</li><li><b>sd(standard deviation)</b> - Variance of complexity within the module. An amount close to the mean is good.</li> <br> <li>An <b>ascending</b> line means that there is an increase in complexity; <b>Decending</b> lines usually mean an increase in simplicity, or refactoring.</li><li>A <b>straight</b> line means no change was made; A line with <b>small changes in shape</b> means stable progression of module development.</li></ul>"
+  };
+  help.innerHTML = '<div><h2>'+help_ttl[analysis_type]+'</h2><p>'+help_desc[analysis_type]+'</p></div><div>'+help_lst[analysis_type]+'</div>';
 </script>
 {% endblock %}
-"churn"
