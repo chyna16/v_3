@@ -13,6 +13,9 @@ function update_progress(status_url) {
     if (data['state'] == 'FAILURE') {
       console.log('FAILURE in update_progress')
     }
+    else if (data['state'] == 'SUCCESS') {
+      surl = 'NULL'
+    }
     else {
       if (delay < 5000) delay += 1000;
       // rerun in 2 seconds
