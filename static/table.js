@@ -7,7 +7,7 @@ function setTableRows(row, elem_id, data) {
         var col = document.createElement(elem_id); // a th / td element
 
         if (i == 0) { col.style.width = "65%"; } // first column width
-        else { col.style.width = (35 / (keys.length - 1)) + "%"; } 
+        else { col.style.width = (35 / (keys.length - 1)) + "%"; }
             // remaining column widths
 
         // column styling
@@ -20,12 +20,12 @@ function setTableRows(row, elem_id, data) {
         if (data == keys) {
             // if table head is being created
             col.setAttribute('value', data[i]);
-            col.appendChild(document.createTextNode(data[i])); 
-        } 
+            col.appendChild(document.createTextNode(data[i]));
+        }
         else {
             // if table body is being created
             col.setAttribute('value', data[keys[i]]);
-            col.appendChild(document.createTextNode(data[keys[i]])); 
+            col.appendChild(document.createTextNode(data[keys[i]]));
         }
 
         row.appendChild(col); // each column created is added to passed in row
@@ -35,7 +35,7 @@ function setTableRows(row, elem_id, data) {
 
 function setListRows(row, elem_id, data) {
     var col = document.createElement(elem_id);
-    if (elem_id == 'td') { 
+    if (elem_id == 'td') {
         col.onclick = function() { chooseModule(this); }
         col.setAttribute('value', data);
         col.style.cursor = 'pointer';
@@ -69,14 +69,12 @@ function createTable(data) {
     else {
         // h_row.style.width = '1000px';
         // h_row.style.float = 'none';
-        table_head.appendChild(setTableRows(h_row, "th", keys)) 
+        table_head.appendChild(setTableRows(h_row, "th", keys))
             // adds a completed row to table head
-        data.forEach(function(d) { 
+        data.forEach(function(d) {
             // for each row within the data, a row is created and added to body
             var b_row = document.createElement("tr");
             table_body.appendChild(setTableRows(b_row, "td", d));
         })
     }
-    
-    createGraph(data);
 }

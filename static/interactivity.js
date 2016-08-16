@@ -28,7 +28,7 @@ function filterData() {
             }
         }
         console.log(filtered_entity_list);
-        createTable(filtered_entity_list);
+        createGraph(filtered_entity_list, analysis_type);
     }
     else {
         filtered_data = []; // filtered_data is emptied, and updated below
@@ -41,7 +41,7 @@ function filterData() {
             }
         });
 
-        createTable(filtered_data);
+        createGraph(filtered_data, analysis_type);
     }
 }
 
@@ -177,35 +177,22 @@ function chooseModule(elem) {
 // calls function to create graph using the selected data
 function chooseColumn(elem) {
     chosen_key = elem.getAttribute('value'); // chosen_key is reassigned
-    createGraph(filtered_data);
+    createGraph(filtered_data, analysis_type);
 }
 
 
 
-// called by DOMContentLoaded event
-// modifies styling of divs depending on type of analysis
-function configureDivs() {
-    if (analysis_type == 'coupling') {
-        d3.select("#container")
-            .style('display', 'flex');
+// Called by createGraph
+// Custom styling for Coupling visualization
+function configureDivCoupling() {
+  d3.select("#container")
+      .style('display', 'flex');
 
-        d3.select("#wrapper")
-            .style('width', '50%')
-            .style('height', '400px')
-            .style('margin-top', '30px');
+  d3.select("#wrapper")
+      .style('width', '50%')
+      .style('height', '400px')
+      .style('margin-top', '30px');
 
-        d3.select("#table")
-            .style('margin-top', '0');
-    }
-    else {
-        d3.select("#table")
-            .style('width', '1000px');
-
-        d3.select("#thead")
-            .style('width', '955px');
-
-        d3.select("#wrapper")
-            .style('width', '1000px')
-            .style('overflow-x', 'auto');
-    }
+  d3.select("#table")
+      .style('margin-top', '0');
 }

@@ -70,7 +70,7 @@
 <div id="container">
 
   <div id="wrapper">
-      <div id="graph"></div>
+      <!-- This is where graphs will be created -->
   </div>
 
   <div id="table" class="col-md-10">
@@ -96,38 +96,13 @@
     var temp_elem;
 
     var chosen_key = "default"; // the default key represents all columns
-    //if (analysis_type == 'metrics') { chosen_key = 'n-revs'; }
-        // if the analysis is metrics, then revs column should be default
-
-    console.log(keys);
-    console.log(json_data);
-    console.log(analysis_type);
-    console.log(repo);
-
-    if (analysis_type == 'coupling') {
-        entity_list = {}
-
-        json_data.forEach(function(d) {
-            if (!entity_list[d.entity]) {
-                entity_list[d.entity] = {degree: d.degree, 'average-revs': d['average-revs']};
-            }
-            if (!entity_list[d.coupled]) {
-                entity_list[d.coupled] = {degree: d.degree, 'average-revs': d['average-revs']};
-            }
-        })
-    }
 
     // the script waits until all the html content has been loaded
     // before calling the function
     // to create the default table/graph
     document.addEventListener("DOMContentLoaded", function(event) {
-      if (analysis_type == "cloud") { createGraph(json_data); }
-      else {
-        configureDivs();
-        createSlider();
-        if (analysis_type == 'coupling') createTable(entity_list);
-        else createTable(json_data);
-      }
+      createSlider();
+      createGraph(json_data, analysis_type);
     })
 
     // Populate Help Menu based on analysis type

@@ -1,61 +1,54 @@
-function createGraphAlpha(data, analysis) {
+"use strict";
+
+// Function that handles setup and drawing of each type of analysis
+function createGraph(data, analysis) {
   var color = d3.scale.category20();
+  //d3.select('#wrapper').html('')
 
   switch (analysis){
     case 'cloud':
       createWordcloud(data);
       break;
     case 'coupling':
-      // if coupling, graph is not create until chooseModule is called
+      // if coupling, graph is not created until chooseModule is called
+      json_data.forEach(function(d) {
+        if (!entity_list[d.entity]) {
+          entity_list[d.entity] = {degree: d.degree, 'average-revs': d['average-revs']};
+        }
+        if (!entity_list[d.coupled]) {
+          entity_list[d.coupled] = {degree: d.degree, 'average-revs': d['average-revs']};
+        }
+      })
+
+      configureDivCoupling()
       createHeader(color);
-      d3.select("#graph")
+      createTable(entity_list)
+      d3.select("#wrapper")
         .html('<p>Choose an enitity to view degree of coupling.</p>');
       break;
     case 'complexity':
+      createHeader(color);
+      createLineGraph(data);
+      createTable(data)
       break;
     case 'churn':
       createScatterPlot(data);
+      createTable(data)
       break;
     case 'hotspots':
       createHeader(color);
       createBubblePack(data);
+      createTable(data)
       break;
     case 'metrics':
+      createBarGraph(data);
+      createTable(data)
       break;
     default:
+      createBarGraph(data);
+      createTable(data)
       break;
   }
-}
-
-// this is called by chooseColumn when the user selects data for y-axis
-// also called by createTable after table has been created / updated
-function createGraph(data) {
-    if (analysis_type == "hotspots") {
-      var color = d3.scale.category20();
-      createHeader(color);
-      createBubblePack(data);
-    }
-    else if (analysis_type == "coupling") {
-        // if coupling, graph is not create until chooseModule is called
-        var color = d3.scale.category20();
-        createHeader(color);
-        d3.select("#graph")
-          .html('<p>Choose an enitity to view degree of coupling.</p>');
-    }
-    else if (analysis_type == "cloud") {
-        createWordcloud(data);
-    }
-    else if (analysis_type == "churn") {
-      createScatterPlot(data);
-    }
-    else if (analysis_type == "complexity") {
-        var color = d3.scale.category20();
-        createHeader(color);
-        createLineGraph(data);
-    }
-    else {
-        createBarGraph(data);
-    }
 }
 
 function createHeader(color) {
@@ -104,10 +97,10 @@ function createHeader(color) {
 }
 
 
-function createLineGraph(data, name, button){
+function createLineGraph(data){
     d3.select("#wrapper").html('Select a module from the dropdown list above.');
-    stage = []
-    arr = []
+    var stage = []
+    var arr = []
     data.map(function(d) {
         if (stage.indexOf(d[keys[0]]) == -1){
           stage.push(d[keys[0]])
@@ -118,12 +111,10 @@ function createLineGraph(data, name, button){
       })
 
     var w;
-    var width;
+    var width=900;
     var margin = {top: 20, left: 70, right: 20, bottom: 130};
     var height = 450 - margin.top - margin.bottom;
     var color = d3.scale.ordinal().domain(keys).range(["#6d9af6", "#52465f"]);
-
-    width = 900;
 
     if (chosen_key == 'default') {
         var labels = keys.filter(function(key) {
@@ -230,10 +221,10 @@ function updateData(data, name, button){
         .text(function(d) { return d; });
 
      var buttonValue = 'n'
-
+     var nameof;
         d3.select('select')
             .on("change", function(){
-                key = this.selectedIndex
+                var key = this.selectedIndex
                 nameof = (arr[key])
                 updateData(data, nameof, buttonValue)
             })
@@ -250,7 +241,7 @@ function updateData(data, name, button){
 
 
 function createBarGraph(data) {
-    d3.select("#graph").html('');
+    d3.select("#wrapper").html('');
         // .html("") causes the wrapper to be emptied out
         // this prevents copies from being made each time function is called
     var w;
@@ -324,7 +315,7 @@ function createBarGraph(data) {
       });
 
     // appending the general svg as well as the div for the graph itself
-    var canvas = d3.select("#graph")
+    var canvas = d3.select("#wrapper")
         .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -414,7 +405,7 @@ function createBarGraph(data) {
 }
 
 function createScatterPlot(data){
-  d3.select("#graph").html('');
+  d3.select("#wrapper").html('');
 
   var margin = {top: 20, right: 20, bottom: 30, left: 50},
     width = 900 - margin.left - margin.right,
@@ -447,7 +438,7 @@ function createScatterPlot(data){
     .outerTickSize(10)
     .orient("left");
 
-  var svg = d3.select("#graph").append("svg")
+  var svg = d3.select("#wrapper").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .call(tip)
@@ -485,11 +476,11 @@ function createScatterPlot(data){
       data[d.entity]["deleted"] = d["deleted"];
     });
 
-    cAddMax = d3.max(d3.values(data), function(d) { return parseInt(d.added); });
-    cDelMax = d3.max(d3.values(data), function(d) { return parseInt(d.deleted); });
+    var cAddMax = d3.max(d3.values(data), function(d) { return parseInt(d.added); });
+    var cDelMax = d3.max(d3.values(data), function(d) { return parseInt(d.deleted); });
     function scaleColor(point) {
-      add = parseInt(point.added) / cAddMax;
-      del = parseInt(point.deleted) / cDelMax;
+      var add = parseInt(point.added) / cAddMax;
+      var del = parseInt(point.deleted) / cDelMax;
       return add + del;
     }
 
@@ -738,7 +729,7 @@ function createBubblePack(inputData) {
 }
 
 function createBubbleChart(data) {
-    d3.select("#graph").html('');
+    d3.select("#wrapper").html('');
 
     var diameter = 700;
 
@@ -762,7 +753,7 @@ function createBubbleChart(data) {
         // d3 assigns each node with r, x, & y values
 
     // svg is appended
-    var canvas = d3.select("#graph")
+    var canvas = d3.select("#wrapper")
         .append("svg")
             .attr("width", diameter)
             .attr("height", diameter)
@@ -797,12 +788,12 @@ function createBubbleChart(data) {
 
 
 function createMeter(data, module) {
-    d3.select("#graph").html('');
+    d3.select("#wrapper").html('');
 
     var r = 75, // meter outer radius
         h = data.length * 200; // width of svg
 
-    var width = parseInt(d3.select("#graph").style("width"));
+    var width = parseInt(d3.select("#wrapper").style("width"));
 
     var color = d3.scale.category20();
 
@@ -834,7 +825,7 @@ function createMeter(data, module) {
         .text('Coupled with: ' + module);
 
     // svg and g div appended
-    var svg = d3.select("#graph")
+    var svg = d3.select("#wrapper")
         .append("svg")
             .attr('width', width - 20) // scroll bar if w exceeds width of wrapper
             .attr('height', h)
@@ -881,7 +872,7 @@ function createMeter(data, module) {
 }
 
 function createPieChart(data, module) {
-    d3.select("#graph").html('');
+    d3.select("#wrapper").html('');
 
     d3.select("#title")
         .style('margin-bottom', '15px')
@@ -915,7 +906,7 @@ function createPieChart(data, module) {
         .padAngle(.02)
         .value(function(d) { return d['average-revs']; });
 
-    var svg = d3.select("#graph")
+    var svg = d3.select("#wrapper")
         .append("svg")
             .attr('width', w)
             .attr('height', w)
@@ -956,7 +947,7 @@ function createWordcloud(data) {
     var commit_words = data;
     var padding = 30;
     var height = window.innerHeight - 2*padding - 20 - 70,
-        width = d3.select("#content-div").node().getBoundingClientRect().width - 2*padding;
+        width = d3.select('#wrapper').node().getBoundingClientRect().width - 2*padding;
     var font = d3.scale.linear()
                     .range([20, 150])
                     .domain(d3.extent(commit_words, function(d) {
@@ -990,7 +981,7 @@ function createWordcloud(data) {
                     .start();
 
     function draw(words) {
-        d3.select("#graph").append("svg")
+        d3.select('#wrapper').append("svg")
                 .attr("width", width + padding)
                 .attr("height", height + padding)
                 .style("display", "block")
