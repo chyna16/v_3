@@ -1050,7 +1050,7 @@ function commitSelector(dates) {
           .tickFormat(function() { return null; }))
 
     // Assemble an array of values to use as ticks
-    tickVals = [datum[0]]
+    var tickVals = [datum[0]]
     var endDate = d3.timeDay(datum[datum.length-1])-5
     if (d3.timeMonth.count(datum[0],datum[datum.length-1]) < 10)
       tickVals = tickVals.concat(d3.timeMonth.range(datum[0],endDate));
@@ -1106,7 +1106,7 @@ function commitSelector(dates) {
         var lowerSearch = true
 
         for (var i=0; i < dates.length; i++){
-          d = dates[i]
+          var d = dates[i]
           if (lowerSearch) {
             if (d > date1) {
               returnVal[0] = d
