@@ -83,7 +83,7 @@ function createHeader(color) {
               .on('click', function() { chooseColumn(this); });
       }
   }
-  if (analysis_type != 'complexity') {
+  if (analysis_type != 'complexity' && analysis_type != 'coupling') {
     header.append("button")
       .attr('class', 'btn')
       .text('add filter')
