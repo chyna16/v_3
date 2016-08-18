@@ -39,6 +39,20 @@ class GeneratorTests(unittest.TestCase):
 	def tearDown(self):
 		pass
 
+	def test_valid_date(self):
+		# test good date
+		assert generator.valid_date('1990-01-01')
+		assert generator.valid_date('1990-01-01 16:14:43')
+		# test bad dates
+		assert not generator.valid_date('1990-01 16:14:43')
+		assert not generator.valid_date('1990-Fish-01')
+
+	def test_bad_range(self):
+		# test bad range (should return true)
+		assert generator.bad_range('1990-01-01', '1989-01-01')
+		assert generator.bad_range('1990-01-01', 'Not-A-Date')
+		# test a good range (should return false)
+		assert not generator.bad_range('1990-01-01', '2000-01-01')
 
 	def test_create_log(self):
 		generator.create_log('logfile', 'v3_test', '', '', settings.v3_dir + '/.git')
