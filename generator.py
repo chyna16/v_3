@@ -37,7 +37,7 @@ def valid_date(date):
 
 # called by index view
 def bad_range(start, end):
-    if not valid_date(start) and not valid_date(end):
+    if not valid_date(start) or not valid_date(end):
         return True
     elif start > end:
         return True
