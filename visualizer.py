@@ -144,9 +144,11 @@ def result():
 
     if request.method == 'GET':
         analysis = request.args.get('analysis')
+        repo_details = repo_name + "_" + from_date + "_" + to_date
+        if not os.path.exists(os.path.join(csv_dir, repo_details)):
+            abort(404)
         if not repo_name or not analysis or not from_date or not to_date:
             abort(404)
-        repo_details = repo_name + "_" + from_date + "_" + to_date
         if analysis == "cloud":
             data, keys = get_log_data(os.path.join(csv_dir, repo_details),
                 analysis + "_" + repo_details + ".log")

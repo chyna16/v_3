@@ -25,10 +25,10 @@ class PageTests(unittest.TestCase):
 		self.assertIn('Dashboard', self.browser.title)
 
 	def test_result_title(self):
-		self.browser.get('http://127.0.0.1:5000/result?repo_name=mcshake&to_date=2014-12-23&analysis=metrics&from_date=2014-10-24')
+		self.browser.get('http://127.0.0.1:5000/result?repo_name=mcshake&to_date=2014-12-23&analysis=metrics&from_date=2014-10-24&location=NULL')
 		self.assertIn('Result', self.browser.title)
 
-	
+
 
 if __name__ == '__main__':
 	unittest.main()
