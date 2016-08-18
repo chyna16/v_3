@@ -8,7 +8,16 @@ import data_manager
 class FolderList(Resource):
 	def get(self):
 		dir_list = repo_manager.get_dir_list(settings.csv_dir)
-		return jsonify({'csv_files': dir_list})
+
+		lst={}
+		for folder in dir_list:
+			sp=folder.split('_')
+			if sp[0] in lst.keys():
+				lst[sp[0]].append({'from':sp[1], 'to':sp[2]})
+			else:
+				lst[sp[0]]=[{'from':sp[1], 'to':sp[2]}]
+
+		return jsonify({'available-analysis': lst})
 
 
 class CSVData(Resource):
