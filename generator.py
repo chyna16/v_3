@@ -182,6 +182,7 @@ def process_log(repo, from_date, to_date, csv_path, celery_task):
     repo_address = os.path.join(settings.repo_dir, repo, '.git')
     create_log('logfile', repo, from_date, to_date, repo_address)
     create_log('cloud', repo, from_date, to_date, repo_address)
+    run_codemaat('summary', 'summary', repo, from_date, to_date)
     celery_task.update_state(state="cloud")
     run_codemaat('authors', 'metrics', repo, from_date, to_date)
     celery_task.update_state(state="metrics")
