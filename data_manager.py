@@ -46,7 +46,10 @@ def parse_csv(folder, filename):
             # fill temp dict with each value in the row
             if not ignore_module(row[0]):
                 for j, key in enumerate(key_list):
-                    temp_dict[key] = row[j]  # pair respective header w/ value
+                    try:
+                        temp_dict[key] = row[j]  # pair respective header w/ value
+                    except:
+                        pass
                 data_dict.append(temp_dict)
     csv_file.close()
 
