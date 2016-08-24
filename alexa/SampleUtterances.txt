@@ -1,0 +1,22 @@
+RepoIntent about {repo}
+RepoIntent tell me about {repo}
+RepoIntent {repo} analysis
+RepoIntent {repo} information
+RepoIntent alexa ask code metrics about {repo}
+RepoIntent you got {repo}
+RepoIntent ask code metrics for {repo}
+
+AnalysisIntent {analysis} abracadabra
+AnalysisIntent run {analysis}
+AnalysisIntent review {analysis}
+AnalysisIntent what about {analysis}
+AnalysisIntent is there any {analysis}
+AnalysisIntent how many {analysis}
+AnalysisIntent how many {analysis} are there
+
+DateIntent different range
+DateIntent different date
+DateIntent different dates
+DateIntent change range
+DateIntent change date
+DateIntent change dates
